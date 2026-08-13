@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import api from "../services/api";
 import AppNavbar from "./AppNavbar";
 import "./Dashboard.css";
-import "./Auth.css";
 import "./Profile.css";
 
 function Profile() {

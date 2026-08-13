@@ -133,3 +133,26 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/*
+ * Status banner. Defined here rather than pulled from the auth stylesheet so
+ * this page owns its own styling and uses the app-wide theme tokens.
+ */
+.profile-content .auth-message {
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.profile-content .auth-message.error {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
+}
+
+.profile-content .auth-message.success {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
+}
