@@ -1,0 +1,377 @@
+/*
+ * Shared styling for the portal pages (health records, admin console, role
+ * settings, hospital patient lookup). Uses the app-wide tokens from index.css.
+ */
+
+.portal-page {
+  min-height: 100vh;
+  background: var(--bg-page);
+}
+
+.portal-content {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.portal-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.portal-head h1 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  letter-spacing: -0.02em;
+}
+
+.portal-head p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.portal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.portal-back:hover { color: var(--accent); }
+
+/* ------------------------------------------------------------------ buttons */
+
+.portal-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, opacity 0.15s;
+}
+
+.portal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.portal-btn.primary { background: var(--accent); color: #fff; }
+.portal-btn.primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+.portal-btn.ghost {
+  background: var(--bg-surface);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+.portal-btn.ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+
+.portal-btn.danger { background: var(--danger); color: #fff; }
+.portal-btn.danger:hover:not(:disabled) { background: var(--danger-hover); }
+
+.portal-btn.small { padding: 7px 12px; font-size: 13px; border-radius: 8px; }
+
+/* ------------------------------------------------------------------- panels */
+
+.portal-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.portal-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.portal-toolbar input,
+.portal-toolbar select {
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 14px;
+}
+
+.portal-toolbar input { flex: 1; min-width: 200px; }
+.portal-toolbar input:focus,
+.portal-toolbar select:focus { outline: none; border-color: var(--accent); }
+
+/* -------------------------------------------------------------------- stats */
+
+.portal-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.portal-stat {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.portal-stat .num {
+  display: block;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.portal-stat .label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ------------------------------------------------------------------- record */
+
+.record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.record-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px 18px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.record-card:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+
+.record-main { flex: 1; min-width: 240px; }
+
+.record-title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.record-title-row h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.record-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.record-vitals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.record-vitals span b {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.record-notes {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.record-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ------------------------------------------------------------------- badges */
+
+.portal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.portal-badge.type { background: var(--accent-soft-bg); color: var(--accent); }
+.portal-badge.pdf { background: var(--warning-bg); color: var(--warning-text); }
+.portal-badge.hospital { background: var(--success-bg); color: var(--success-text); }
+.portal-badge.approved { background: var(--success-bg); color: var(--success-text); }
+.portal-badge.pending { background: var(--warning-bg); color: var(--warning-text); }
+.portal-badge.rejected { background: var(--error-bg); color: var(--error-text); }
+
+/* ------------------------------------------------------------------ message */
+
+.portal-message {
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
+
+.portal-message.error {
+  background: var(--error-bg);
+  color: var(--error-text);
+  border: 1px solid var(--error-border);
+}
+
+.portal-message.success {
+  background: var(--success-bg);
+  color: var(--success-text);
+  border: 1px solid var(--success-border);
+}
+
+.portal-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* -------------------------------------------------------------------- table */
+
+.portal-table-wrap { overflow-x: auto; }
+
+.portal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.portal-table th,
+.portal-table td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color-soft);
+  white-space: nowrap;
+}
+
+.portal-table th {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.portal-table tbody tr:hover { background: var(--accent-soft-bg); }
+
+/* -------------------------------------------------------------------- modal */
+
+.portal-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 16px;
+  overflow-y: auto;
+  background: rgba(6, 12, 9, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.portal-modal {
+  width: 100%;
+  max-width: 620px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+.portal-modal h2 { margin: 0 0 4px; font-size: 19px; }
+
+.portal-modal .sub {
+  margin: 0 0 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* --------------------------------------------------------------------- form */
+
+.portal-form { display: flex; flex-direction: column; gap: 14px; }
+
+.portal-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.portal-field { display: flex; flex-direction: column; gap: 6px; }
+
+.portal-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.portal-field input,
+.portal-field select,
+.portal-field textarea {
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 14px;
+  width: 100%;
+}
+
+.portal-field textarea { resize: vertical; min-height: 74px; }
+
+.portal-field input:focus,
+.portal-field select:focus,
+.portal-field textarea:focus { outline: none; border-color: var(--accent); }
+
+.portal-field .hint { font-size: 12px; color: var(--text-secondary); }
+
+.portal-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+@media (max-width: 600px) {
+  .portal-content { padding: 24px 16px 48px; }
+  .record-actions { width: 100%; }
+  .portal-form-actions { flex-direction: column-reverse; }
+  .portal-form-actions .portal-btn { width: 100%; }
+}

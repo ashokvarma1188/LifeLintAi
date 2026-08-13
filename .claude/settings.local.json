@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -sL --compressed --max-time 90 \"https://lifelinkportal.vercel.app/assets/DonationBox3D-DY4sOR6r.js\" -o js/DonationBox3D.js)",
+      "Bash(curl -sL --compressed --max-time 90 \"https://lifelinkportal.vercel.app/assets/vanilla-m3Xdu9cz.js\" -o js/vanilla.js)",
+      "Bash(node beautify.js js/DonationBox3D.js box3d.js)",
+      "Bash(npm install *)"
+    ]
+  }
+}

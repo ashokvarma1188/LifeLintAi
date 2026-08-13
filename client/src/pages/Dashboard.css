@@ -1,0 +1,268 @@
+* {
+  box-sizing: border-box;
+}
+
+.dash-wrapper {
+  min-height: 100vh;
+  background: var(--bg-page);
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.dash-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 40px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color-soft);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.dash-navbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.dash-navbar .mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dash-navbar .user-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dash-navbar .avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent-soft-bg);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.theme-toggle {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.logout-btn {
+  padding: 7px 14px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all 0.15s ease;
+}
+
+.logout-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.dash-content {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.dash-welcome {
+  animation: fadeIn 0.4s ease both;
+  margin-bottom: 28px;
+}
+
+.dash-welcome h1 {
+  font-size: 24px;
+  color: var(--text-primary);
+  margin: 0 0 5px;
+  font-weight: 600;
+}
+
+.dash-welcome p {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 14.5px;
+}
+
+/* SOS Section - stays constant red in both themes, it's an emergency-alert color, not a UI theme color */
+.sos-card {
+  background: linear-gradient(135deg, #e0122a, #b8001f);
+  border-radius: 16px;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #fff;
+  margin-bottom: 28px;
+  animation: fadeIn 0.5s ease both;
+  box-shadow: 0 12px 30px rgba(208, 2, 27, 0.28);
+}
+
+.sos-card .sos-text h2 {
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 600;
+}
+
+.sos-card .sos-text p {
+  margin: 0;
+  opacity: 0.85;
+  font-size: 13.5px;
+  max-width: 380px;
+}
+
+.sos-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: #fff;
+  color: #d0021b;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
+  animation: sosPulse 2s infinite;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.sos-button:hover:not(:disabled) {
+  transform: scale(1.04);
+}
+
+.sos-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  animation: none;
+}
+
+@keyframes sosPulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.45); }
+  70% { box-shadow: 0 0 0 16px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+.sos-status {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+}
+
+.sos-status.success {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.sos-status.error {
+  background: var(--error-bg);
+  color: var(--error-text);
+}
+
+/* Feature grid */
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.dash-card {
+  background: var(--bg-surface);
+  border-radius: 14px;
+  padding: 22px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  animation: fadeIn 0.5s ease both;
+  cursor: default;
+}
+
+.dash-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.dash-card .icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--accent-soft-bg);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.dash-card h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.dash-card p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.dash-card .badge-soon {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--warning-text);
+  background: var(--warning-bg);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
