@@ -16,7 +16,7 @@ export async function login({ email, password }) {
 }
 
 export async function register(form) {
-  const { data } = await api.post("/auth/register", { ...form, role: "citizen" });
+  const { data } = await api.post("/auth/register", form);
   return persistSession(data);
 }
 
