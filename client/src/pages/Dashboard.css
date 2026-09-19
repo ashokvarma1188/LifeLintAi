@@ -262,6 +262,17 @@
   border-radius: 999px;
 }
 
+.dash-card .badge-live {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft-bg);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }

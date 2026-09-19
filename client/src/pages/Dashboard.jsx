@@ -22,27 +22,27 @@ const FEATURES = {
     { icon: Hospital, title: "Find Hospitals", desc: "Search nearby hospitals with bed and ambulance availability.", path: "/find-hospitals" },
     { icon: ShieldCheck, title: "Role & Account", desc: "Request a hospital, police, fire station or pharmacy account.", path: "/settings/role" },
     { icon: Droplet, title: "Blood Donation", desc: "Find or offer blood donations by blood group, nearby." },
-    { icon: Bot, title: "AI First-Aid Assistant", desc: "Get quick first-aid guidance while help is on the way." },
+    { icon: Bot, title: "AI First-Aid Assistant", desc: "Get quick first-aid guidance while help is on the way. Open it from the chat button in the bottom-right corner.", note: "Live now" },
   ],
   police: [
-    { icon: Siren, title: "Incoming Alerts", desc: "Live SOS alerts raised in your coverage area." },
+    { icon: Siren, title: "Incoming Alerts", desc: "Live SOS alerts raised in your coverage area.", path: "/police/alerts" },
     { icon: Map, title: "Coverage Map", desc: "See active incidents plotted across your jurisdiction." },
-    { icon: ClipboardList, title: "Incident Reports", desc: "File and review reports for responded incidents." },
+    { icon: ClipboardList, title: "Incident Reports", desc: "File and review reports for responded incidents.", path: "/police/alerts" },
   ],
   hospital: [
     { icon: Users, title: "Patient Records", desc: "Look up a patient by phone and file medical reports.", path: "/hospital/patients" },
-    { icon: Ambulance, title: "Incoming Patients", desc: "Patients heading your way from SOS alerts." },
-    { icon: BedDouble, title: "Bed Availability", desc: "Keep your bed and ambulance counts up to date." },
+    { icon: Ambulance, title: "Incoming Patients", desc: "Patients heading your way from SOS alerts.", path: "/hospital/incoming" },
+    { icon: BedDouble, title: "Bed Availability", desc: "Keep your bed and ambulance counts up to date.", path: "/hospital/beds" },
   ],
   firestation: [
-    { icon: Siren, title: "Active Calls", desc: "Fire and rescue calls assigned to your station." },
-    { icon: Truck, title: "Fleet Status", desc: "Track which engines and crews are available." },
+    { icon: Siren, title: "Active Calls", desc: "Fire and rescue calls assigned to your station.", path: "/firestation/alerts" },
+    { icon: Truck, title: "Fleet Status", desc: "Track which engines and crews are available.", path: "/firestation/alerts" },
     { icon: Map, title: "Coverage Map", desc: "Live view of incidents across your coverage area." },
   ],
   pharmacy: [
-    { icon: Package, title: "Stock Status", desc: "Publish which critical medicines you have in stock." },
-    { icon: Clock, title: "Hours & Availability", desc: "Let people know when you are open." },
-    { icon: Inbox, title: "Requests", desc: "Incoming medicine requests from nearby users." },
+    { icon: Package, title: "Stock Status", desc: "Publish which critical medicines you have in stock.", path: "/pharmacy/stock" },
+    { icon: Clock, title: "Hours & Availability", desc: "Let people know when you are open.", path: "/pharmacy/stock" },
+    { icon: Inbox, title: "Requests", desc: "Incoming medicine requests from nearby users.", path: "/pharmacy/stock" },
   ],
   admin: [
     { icon: ShieldCheck, title: "Admin Console", desc: "Approve or reject organisation account requests.", path: "/admin" },
@@ -132,7 +132,8 @@ function Dashboard() {
               <p>Press the button to instantly alert the nearest hospital with your live location.</p>
               {sosResult && (
                 <div className="sos-status success">
-                  SOS sent — nearest hospital: {sosResult.nearestHospital?.name || "searching..."}
+                  SOS sent — nearest hospital:{" "}
+                  {sosResult.nearestHospital?.name || "none found within 10km, but your alert was recorded"}
                 </div>
               )}
               {sosError && <div className="sos-status error">{sosError}</div>}
@@ -145,7 +146,7 @@ function Dashboard() {
         )}
 
         <div className="dash-grid">
-          {cards.map(({ icon: Icon, title, desc, path }) => {
+          {cards.map(({ icon: Icon, title, desc, path, note }) => {
             const locked = Boolean(path) && (isPending || isRejected);
             const clickable = Boolean(path) && !locked;
 
@@ -161,7 +162,8 @@ function Dashboard() {
                 </div>
                 <h3>{title}</h3>
                 <p>{desc}</p>
-                {!path && <span className="badge-soon">Coming soon</span>}
+                {!path && !note && <span className="badge-soon">Coming soon</span>}
+                {note && <span className="badge-live">{note}</span>}
                 {locked && <span className="badge-soon">Awaiting approval</span>}
               </div>
             );

@@ -27,6 +27,25 @@ const userSchema = new mongoose.Schema(
         relation: { type: String },
       },
     ],
+
+    // Fire station only: engines/units under this station.
+    fleet: [
+      {
+        unitName: { type: String, required: true },
+        status: { type: String, enum: ["available", "dispatched", "maintenance"], default: "available" },
+      },
+    ],
+
+    // Pharmacy only: medicines this pharmacy has published stock for.
+    stock: [
+      {
+        medicineName: { type: String, required: true },
+        inStock: { type: Boolean, default: true },
+        quantity: { type: Number },
+      },
+    ],
+    openHours: { type: String },
+    isOpen: { type: Boolean, default: true },
   },
   { timestamps: true }
 );

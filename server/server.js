@@ -9,6 +9,10 @@ const sosRoutes = require("./routes/sosRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const healthRecordRoutes = require("./routes/healthRecordRoutes");
 const hospitalPatientRoutes = require("./routes/hospitalPatientRoutes");
+const policeRoutes = require("./routes/policeRoutes");
+const firestationRoutes = require("./routes/firestationRoutes");
+const pharmacyRoutes = require("./routes/pharmacyRoutes");
+const assistantRoutes = require("./routes/assistantRoutes");
 
 const app = express();
 
@@ -42,6 +46,10 @@ app.use("/api/sos", sosRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/health-records", healthRecordRoutes);
 app.use("/api/hospital/patients", hospitalPatientRoutes);
+app.use("/api/police", policeRoutes);
+app.use("/api/firestation", firestationRoutes);
+app.use("/api/pharmacy", pharmacyRoutes);
+app.use("/api/assistant", assistantRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)
