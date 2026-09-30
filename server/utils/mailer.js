@@ -16,6 +16,9 @@ const getTransporter = () => {
       connectionTimeout: 10000,
       greetingTimeout: 10000,
       socketTimeout: 10000,
+      // Belt-and-suspenders alongside dns.setDefaultResultOrder("ipv4first") in
+      // server.js — some hosts have no outbound IPv6 route and fail with ENETUNREACH.
+      family: 4,
     });
   }
   return transporter;

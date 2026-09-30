@@ -1,4 +1,9 @@
 require("dotenv").config();
+const dns = require("dns");
+// Render's containers resolve some hosts (e.g. smtp.gmail.com) to an IPv6 address
+// first but have no outbound IPv6 route, causing an immediate ENETUNREACH — prefer
+// IPv4 results so outgoing SMTP connections actually work.
+dns.setDefaultResultOrder("ipv4first");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
