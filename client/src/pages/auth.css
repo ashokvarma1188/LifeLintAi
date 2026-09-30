@@ -107,6 +107,16 @@
 
 .auth-input-wrap { position: relative; }
 
+/*
+ * Edge/IE inject their own native reveal/clear icons at the same top-right spot
+ * as our custom .auth-eye button and sit above it, silently swallowing the
+ * click — the button's onClick never fires and the field looks "stuck" as dots.
+ */
+.auth-input-wrap input[type="password"]::-ms-reveal,
+.auth-input-wrap input[type="password"]::-ms-clear {
+  display: none;
+}
+
 .auth-field input,
 .auth-field select {
   width: 100%;
@@ -158,10 +168,16 @@
   pointer-events: none;
 }
 
+.auth-input-wrap input[type="password"],
+.auth-input-wrap input[type="text"] {
+  padding-right: 2.5rem;
+}
+
 .auth-eye {
   position: absolute;
   top: 50%;
   right: 0.5rem;
+  z-index: 2;
   display: flex;
   height: 2rem;
   width: 2rem;
