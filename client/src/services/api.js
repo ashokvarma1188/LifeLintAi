@@ -15,9 +15,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // An expired or tampered token should not leave the app in a half-signed-in
-    // state — clear it and send the user back to the login form.
-    if (error.response?.status === 401) {
+    // An expired/tampered token, or a now-suspended account, should not leave the
+    // app in a half-signed-in state — clear it and send the user back to login.
+    const isSuspended = error.response?.status === 403 && error.response?.data?.message?.includes("suspended");
+    if (error.response?.status === 401 || isSuspended) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       if (!window.location.pathname.startsWith("/login")) {

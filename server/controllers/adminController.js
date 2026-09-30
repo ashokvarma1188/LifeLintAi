@@ -61,6 +61,9 @@ const setSuspended = (suspended, successMessage) => async (req, res) => {
     }
 
     user.suspended = suspended;
+    // Invalidate any token already issued to this account — otherwise a suspended
+    // user stays fully signed in until their 7-day token naturally expires.
+    if (suspended) user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
 
     res.json({ message: successMessage, user: publicUser(user) });
