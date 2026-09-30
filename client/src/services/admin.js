@@ -44,6 +44,26 @@ export async function rejectUser(userId) {
   return data.user;
 }
 
+export async function suspendUser(userId) {
+  const { data } = await api.post(`/admin/suspend/${userId}`);
+  return data.user;
+}
+
+export async function reactivateUser(userId) {
+  const { data } = await api.post(`/admin/reactivate/${userId}`);
+  return data.user;
+}
+
+export async function getAnalytics() {
+  const { data } = await api.get("/admin/analytics");
+  return data;
+}
+
+export async function getAuditLog() {
+  const { data } = await api.get("/admin/audit-log");
+  return data.entries;
+}
+
 export async function requestRoleChange(role, orgName) {
   const { data } = await api.post("/auth/request-role-change", { role, orgName });
   return data;
