@@ -1,0 +1,196 @@
+/* Shared styles for static public pages (Privacy, Terms, FAQ, etc.) — scoped under .ll-root. */
+
+.pp-emergency-banner {
+  position: relative;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 48px 10px 16px;
+  background: color-mix(in oklab, var(--ll-emergency) 16%, var(--ll-background));
+  color: var(--ll-foreground);
+  font-size: 12.5px;
+  line-height: 1.4;
+  border-bottom: 1px solid var(--ll-border);
+}
+.pp-emergency-banner svg { flex-shrink: 0; color: var(--ll-emergency); }
+.pp-emergency-banner button {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--ll-muted-foreground);
+  cursor: pointer;
+  display: flex;
+  padding: 4px;
+}
+.pp-emergency-banner button:hover { color: var(--ll-foreground); }
+
+.pp-page {
+  padding-top: 140px;
+  padding-bottom: 40px;
+}
+
+.pp-container {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding-inline: 24px;
+}
+
+.pp-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ll-primary);
+  margin: 0 0 10px;
+}
+
+.pp-title {
+  font-size: 2.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 12px;
+}
+
+.pp-subtitle {
+  color: var(--ll-muted-foreground);
+  font-size: 15px;
+  margin: 0 0 40px;
+  max-width: 40rem;
+}
+
+.pp-prose h2 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 36px 0 12px;
+}
+.pp-prose h2:first-child { margin-top: 0; }
+.pp-prose p {
+  color: var(--ll-muted-foreground);
+  line-height: 1.7;
+  margin: 0 0 14px;
+  font-size: 14.5px;
+}
+.pp-prose ul {
+  margin: 0 0 14px;
+  padding-left: 20px;
+  color: var(--ll-muted-foreground);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+.pp-prose li { margin-bottom: 6px; }
+.pp-prose strong { color: var(--ll-foreground); font-weight: 600; }
+.pp-updated {
+  font-size: 12.5px;
+  color: var(--ll-muted-foreground);
+  margin-bottom: 32px;
+}
+
+.pp-faq-item {
+  border: 1px solid var(--ll-border);
+  border-radius: var(--ll-radius);
+  background: var(--ll-glass-bg);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.pp-faq-question {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  background: transparent;
+  border: none;
+  color: var(--ll-foreground);
+  font-size: 14.5px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.pp-faq-question svg { flex-shrink: 0; color: var(--ll-muted-foreground); transition: transform 0.2s; }
+.pp-faq-item.is-open .pp-faq-question svg { transform: rotate(180deg); }
+.pp-faq-answer {
+  padding: 0 18px 16px;
+  color: var(--ll-muted-foreground);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.pp-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin: 24px 0 40px;
+}
+.pp-audience-card {
+  border: 1px solid var(--ll-border);
+  border-radius: var(--ll-radius);
+  background: var(--ll-glass-bg);
+  padding: 20px;
+}
+.pp-audience-card h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pp-audience-card h3 svg { color: var(--ll-primary); }
+.pp-audience-card ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--ll-muted-foreground);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.pp-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px;
+  border: 1px solid var(--ll-border);
+  border-radius: var(--ll-radius);
+  background: var(--ll-glass-bg);
+  margin-bottom: 12px;
+}
+.pp-status-name { font-size: 14px; font-weight: 500; }
+.pp-status-sub { font-size: 12.5px; color: var(--ll-muted-foreground); margin-top: 2px; }
+.pp-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+}
+.pp-status-badge.up { color: oklch(75% 0.2 152); background: color-mix(in oklab, var(--ll-primary) 18%, transparent); }
+.pp-status-badge.down { color: var(--ll-emergency-foreground); background: color-mix(in oklab, var(--ll-emergency) 30%, transparent); }
+.pp-status-badge.checking { color: var(--ll-muted-foreground); background: var(--ll-surface-elevated); }
+.pp-status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+.pp-contact-card {
+  border: 1px solid var(--ll-border);
+  border-radius: var(--ll-radius);
+  background: var(--ll-glass-bg);
+  padding: 22px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.pp-contact-card svg { color: var(--ll-primary); flex-shrink: 0; margin-top: 2px; }
+.pp-contact-card h3 { font-size: 14.5px; font-weight: 600; margin: 0 0 4px; }
+.pp-contact-card p { font-size: 13.5px; color: var(--ll-muted-foreground); margin: 0; }
+.pp-contact-card a { color: var(--ll-primary); }
+
+@media (max-width: 640px) {
+  .pp-page { padding-top: 110px; }
+  .pp-title { font-size: 1.75rem; }
+}

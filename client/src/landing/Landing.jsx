@@ -2,6 +2,7 @@ import { useState } from "react";
 import Particles from "./components/Particles";
 import ThemeToggle from "./components/ThemeToggle";
 import Navbar from "./components/Navbar";
+import EmergencyBanner from "./components/EmergencyBanner";
 import Hero from "./components/Hero";
 import HowItWorks from "./components/HowItWorks";
 import ImpactStats from "./components/ImpactStats";
@@ -17,6 +18,7 @@ function Landing() {
 
   return (
     <div className={`ll-root${light ? " ll-light" : ""}`}>
+      <EmergencyBanner />
       <Particles />
       <ThemeToggle light={light} onToggle={() => setLight((v) => !v)} />
       <main className="ll-main">

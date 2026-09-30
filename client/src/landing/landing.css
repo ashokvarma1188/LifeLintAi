@@ -1001,6 +1001,19 @@
 
 .ll-footer-accent { color: var(--ll-primary); }
 
+.ll-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.25rem;
+}
+.ll-footer-links a {
+  color: var(--ll-muted-foreground);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.ll-footer-links a:hover { color: var(--ll-foreground); }
+
 /* --------------------------------------------------------- breakpoints */
 
 @media (min-width: 640px) {

@@ -42,6 +42,18 @@ function CtaFooter() {
               Life<span className="ll-footer-accent">Link</span> · Smart Donation Network
             </span>
           </div>
+          <nav className="ll-footer-links">
+            <Link to="/features">Features</Link>
+            <Link to="/organizations">For Organizations</Link>
+            <Link to="/safety">Safety &amp; Privacy</Link>
+            <Link to="/faq">FAQ</Link>
+            <Link to="/download">Download App</Link>
+            <Link to="/contact">Contact</Link>
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/terms">Terms</Link>
+            <Link to="/cookies">Cookies</Link>
+            <Link to="/status">Status</Link>
+          </nav>
           <div>© {new Date().getFullYear()} LifeLink. Privacy-first by design.</div>
         </footer>
       </div>
