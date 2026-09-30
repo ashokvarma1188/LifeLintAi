@@ -9,10 +9,12 @@ import {
   requestRoleChange,
   refreshCurrentUser,
 } from "../services/admin";
-import { getUser, setTwoFactor, logoutEverywhere, logout } from "../services/auth";
+import { getUser, setTwoFactor, logoutEverywhere, logout, demoSwitchRole } from "../services/auth";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
+
+const DEMO_ROLES = ["civilian", "hospital", "police", "firestation", "pharmacy", "admin"];
 
 function RoleSettings() {
   const navigate = useNavigate();
@@ -24,6 +26,8 @@ function RoleSettings() {
   const [saving, setSaving] = useState(false);
 
   const needsOrg = roleNeedsOrg(role);
+  const [demoSaving, setDemoSaving] = useState(null);
+  const [demoError, setDemoError] = useState("");
   const [twoFAsaving, setTwoFAsaving] = useState(false);
   const [signOutSaving, setSignOutSaving] = useState(false);
   const [securityNotice, setSecurityNotice] = useState("");
@@ -54,6 +58,18 @@ function RoleSettings() {
     } catch (err) {
       setSecurityError(getErrorMessage(err, "Could not sign out of all devices."));
       setSignOutSaving(false);
+    }
+  };
+
+  const handleDemoSwitch = async (targetRole) => {
+    setDemoSaving(targetRole);
+    setDemoError("");
+    try {
+      await demoSwitchRole(targetRole);
+      navigate("/dashboard");
+    } catch (err) {
+      setDemoError(getErrorMessage(err, "Could not switch role."));
+      setDemoSaving(null);
     }
   };
 
@@ -98,6 +114,29 @@ function RoleSettings() {
 
         {error && <div className="portal-message error">{error}</div>}
         {notice && <div className="portal-message success">{notice}</div>}
+
+        {user.isDemo && (
+          <div className="portal-panel" style={{ marginBottom: 20, borderColor: "var(--ll-primary)" }}>
+            <h3 style={{ marginTop: 0, fontSize: 15 }}>Demo account — instant role switch</h3>
+            <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: -6 }}>
+              No admin approval needed on this account — pick a role to jump straight to that dashboard.
+            </p>
+            {demoError && <div className="portal-message error">{demoError}</div>}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {DEMO_ROLES.map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  className={`portal-btn ${user.role === r ? "primary" : "ghost"}`}
+                  onClick={() => handleDemoSwitch(r)}
+                  disabled={Boolean(demoSaving)}
+                >
+                  {demoSaving === r ? "Switching…" : roleLabel(r)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="portal-panel">
           <p style={{ marginTop: 0, fontSize: 14 }}>

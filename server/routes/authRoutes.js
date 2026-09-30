@@ -8,6 +8,7 @@ const {
   logoutEverywhere,
   me,
   requestRoleChange,
+  demoSwitchRole,
   forgotPassword,
   resetPassword,
   verifyEmail,
@@ -23,6 +24,7 @@ router.post("/2fa", protect, setTwoFactor);
 router.post("/logout-everywhere", protect, logoutEverywhere);
 router.get("/me", protect, me);
 router.post("/request-role-change", protect, requestRoleChange);
+router.post("/demo-switch-role", protect, demoSwitchRole);
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);
 router.post("/verify-email/:token", verifyEmail);

@@ -22,6 +22,11 @@ function AppNavbar({ showLogout }) {
         LifeLink AI
       </div>
       <div className="user-area">
+        {user.isDemo && (
+          <button className="logout-btn" onClick={() => navigate("/settings/role")} title="Switch to a different role">
+            Switch role
+          </button>
+        )}
         <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
           {theme === "light" ? <IconMoon width={17} height={17} /> : <IconSun width={17} height={17} />}
         </button>

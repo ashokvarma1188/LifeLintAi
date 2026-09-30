@@ -89,3 +89,10 @@ export async function resendVerification() {
   const { data } = await api.post("/auth/resend-verification");
   return data;
 }
+
+/** Only works for the one hand-seeded demo account — every other user gets a 403. */
+export async function demoSwitchRole(role) {
+  const { data } = await api.post("/auth/demo-switch-role", { role });
+  localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+  return data.user;
+}

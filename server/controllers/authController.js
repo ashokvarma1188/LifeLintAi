@@ -46,6 +46,7 @@ const publicUser = (user) => ({
   emailVerified: Boolean(user.emailVerified),
   twoFactorEnabled: Boolean(user.twoFactorEnabled),
   hasVerificationDoc: Boolean(user.verificationDoc?.filename),
+  isDemo: Boolean(user.isDemo),
 });
 
 const register = async (req, res) => {
@@ -270,6 +271,43 @@ const requestRoleChange = async (req, res) => {
   }
 };
 
+const DEMO_SWITCHABLE_ROLES = ["civilian", "hospital", "police", "firestation", "pharmacy", "admin"];
+const DEMO_ORG_NAMES = {
+  hospital: "Demo Hospital",
+  police: "Demo Police Department",
+  firestation: "Demo Fire Station",
+  pharmacy: "Demo Pharmacy",
+};
+
+/**
+ * Instantly switches role with no pending/approval step — only for the one
+ * hand-seeded demo account (isDemo: true), so a single login can walk through
+ * every dashboard for a demo/interview. Every other account still goes
+ * through requestRoleChange above and needs admin approval.
+ */
+const demoSwitchRole = async (req, res) => {
+  try {
+    if (!req.user.isDemo) {
+      return res.status(403).json({ message: "This account cannot switch roles instantly" });
+    }
+
+    const role = (req.body.role || "").trim().toLowerCase();
+    if (!DEMO_SWITCHABLE_ROLES.includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    const user = req.user;
+    user.role = role;
+    user.roleStatus = "approved";
+    user.orgName = DEMO_ORG_NAMES[role] || undefined;
+    await user.save();
+
+    res.json({ message: `Switched to ${role}`, user: publicUser(user) });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
 /**
  * Always responds the same way whether or not the email exists, so a caller
  * can't use this to probe which emails are registered.
@@ -387,6 +425,7 @@ module.exports = {
   logoutEverywhere,
   me,
   requestRoleChange,
+  demoSwitchRole,
   forgotPassword,
   resetPassword,
   verifyEmail,

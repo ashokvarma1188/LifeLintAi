@@ -73,6 +73,10 @@ const userSchema = new mongoose.Schema(
 
     suspended: { type: Boolean, default: false },
 
+    // One hand-seeded account (see scripts/createDemoAccount.js) for showing every
+    // role from a single login — normal accounts can never set this on themselves.
+    isDemo: { type: Boolean, default: false },
+
     // Bumped by "log out everywhere" — any JWT signed with an older value is rejected.
     tokenVersion: { type: Number, default: 0 },
 
