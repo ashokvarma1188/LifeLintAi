@@ -2,14 +2,13 @@ const mongoose = require("mongoose");
 const EmergencyRequest = require("../models/EmergencyRequest");
 const IncidentReport = require("../models/IncidentReport");
 
-/*
- * Police and fire station both respond to the same pool of SOS alerts —
- * there's no per-department routing on EmergencyRequest yet, so both see
- * every open alert platform-wide, same as hospitals do.
- */
+/** Only alerts the civilian chose to send to this responder's own service (police/firestation). */
 const listAlerts = async (req, res) => {
   try {
-    const requests = await EmergencyRequest.find({ status: { $in: ["pending", "accepted"] } })
+    const requests = await EmergencyRequest.find({
+      status: { $in: ["pending", "accepted"] },
+      targets: req.user.role,
+    })
       .populate("citizenId", "name phone")
       .sort({ createdAt: -1 })
       .limit(200);

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, CheckCheck, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, CheckCheck, Trash2, Check, X } from "lucide-react";
 import AppNavbar from "./AppNavbar";
+import CoverageMap from "../components/CoverageMap";
 import { listAlerts, listReports, createReport, updateReportStatus, getFleet, updateFleet } from "../services/firestation";
+import { acceptSOS, declineSOS, resolveSOS } from "../services/sos";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
@@ -76,6 +78,23 @@ function FirestationAlerts() {
     }
   };
 
+  const actOnAlert = async (id, action) => {
+    setBusyId(id);
+    setNotice("");
+    setError("");
+    try {
+      if (action === "accept") await acceptSOS(id);
+      else if (action === "decline") await declineSOS(id);
+      else await resolveSOS(id);
+      setNotice(`Alert marked as ${action === "accept" ? "accepted" : action}.`);
+      await load();
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not update this alert."));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const addUnit = () => {
     if (!newUnit.trim()) return;
     setFleet([...fleet, { unitName: newUnit.trim(), status: "available" }]);
@@ -126,11 +145,20 @@ function FirestationAlerts() {
             <button className={`portal-btn ${tab === "fleet" ? "primary" : "ghost"}`} onClick={() => setTab("fleet")}>
               Fleet status
             </button>
+            <button className={`portal-btn ${tab === "map" ? "primary" : "ghost"}`} onClick={() => setTab("map")}>
+              Coverage map
+            </button>
           </div>
         </div>
 
         {error && <div className="portal-message error">{error}</div>}
         {notice && <div className="portal-message success">{notice}</div>}
+
+        {tab === "map" && (
+          <div className="portal-panel">
+            <CoverageMap alerts={alerts} />
+          </div>
+        )}
 
         {tab === "alerts" && (
           <div className="portal-panel">
@@ -148,6 +176,7 @@ function FirestationAlerts() {
                       <th>Type</th>
                       <th>Status</th>
                       <th>Raised</th>
+                      <th />
                     </tr>
                   </thead>
                   <tbody>
@@ -158,6 +187,23 @@ function FirestationAlerts() {
                         <td>{a.type}</td>
                         <td><span className={`portal-badge ${ALERT_BADGE[a.status]}`}>{a.status}</span></td>
                         <td>{new Date(a.createdAt).toLocaleString()}</td>
+                        <td style={{ whiteSpace: "nowrap" }}>
+                          {a.status === "pending" && (
+                            <>
+                              <button className="portal-btn primary small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "accept")}>
+                                <Check size={14} /> Accept
+                              </button>
+                              <button className="portal-btn danger small" style={{ marginLeft: 6 }} disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "decline")}>
+                                <X size={14} /> Decline
+                              </button>
+                            </>
+                          )}
+                          {a.status === "accepted" && (
+                            <button className="portal-btn primary small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "resolve")}>
+                              <CheckCheck size={14} /> Resolve
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

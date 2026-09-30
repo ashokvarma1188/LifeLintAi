@@ -8,8 +8,24 @@ const emergencyRequestSchema = new mongoose.Schema(
       type: { type: String, enum: ["Point"], default: "Point" },
       coordinates: { type: [Number], required: true },
     },
-    status: { type: String, enum: ["pending", "accepted", "resolved"], default: "pending" },
+    status: {
+      type: String,
+      enum: ["pending", "accepted", "declined", "resolved", "cancelled"],
+      default: "pending",
+    },
     assignedHospitalId: { type: mongoose.Schema.Types.ObjectId, ref: "Hospital" },
+
+    // Who actually responded (accepted/declined/resolved), and their ETA in minutes if given.
+    respondedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    respondedByRole: { type: String, enum: ["hospital", "police", "firestation"] },
+    etaMinutes: { type: Number },
+
+    /* Which services the civilian chose to alert — controls who sees this request. */
+    targets: {
+      type: [{ type: String, enum: ["hospital", "police", "firestation", "pharmacy"] }],
+      default: ["hospital"],
+      validate: { validator: (arr) => arr.length > 0, message: "Pick at least one service to alert" },
+    },
   },
   { timestamps: true }
 );

@@ -7,8 +7,16 @@ export async function listSOS() {
   return data.requests;
 }
 
-export async function acceptSOS(id) {
-  const { data } = await api.patch(`/sos/${id}/accept`);
+/* Shared by any responder role (hospital/police/firestation) — the backend checks
+   the request actually targets that responder's own service. */
+
+export async function acceptSOS(id, etaMinutes) {
+  const { data } = await api.patch(`/sos/${id}/accept`, etaMinutes !== undefined ? { etaMinutes } : {});
+  return data.request;
+}
+
+export async function declineSOS(id) {
+  const { data } = await api.patch(`/sos/${id}/decline`);
   return data.request;
 }
 
