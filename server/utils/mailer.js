@@ -5,9 +5,17 @@ const isConfigured = () => Boolean(process.env.EMAIL_USER && process.env.EMAIL_P
 let transporter = null;
 const getTransporter = () => {
   if (!transporter) {
+    // Port 465 (SMTPS) is blocked outbound on some hosts, including Render's free
+    // tier — 587 with STARTTLS is far more commonly left open.
     transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      requireTLS: true,
       auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      socketTimeout: 10000,
     });
   }
   return transporter;
