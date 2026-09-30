@@ -9,6 +9,10 @@ const hospitalSchema = new mongoose.Schema(
       type: { type: String, enum: ["Point"], default: "Point" },
       coordinates: { type: [Number], required: true }, // [longitude, latitude]
     },
+    // Null until a hospital-role account first claims this record via updateHospital.
+    // Once set, only that account (or an admin) may edit it — closes the gap where
+    // any hospital login could edit any other hospital's public bed/ambulance data.
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", default: null },
     totalBeds: { type: Number, default: 0 },
     availableBeds: { type: Number, default: 0 },
     ambulanceAvailable: { type: Boolean, default: true },
