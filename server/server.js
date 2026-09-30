@@ -71,6 +71,10 @@ app.get("/", (req, res) => {
 app.use("/api/auth/login", authLimiter);
 app.use("/api/auth/register", authLimiter);
 app.use("/api/auth/forgot-password", authLimiter);
+// A 6-digit OTP is brute-forceable in far fewer than 300 tries (the general
+// /api cap) — give it the same tight ceiling as login.
+app.use("/api/auth/verify-2fa", authLimiter);
+app.use("/api/auth/resend-verification", authLimiter);
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/hospitals", hospitalRoutes);
