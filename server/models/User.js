@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
     orgName: { type: String },
 
     bloodGroup: { type: String },
+    donorAvailable: { type: Boolean, default: false },
     phone: { type: String },
     age: { type: Number },
     medicalHistory: [{ type: String }],
