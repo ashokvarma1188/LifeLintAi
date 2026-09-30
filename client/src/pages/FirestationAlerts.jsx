@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Plus, CheckCheck, Trash2, Check, X } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import CoverageMap from "../components/CoverageMap";
@@ -15,7 +15,8 @@ const FLEET_STATUSES = ["available", "dispatched", "maintenance"];
 
 function FirestationAlerts() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("alerts");
+  const location = useLocation();
+  const [tab, setTab] = useState(location.state?.tab || "alerts");
   const [alerts, setAlerts] = useState([]);
   const [reports, setReports] = useState([]);
   const [fleet, setFleet] = useState([]);

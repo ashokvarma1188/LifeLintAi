@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import api, { getErrorMessage } from "../services/api";
 import { getUser, resendVerification } from "../services/auth";
-import { roleLabel } from "../services/admin";
+import { roleLabel, refreshCurrentUser } from "../services/admin";
 import { listActiveAnnouncements } from "../services/announcements";
 import AppNavbar from "./AppNavbar";
 import "./Dashboard.css";
@@ -29,9 +29,9 @@ const FEATURES = {
     { icon: Bot, title: "AI First-Aid Assistant", desc: "Get quick first-aid guidance while help is on the way. Open it from the chat button in the bottom-right corner.", note: "Live now" },
   ],
   police: [
-    { icon: Siren, title: "Incoming Alerts", desc: "Live SOS alerts raised in your coverage area.", path: "/police/alerts" },
-    { icon: Map, title: "Coverage Map", desc: "See active incidents plotted across your jurisdiction.", path: "/police/alerts" },
-    { icon: ClipboardList, title: "Incident Reports", desc: "File and review reports for responded incidents.", path: "/police/alerts" },
+    { icon: Siren, title: "Incoming Alerts", desc: "Live SOS alerts raised in your coverage area.", path: "/police/alerts", tab: "alerts" },
+    { icon: Map, title: "Coverage Map", desc: "See active incidents plotted across your jurisdiction.", path: "/police/alerts", tab: "map" },
+    { icon: ClipboardList, title: "Incident Reports", desc: "File and review reports for responded incidents.", path: "/police/alerts", tab: "reports" },
     { icon: Building2, title: "Organisation Profile", desc: "Logo, hours, service radius, and staff accounts.", path: "/org-profile" },
   ],
   hospital: [
@@ -41,15 +41,15 @@ const FEATURES = {
     { icon: Building2, title: "Organisation Profile", desc: "Logo, hours, service radius, and staff accounts.", path: "/org-profile" },
   ],
   firestation: [
-    { icon: Siren, title: "Active Calls", desc: "Fire and rescue calls assigned to your station.", path: "/firestation/alerts" },
-    { icon: Truck, title: "Fleet Status", desc: "Track which engines and crews are available.", path: "/firestation/alerts" },
-    { icon: Map, title: "Coverage Map", desc: "Live view of incidents across your coverage area.", path: "/firestation/alerts" },
+    { icon: Siren, title: "Active Calls", desc: "Fire and rescue calls assigned to your station.", path: "/firestation/alerts", tab: "alerts" },
+    { icon: Truck, title: "Fleet Status", desc: "Track which engines and crews are available.", path: "/firestation/alerts", tab: "fleet" },
+    { icon: Map, title: "Coverage Map", desc: "Live view of incidents across your coverage area.", path: "/firestation/alerts", tab: "map" },
     { icon: Building2, title: "Organisation Profile", desc: "Logo, hours, service radius, and staff accounts.", path: "/org-profile" },
   ],
   pharmacy: [
-    { icon: Package, title: "Stock Status", desc: "Publish which critical medicines you have in stock.", path: "/pharmacy/stock" },
-    { icon: Clock, title: "Hours & Availability", desc: "Let people know when you are open.", path: "/pharmacy/stock" },
-    { icon: Inbox, title: "Requests", desc: "Incoming medicine requests from nearby users.", path: "/pharmacy/stock" },
+    { icon: Package, title: "Stock Status", desc: "Publish which critical medicines you have in stock.", path: "/pharmacy/stock", tab: "stock" },
+    { icon: Clock, title: "Hours & Availability", desc: "Let people know when you are open.", path: "/pharmacy/stock", tab: "stock" },
+    { icon: Inbox, title: "Requests", desc: "Incoming medicine requests from nearby users.", path: "/pharmacy/stock", tab: "requests" },
     { icon: Building2, title: "Organisation Profile", desc: "Logo, service radius, and staff accounts.", path: "/org-profile" },
   ],
   admin: [
@@ -62,7 +62,7 @@ const normaliseRole = (role) => (role === "citizen" || !role ? "civilian" : role
 
 function Dashboard() {
   const navigate = useNavigate();
-  const user = getUser() || {};
+  const [user, setUser] = useState(() => getUser() || {});
   const role = normaliseRole(user.role);
   const status = user.roleStatus || "approved";
 
@@ -78,6 +78,13 @@ function Dashboard() {
     (async () => {
       const data = await listActiveAnnouncements().catch(() => []);
       setAnnouncements(data);
+    })();
+    // Pick up an admin's approve/reject/reactivate decision without needing a
+    // fresh login — the cached user in localStorage otherwise only updates
+    // inside RoleSettings' own submit handler or at next login.
+    (async () => {
+      const fresh = await refreshCurrentUser().catch(() => null);
+      if (fresh) setUser(fresh);
     })();
   }, []);
 
@@ -158,18 +165,15 @@ function Dashboard() {
           </div>
         ))}
 
-        {isPending && (
-          <div className="portal-message error" style={{ marginBottom: 24 }}>
-            Your {roleLabel(user.role).toLowerCase()} account is waiting for admin approval. You
-            will get access to these features once it is approved.
-          </div>
-        )}
-
-        {isRejected && (
-          <div className="portal-message error" style={{ marginBottom: 24 }}>
-            Your organisation request was rejected.{" "}
-            <button className="portal-back" style={{ margin: 0 }} onClick={() => navigate("/settings/role")}>
-              Request a different role
+        {(isPending || isRejected) && (
+          <div className="portal-panel" style={{ marginBottom: 24 }}>
+            <div className="portal-message error" style={{ marginBottom: 16 }}>
+              {isPending
+                ? `Your ${roleLabel(user.role).toLowerCase()} account is waiting for admin approval. You'll get access to these features once it's approved — check back here any time.`
+                : "Your organisation request was rejected."}
+            </div>
+            <button className="portal-btn primary" onClick={() => navigate("/settings/role")}>
+              {isPending ? "View request / switch to a different role" : "Request a different role"}
             </button>
           </div>
         )}
@@ -225,17 +229,14 @@ function Dashboard() {
           </div>
         )}
 
-        <div className="dash-grid">
-          {cards.map(({ icon: Icon, title, desc, path, note }) => {
-            const locked = Boolean(path) && (isPending || isRejected);
-            const clickable = Boolean(path) && !locked;
-
-            return (
+        {!isPending && !isRejected && (
+          <div className="dash-grid">
+            {cards.map(({ icon: Icon, title, desc, path, note, tab }) => (
               <div
                 className="dash-card"
                 key={title}
-                style={clickable ? { cursor: "pointer" } : undefined}
-                onClick={clickable ? () => navigate(path) : undefined}
+                style={path ? { cursor: "pointer" } : undefined}
+                onClick={path ? () => navigate(path, tab ? { state: { tab } } : undefined) : undefined}
               >
                 <div className="icon-circle">
                   <Icon size={19} />
@@ -244,11 +245,10 @@ function Dashboard() {
                 <p>{desc}</p>
                 {!path && !note && <span className="badge-soon">Coming soon</span>}
                 {note && <span className="badge-live">{note}</span>}
-                {locked && <span className="badge-soon">Awaiting approval</span>}
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
