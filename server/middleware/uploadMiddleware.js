@@ -30,4 +30,30 @@ const uploadPdf = (req, res, next) =>
     return res.status(400).json({ message: err.message || "Upload failed" });
   });
 
-module.exports = { uploadPdf, MAX_PDF_BYTES };
+const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+
+/* Held in memory just long enough to forward to Gemini as inline data — never written to disk. */
+const imageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_IMAGE_BYTES },
+  fileFilter: (req, file, cb) => {
+    const isImage = ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype);
+    if (!isImage) {
+      return cb(new Error("Only JPG, PNG or WEBP photos are allowed"));
+    }
+    cb(null, true);
+  },
+});
+
+/** Accepts an optional `photo` file and turns multer failures into clean JSON. */
+const uploadPhoto = (req, res, next) =>
+  imageUpload.single("photo")(req, res, (err) => {
+    if (!err) return next();
+
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({ message: "Photo must be smaller than 6 MB" });
+    }
+    return res.status(400).json({ message: err.message || "Upload failed" });
+  });
+
+module.exports = { uploadPdf, MAX_PDF_BYTES, uploadPhoto, MAX_IMAGE_BYTES };

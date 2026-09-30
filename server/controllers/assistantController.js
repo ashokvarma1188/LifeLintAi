@@ -15,7 +15,13 @@ Rules:
   (e.g. "adults can typically take the standard labeled dose of paracetamol for
   a mild fever, but check the package and consult a pharmacist if unsure").
 - If a question is outside first-aid/medication scope, gently redirect back to what
-  you can help with.`;
+  you can help with.
+- If a photo of an injury is attached: describe what the wound looks like in plain
+  terms (e.g. cut, scrape, burn) and your best read of how severe the bleeding
+  appears (none/minor ooze/actively bleeding/heavy), then give immediate first-aid
+  steps. Always make clear a photo is not a diagnosis — for anything deep, heavy
+  bleeding, or that won't stop, tell them to seek in-person medical care or call
+  emergency services right away.`;
 
 const isConfigured = () => Boolean(process.env.GEMINI_API_KEY);
 
@@ -29,12 +35,18 @@ const getModel = () => {
  * `history` is the last few turns from the widget, kept short since this is a
  * quick-help chat rather than a long conversation the model needs full context for.
  */
+/** history/message arrive as JSON strings when sent as multipart (i.e. a photo is attached). */
 const chat = async (req, res) => {
   try {
-    const { message, history } = req.body;
+    const message = req.body.message;
+    let history = req.body.history;
+    if (typeof history === "string") {
+      try { history = JSON.parse(history); } catch { history = []; }
+    }
+    const photo = req.file;
 
-    if (!message || !String(message).trim()) {
-      return res.status(400).json({ message: "A message is required" });
+    if ((!message || !String(message).trim()) && !photo) {
+      return res.status(400).json({ message: "A message or photo is required" });
     }
 
     if (!isConfigured()) {
@@ -44,12 +56,21 @@ const chat = async (req, res) => {
       });
     }
 
+    const userParts = [];
+    const text = message ? String(message).trim() : "";
+    if (photo) {
+      userParts.push({ inlineData: { mimeType: photo.mimetype, data: photo.buffer.toString("base64") } });
+      userParts.push({ text: text || "Here's a photo of the injury. What is it and how should I treat it?" });
+    } else {
+      userParts.push({ text });
+    }
+
     const priorTurns = Array.isArray(history) ? history.slice(-8) : [];
     const contents = [
       ...priorTurns
         .filter((t) => t && t.role && t.content)
         .map((t) => ({ role: t.role === "assistant" ? "model" : "user", parts: [{ text: String(t.content) }] })),
-      { role: "user", parts: [{ text: String(message).trim() }] },
+      { role: "user", parts: userParts },
     ];
 
     const result = await getModel().generateContent({ contents });
