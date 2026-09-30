@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ShieldCheck, LogOut } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import {
   REQUESTABLE_ROLES,
@@ -9,7 +9,7 @@ import {
   requestRoleChange,
   refreshCurrentUser,
 } from "../services/admin";
-import { getUser } from "../services/auth";
+import { getUser, setTwoFactor, logoutEverywhere, logout } from "../services/auth";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
@@ -24,6 +24,38 @@ function RoleSettings() {
   const [saving, setSaving] = useState(false);
 
   const needsOrg = roleNeedsOrg(role);
+  const [twoFAsaving, setTwoFAsaving] = useState(false);
+  const [signOutSaving, setSignOutSaving] = useState(false);
+  const [securityNotice, setSecurityNotice] = useState("");
+  const [securityError, setSecurityError] = useState("");
+
+  const handleToggle2FA = async () => {
+    setTwoFAsaving(true);
+    setSecurityError("");
+    setSecurityNotice("");
+    try {
+      const data = await setTwoFactor(!user.twoFactorEnabled);
+      setUser({ ...user, twoFactorEnabled: data.twoFactorEnabled });
+      setSecurityNotice(data.message);
+    } catch (err) {
+      setSecurityError(getErrorMessage(err, "Could not update two-factor authentication."));
+    } finally {
+      setTwoFAsaving(false);
+    }
+  };
+
+  const handleLogoutEverywhere = async () => {
+    setSignOutSaving(true);
+    setSecurityError("");
+    try {
+      await logoutEverywhere();
+      logout();
+      navigate("/login", { replace: true });
+    } catch (err) {
+      setSecurityError(getErrorMessage(err, "Could not sign out of all devices."));
+      setSignOutSaving(false);
+    }
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -108,6 +140,37 @@ function RoleSettings() {
               </button>
             </div>
           </form>
+        </div>
+
+        <div className="portal-panel" style={{ marginTop: 20 }}>
+          <h3 style={{ marginTop: 0, fontSize: 15 }}>Security</h3>
+
+          {securityError && <div className="portal-message error">{securityError}</div>}
+          {securityNotice && <div className="portal-message success">{securityNotice}</div>}
+
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid var(--border-color-soft)" }}>
+            <div>
+              <div style={{ fontWeight: 500, fontSize: 14 }}>Two-factor authentication</div>
+              <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>
+                {user.twoFactorEnabled ? "Enabled — a code is emailed to you at every login." : "Off — add a login code sent to your email."}
+              </div>
+            </div>
+            <button className={`portal-btn ${user.twoFactorEnabled ? "danger" : "primary"} small`} onClick={handleToggle2FA} disabled={twoFAsaving}>
+              <ShieldCheck size={14} /> {twoFAsaving ? "Saving…" : user.twoFactorEnabled ? "Disable" : "Enable"}
+            </button>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
+            <div>
+              <div style={{ fontWeight: 500, fontSize: 14 }}>Sign out of all devices</div>
+              <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>
+                Invalidates every session, including this one — you'll need to log in again.
+              </div>
+            </div>
+            <button className="portal-btn ghost small" onClick={handleLogoutEverywhere} disabled={signOutSaving}>
+              <LogOut size={14} /> {signOutSaving ? "Signing out…" : "Log out everywhere"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

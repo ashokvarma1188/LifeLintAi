@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { login } from "../services/auth";
+import { login, verifyTwoFactor } from "../services/auth";
 import { getErrorMessage } from "../services/api";
 import AuthShell from "./AuthShell";
 import PasswordField from "./PasswordField";
@@ -11,6 +11,11 @@ function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Once the password checks out and the account has 2FA on, we hold here
+  // until the emailed code is entered — no token has been issued yet.
+  const [pending2FA, setPending2FA] = useState(null); // { userId, devCode }
+  const [code, setCode] = useState("");
 
   // Set by ProtectedRoute when it bounces a signed-out user, so we can send
   // them back where they were headed.
@@ -27,14 +32,75 @@ function Login() {
     setLoading(true);
 
     try {
-      await login(form);
-      navigate(redirectTo, { replace: true });
+      const result = await login(form);
+      if (result?.requires2FA) {
+        setPending2FA({ userId: result.userId, devCode: result.devCode });
+      } else {
+        navigate(redirectTo, { replace: true });
+      }
     } catch (err) {
       setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
   };
+
+  const handleVerifyCode = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      await verifyTwoFactor(pending2FA.userId, code);
+      navigate(redirectTo, { replace: true });
+    } catch (err) {
+      setError(getErrorMessage(err, "That code is invalid or has expired."));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (pending2FA) {
+    return (
+      <AuthShell
+        title="Enter your code"
+        subtitle="We sent a 6-digit code to your email."
+        error={error}
+        footer={
+          <button type="button" onClick={() => setPending2FA(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ll-primary)", fontWeight: 500 }}>
+            Back to sign in
+          </button>
+        }
+      >
+        <form className="auth-form" onSubmit={handleVerifyCode} noValidate>
+          <div className="auth-field">
+            <label htmlFor="code">6-digit code</label>
+            <input
+              id="code"
+              inputMode="numeric"
+              maxLength={6}
+              placeholder="123456"
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+              autoComplete="one-time-code"
+              autoFocus
+              required
+            />
+          </div>
+
+          {pending2FA.devCode && (
+            <div className="auth-message" style={{ fontSize: 13 }}>
+              Email isn&apos;t configured on this deployment yet — your code is <strong>{pending2FA.devCode}</strong>.
+            </div>
+          )}
+
+          <button className="auth-submit" type="submit" disabled={loading || code.length !== 6}>
+            {loading ? "Verifying…" : "Verify and sign in"}
+          </button>
+        </form>
+      </AuthShell>
+    );
+  }
 
   return (
     <AuthShell
@@ -70,6 +136,10 @@ function Login() {
           onChange={handleChange}
           autoComplete="current-password"
         />
+
+        <Link to="/forgot-password" className="auth-forgot-link">
+          Forgot password?
+        </Link>
 
         <button className="auth-submit" type="submit" disabled={loading}>
           {loading ? (

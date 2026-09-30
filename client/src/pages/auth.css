@@ -263,6 +263,16 @@
 
 .auth-switch a:hover { filter: brightness(1.15); }
 
+.auth-forgot-link {
+  display: block;
+  text-align: right;
+  margin-top: -0.5rem;
+  font-size: 0.8125rem;
+  color: var(--ll-muted-foreground);
+  transition: color 0.2s;
+}
+.auth-forgot-link:hover { color: var(--ll-primary); }
+
 @media (max-width: 480px) {
   .auth-card { padding: 1.5rem 1.25rem; }
   .auth-row { grid-template-columns: 1fr; }

@@ -1,12 +1,36 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const User = require("../models/User");
 const { VALID_ROLES, isCivilian } = require("../constants/roles");
+const { sendPasswordResetEmail, sendVerificationEmail, sendTwoFactorCode } = require("../utils/mailer");
+
+const hashToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
+
+const clientUrl = () => (process.env.CLIENT_URL || "http://localhost:5173").split(",")[0].trim();
+
+/** Issues a fresh verification token for `user`, emails it (or returns the link if email isn't configured). */
+const issueVerificationEmail = async (user) => {
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  user.emailVerificationToken = hashToken(rawToken);
+  user.emailVerificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+  await user.save();
+
+  const verifyUrl = `${clientUrl()}/verify-email/${rawToken}`;
+  const { sent } = await sendVerificationEmail(user.email, verifyUrl);
+  return { sent, verifyUrl };
+};
 
 const TOKEN_TTL = "7d";
 
 const signToken = (user) =>
-  jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: TOKEN_TTL });
+  jwt.sign(
+    { id: user._id, role: user.role, tokenVersion: user.tokenVersion || 0 },
+    process.env.JWT_SECRET,
+    { expiresIn: TOKEN_TTL }
+  );
+
+const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000));
 
 /* Shape sent to the client. Never includes the password hash. */
 const publicUser = (user) => ({
@@ -18,6 +42,10 @@ const publicUser = (user) => ({
   orgName: user.orgName || null,
   bloodGroup: user.bloodGroup,
   phone: user.phone,
+  suspended: Boolean(user.suspended),
+  emailVerified: Boolean(user.emailVerified),
+  twoFactorEnabled: Boolean(user.twoFactorEnabled),
+  hasVerificationDoc: Boolean(user.verificationDoc?.filename),
 });
 
 const register = async (req, res) => {
@@ -63,7 +91,12 @@ const register = async (req, res) => {
       orgName: orgName || undefined,
       bloodGroup,
       phone,
+      verificationDoc: req.file
+        ? { filename: req.file.originalname, contentType: req.file.mimetype, size: req.file.size, data: req.file.buffer }
+        : undefined,
     });
+
+    const { sent, verifyUrl } = await issueVerificationEmail(user);
 
     res.status(201).json({
       message:
@@ -72,6 +105,8 @@ const register = async (req, res) => {
           : "User registered successfully",
       token: signToken(user),
       user: publicUser(user),
+      // Same dev-mode fallback as forgot-password — remove once email is configured.
+      ...(sent ? {} : { verifyUrl }),
     });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
@@ -96,6 +131,10 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
+    if (user.suspended) {
+      return res.status(403).json({ message: "Your account has been suspended. Contact support if you think this is a mistake." });
+    }
+
     // Accounts created before roles existed are backfilled on first login.
     if (!user.roleStatus) {
       user.role = user.role || "civilian";
@@ -103,11 +142,85 @@ const login = async (req, res) => {
       await user.save();
     }
 
+    if (user.twoFactorEnabled) {
+      const code = generateOtp();
+      user.twoFactorCode = hashToken(code);
+      user.twoFactorCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
+      await user.save();
+
+      const { sent } = await sendTwoFactorCode(user.email, code);
+
+      return res.json({
+        requires2FA: true,
+        userId: user._id,
+        message: "Enter the 6-digit code sent to your email to finish signing in.",
+        // Dev-mode fallback, same pattern as the other flows — remove once email is configured.
+        ...(sent ? {} : { devCode: code }),
+      });
+    }
+
     res.json({
       message: "Login successful",
       token: signToken(user),
       user: publicUser(user),
     });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+const verifyTwoFactor = async (req, res) => {
+  try {
+    const { userId, code } = req.body;
+
+    if (!userId || !code) {
+      return res.status(400).json({ message: "userId and code are required" });
+    }
+
+    const user = await User.findOne({
+      _id: userId,
+      twoFactorCode: hashToken(String(code)),
+      twoFactorCodeExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "That code is invalid or has expired" });
+    }
+
+    user.twoFactorCode = undefined;
+    user.twoFactorCodeExpires = undefined;
+    await user.save();
+
+    res.json({
+      message: "Login successful",
+      token: signToken(user),
+      user: publicUser(user),
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+/** Toggling is immediate — no separate enrolment step, kept deliberately simple. */
+const setTwoFactor = async (req, res) => {
+  try {
+    req.user.twoFactorEnabled = Boolean(req.body.enable);
+    await req.user.save();
+    res.json({
+      message: req.user.twoFactorEnabled ? "Two-factor authentication enabled." : "Two-factor authentication disabled.",
+      twoFactorEnabled: req.user.twoFactorEnabled,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+/** Bumping tokenVersion makes every previously issued JWT fail the check in authMiddleware. */
+const logoutEverywhere = async (req, res) => {
+  try {
+    req.user.tokenVersion = (req.user.tokenVersion || 0) + 1;
+    await req.user.save();
+    res.json({ message: "Signed out of all devices. Please log in again." });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
   }
@@ -157,4 +270,126 @@ const requestRoleChange = async (req, res) => {
   }
 };
 
-module.exports = { register, login, me, requestRoleChange, publicUser };
+/**
+ * Always responds the same way whether or not the email exists, so a caller
+ * can't use this to probe which emails are registered.
+ */
+const forgotPassword = async (req, res) => {
+  try {
+    const email = String(req.body.email || "").trim().toLowerCase();
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    const genericMessage = "If an account exists for that email, a reset link has been sent.";
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.json({ message: genericMessage });
+    }
+
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = hashToken(rawToken);
+    user.resetPasswordExpires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    await user.save();
+
+    const resetUrl = `${clientUrl()}/reset-password/${rawToken}`;
+
+    const { sent } = await sendPasswordResetEmail(user.email, resetUrl);
+
+    res.json({
+      message: genericMessage,
+      // Email isn't configured on this deployment yet — hand back the link
+      // directly so the flow is still testable end to end. Remove this once
+      // EMAIL_USER/EMAIL_PASS are set, so the link is never exposed over the API.
+      ...(sent ? {} : { resetUrl }),
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    const user = await User.findOne({
+      resetPasswordToken: hashToken(token),
+      resetPasswordExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "This reset link is invalid or has expired" });
+    }
+
+    user.password = await bcrypt.hash(password, 10);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json({ message: "Password reset successfully. You can now sign in." });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+const verifyEmail = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    const user = await User.findOne({
+      emailVerificationToken: hashToken(token),
+      emailVerificationExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: "This verification link is invalid or has expired" });
+    }
+
+    user.emailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+
+    res.json({ message: "Email verified successfully." });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+const resendVerification = async (req, res) => {
+  try {
+    if (req.user.emailVerified) {
+      return res.status(400).json({ message: "Your email is already verified" });
+    }
+
+    const { sent, verifyUrl } = await issueVerificationEmail(req.user);
+
+    res.json({
+      message: "Verification email sent.",
+      ...(sent ? {} : { verifyUrl }),
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+module.exports = {
+  register,
+  login,
+  verifyTwoFactor,
+  setTwoFactor,
+  logoutEverywhere,
+  me,
+  requestRoleChange,
+  forgotPassword,
+  resetPassword,
+  verifyEmail,
+  resendVerification,
+  publicUser,
+};

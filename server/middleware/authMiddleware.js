@@ -30,6 +30,13 @@ const protect = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ message: "User not found" });
     }
+    if (user.suspended) {
+      return res.status(403).json({ message: "Your account has been suspended." });
+    }
+    // Tokens issued before this field existed carry no claim — treat that as version 0.
+    if ((decoded.tokenVersion || 0) !== (user.tokenVersion || 0)) {
+      return res.status(401).json({ message: "Your session has ended. Please log in again." });
+    }
 
     req.userId = user._id;
     req.user = user;

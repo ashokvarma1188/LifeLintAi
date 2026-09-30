@@ -19,6 +19,7 @@ function Signup() {
     role: "civilian",
     orgName: "",
   });
+  const [docFile, setDocFile] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -44,7 +45,7 @@ function Signup() {
     try {
       // register() stores the token the server hands back, so the new account
       // is already signed in — no second trip through the login form.
-      const user = await register(form);
+      const user = await register(form, docFile);
       setSuccess(
         user?.roleStatus === "pending"
           ? "Account created. An admin will review your organisation request."
@@ -120,17 +121,30 @@ function Signup() {
         </div>
 
         {needsOrg && (
-          <div className="auth-field">
-            <label htmlFor="orgName">Organisation name *</label>
-            <input
-              id="orgName"
-              type="text"
-              name="orgName"
-              placeholder="e.g. Apollo Hospital"
-              value={form.orgName}
-              onChange={handleChange}
-            />
-          </div>
+          <>
+            <div className="auth-field">
+              <label htmlFor="orgName">Organisation name *</label>
+              <input
+                id="orgName"
+                type="text"
+                name="orgName"
+                placeholder="e.g. Apollo Hospital"
+                value={form.orgName}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="doc">Proof / registration document (optional)</label>
+              <input
+                id="doc"
+                type="file"
+                accept="application/pdf,.pdf"
+                onChange={(e) => setDocFile(e.target.files?.[0] || null)}
+              />
+              <span className="hint">PDF only, up to 4 MB. Helps admin verify your organisation faster.</span>
+            </div>
+          </>
         )}
 
         <div className="auth-row">
