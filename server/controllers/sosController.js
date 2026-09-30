@@ -45,15 +45,27 @@ const createSOS = async (req, res) => {
   }
 };
 
+const DEFAULT_SERVICE_RADIUS_KM = 25;
+
 /**
- * Only requests where the civilian chose to alert Hospital. There is no link
- * between a Hospital document and the hospital User accounts that manage it,
- * so requests can't be scoped to "my hospital" yet — every hospital account
- * sees every hospital-targeted request.
+ * Only requests where the civilian chose to alert Hospital, scoped to this
+ * hospital's own service radius once it has claimed a Hospital record (via
+ * Bed Availability). Accounts that haven't claimed one yet still see every
+ * hospital-targeted request, same as before — there's no location to scope by.
  */
 const listSOS = async (req, res) => {
   try {
-    const requests = await EmergencyRequest.find({ targets: "hospital" })
+    const myHospital = await Hospital.findOne({ ownerId: req.user._id });
+    const filter = { targets: "hospital" };
+
+    if (myHospital) {
+      const radiusKm = req.user.serviceRadiusKm || DEFAULT_SERVICE_RADIUS_KM;
+      filter.location = {
+        $near: { $geometry: myHospital.location, $maxDistance: radiusKm * 1000 },
+      };
+    }
+
+    const requests = await EmergencyRequest.find(filter)
       .populate("citizenId", "name phone bloodGroup")
       .populate("assignedHospitalId", "name")
       .sort({ createdAt: -1 })
@@ -105,10 +117,21 @@ const cancelSOS = async (req, res) => {
 
 const RESPONDER_ROLES = ["hospital", "police", "firestation"];
 
+// What status a request must already be in for each transition to be valid —
+// enforced atomically below so two responders racing to act on the same
+// request can't both "win", and a resolved/declined request can't be
+// silently flipped back.
+const REQUIRED_PRIOR_STATUS = { accepted: "pending", declined: "pending", resolved: "accepted" };
+
 /**
  * Any of Hospital/Police/Fire Station can act on a request, but only one
  * targeted at their own service — a fire station can't accept a
  * hospital-only alert just because it happens to see it somewhere.
+ *
+ * The find-and-update is a single atomic operation filtered on the prior
+ * status: if two responders race to accept the same request, only the first
+ * `findOneAndUpdate` actually matches (the second sees the now-changed
+ * status and gets a clean 409, instead of silently overwriting the first).
  */
 const setStatus = (status) => async (req, res) => {
   try {
@@ -120,24 +143,34 @@ const setStatus = (status) => async (req, res) => {
       return res.status(403).json({ message: "Only response services can update a request" });
     }
 
-    const request = await EmergencyRequest.findOne({ _id: id, targets: req.user.role });
-    if (!request) {
-      return res.status(404).json({ message: "Request not found" });
-    }
-
-    request.status = status;
-    request.respondedBy = req.user._id;
-    request.respondedByRole = req.user.role;
+    const update = {
+      status,
+      respondedBy: req.user._id,
+      respondedByRole: req.user.role,
+    };
     if (status === "accepted" && req.body.etaMinutes !== undefined) {
       const eta = Number(req.body.etaMinutes);
-      if (Number.isFinite(eta) && eta >= 0) request.etaMinutes = eta;
+      if (Number.isFinite(eta) && eta >= 0) update.etaMinutes = eta;
     }
-    await request.save();
-    await request.populate([
+
+    const request = await EmergencyRequest.findOneAndUpdate(
+      { _id: id, targets: req.user.role, status: REQUIRED_PRIOR_STATUS[status] },
+      update,
+      { new: true }
+    ).populate([
       { path: "citizenId", select: "name phone bloodGroup" },
       { path: "assignedHospitalId", select: "name" },
       { path: "respondedBy", select: "name orgName" },
     ]);
+
+    if (!request) {
+      const stillExists = await EmergencyRequest.exists({ _id: id, targets: req.user.role });
+      return res.status(stillExists ? 409 : 404).json({
+        message: stillExists
+          ? "This request was already updated by someone else — refresh and try again."
+          : "Request not found",
+      });
+    }
 
     res.json({ message: `Request marked as ${status}`, request });
   } catch (err) {

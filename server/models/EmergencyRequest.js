@@ -20,9 +20,13 @@ const emergencyRequestSchema = new mongoose.Schema(
     respondedByRole: { type: String, enum: ["hospital", "police", "firestation"] },
     etaMinutes: { type: Number },
 
-    /* Which services the civilian chose to alert — controls who sees this request. */
+    /*
+     * Which services the civilian chose to alert — controls who sees this request.
+     * "pharmacy" isn't included: there's no pharmacy alerts inbox to respond from,
+     * so it was previously accepted here but silently dropped by createSOS.
+     */
     targets: {
-      type: [{ type: String, enum: ["hospital", "police", "firestation", "pharmacy"] }],
+      type: [{ type: String, enum: ["hospital", "police", "firestation"] }],
       default: ["hospital"],
       validate: { validator: (arr) => arr.length > 0, message: "Pick at least one service to alert" },
     },
