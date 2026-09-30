@@ -15,13 +15,12 @@ const createSOS = async (req, res) => {
 
     let nearestHospital = null;
     if (finalTargets.includes("hospital")) {
+      // No $maxDistance cap here on purpose — in a real emergency, "the nearest
+      // hospital is 40km away" is far more useful than "no hospital found".
+      // (Find Hospitals, the browsing page, keeps its 10km "nearby" radius —
+      // this is specifically the emergency-assignment path.)
       nearestHospital = await Hospital.findOne({
-        location: {
-          $near: {
-            $geometry: { type: "Point", coordinates: [longitude, latitude] },
-            $maxDistance: 10000,
-          },
-        },
+        location: { $near: { $geometry: { type: "Point", coordinates: [longitude, latitude] } } },
       });
     }
 
@@ -37,7 +36,7 @@ const createSOS = async (req, res) => {
       message: "SOS request created successfully",
       emergencyRequest,
       nearestHospital: finalTargets.includes("hospital")
-        ? nearestHospital || "No hospital found within 10km"
+        ? nearestHospital || "No hospital is registered on the platform yet"
         : "Hospital was not alerted for this request",
     });
   } catch (err) {
