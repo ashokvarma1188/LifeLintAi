@@ -11,7 +11,7 @@ function HospitalBeds() {
   const navigate = useNavigate();
   const [hospitals, setHospitals] = useState([]);
   const [selectedId, setSelectedId] = useState("");
-  const [form, setForm] = useState({ totalBeds: "", availableBeds: "", ambulanceAvailable: true });
+  const [form, setForm] = useState({ totalBeds: "", availableBeds: "", ambulanceAvailable: true, bloodBankAvailable: false, oxygenAvailable: true });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -39,6 +39,8 @@ function HospitalBeds() {
         totalBeds: h.totalBeds ?? "",
         availableBeds: h.availableBeds ?? "",
         ambulanceAvailable: h.ambulanceAvailable ?? true,
+        bloodBankAvailable: h.bloodBankAvailable ?? false,
+        oxygenAvailable: h.oxygenAvailable ?? true,
       });
     }
   };
@@ -57,9 +59,11 @@ function HospitalBeds() {
         totalBeds: Number(form.totalBeds) || 0,
         availableBeds: Number(form.availableBeds) || 0,
         ambulanceAvailable: form.ambulanceAvailable,
+        bloodBankAvailable: form.bloodBankAvailable,
+        oxygenAvailable: form.oxygenAvailable,
       });
       setHospitals((prev) => prev.map((h) => (h._id === updated._id ? updated : h)));
-      setNotice("Bed and ambulance availability updated.");
+      setNotice("Availability updated.");
     } catch (err) {
       setError(getErrorMessage(err, "Could not save changes."));
     } finally {
@@ -127,15 +131,37 @@ function HospitalBeds() {
                       />
                     </div>
                   </div>
-                  <div className="portal-field" style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    <input
-                      id="ambulanceAvailable"
-                      type="checkbox"
-                      checked={form.ambulanceAvailable}
-                      onChange={(e) => setForm({ ...form, ambulanceAvailable: e.target.checked })}
-                      style={{ width: "auto" }}
-                    />
-                    <label htmlFor="ambulanceAvailable" style={{ margin: 0 }}>Ambulance available</label>
+                  <div className="portal-row">
+                    <div className="portal-field" style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      <input
+                        id="ambulanceAvailable"
+                        type="checkbox"
+                        checked={form.ambulanceAvailable}
+                        onChange={(e) => setForm({ ...form, ambulanceAvailable: e.target.checked })}
+                        style={{ width: "auto" }}
+                      />
+                      <label htmlFor="ambulanceAvailable" style={{ margin: 0 }}>Ambulance available</label>
+                    </div>
+                    <div className="portal-field" style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      <input
+                        id="bloodBankAvailable"
+                        type="checkbox"
+                        checked={form.bloodBankAvailable}
+                        onChange={(e) => setForm({ ...form, bloodBankAvailable: e.target.checked })}
+                        style={{ width: "auto" }}
+                      />
+                      <label htmlFor="bloodBankAvailable" style={{ margin: 0 }}>Blood bank available</label>
+                    </div>
+                    <div className="portal-field" style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      <input
+                        id="oxygenAvailable"
+                        type="checkbox"
+                        checked={form.oxygenAvailable}
+                        onChange={(e) => setForm({ ...form, oxygenAvailable: e.target.checked })}
+                        style={{ width: "auto" }}
+                      />
+                      <label htmlFor="oxygenAvailable" style={{ margin: 0 }}>Oxygen available</label>
+                    </div>
                   </div>
 
                   <div className="portal-form-actions">

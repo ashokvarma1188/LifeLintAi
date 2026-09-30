@@ -64,11 +64,13 @@ const updateHospital = async (req, res) => {
       return res.status(404).json({ message: "Hospital not found" });
     }
 
-    const { totalBeds, availableBeds, ambulanceAvailable } = req.body;
+    const { totalBeds, availableBeds, ambulanceAvailable, bloodBankAvailable, oxygenAvailable } = req.body;
     const update = {};
     if (totalBeds !== undefined) update.totalBeds = totalBeds;
     if (availableBeds !== undefined) update.availableBeds = availableBeds;
     if (ambulanceAvailable !== undefined) update.ambulanceAvailable = ambulanceAvailable;
+    if (bloodBankAvailable !== undefined) update.bloodBankAvailable = bloodBankAvailable;
+    if (oxygenAvailable !== undefined) update.oxygenAvailable = oxygenAvailable;
 
     const hospital = await Hospital.findByIdAndUpdate(id, update, { new: true });
     if (!hospital) {

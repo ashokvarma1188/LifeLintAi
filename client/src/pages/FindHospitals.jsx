@@ -119,6 +119,12 @@ function FindHospitals() {
                   <span className={`fh-ambulance ${h.ambulanceAvailable ? "available" : "unavailable"}`}>
                     {h.ambulanceAvailable ? "Ambulance available" : "No ambulance"}
                   </span>
+                  <span className={`fh-ambulance ${h.bloodBankAvailable ? "available" : "unavailable"}`} style={{ marginTop: 6 }}>
+                    {h.bloodBankAvailable ? "Blood bank available" : "No blood bank"}
+                  </span>
+                  <span className={`fh-ambulance ${h.oxygenAvailable ? "available" : "unavailable"}`} style={{ marginTop: 6 }}>
+                    {h.oxygenAvailable ? "Oxygen available" : "No oxygen"}
+                  </span>
                 </div>
               </div>
             );

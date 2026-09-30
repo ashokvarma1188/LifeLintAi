@@ -12,6 +12,8 @@ const hospitalSchema = new mongoose.Schema(
     totalBeds: { type: Number, default: 0 },
     availableBeds: { type: Number, default: 0 },
     ambulanceAvailable: { type: Boolean, default: true },
+    bloodBankAvailable: { type: Boolean, default: false },
+    oxygenAvailable: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
