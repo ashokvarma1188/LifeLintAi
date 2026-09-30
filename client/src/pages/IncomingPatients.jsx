@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Check, CheckCheck, X } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import CoverageMap from "../components/CoverageMap";
+import MapsLink from "../components/MapsLink";
 import { listSOS, acceptSOS, declineSOS, resolveSOS } from "../services/sos";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
@@ -137,41 +138,44 @@ function IncomingPatients() {
                         </td>
                         <td>{new Date(r.createdAt).toLocaleString()}</td>
                         <td style={{ whiteSpace: "nowrap" }}>
-                          {r.status === "pending" && (
-                            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                              <input
-                                type="number"
-                                min="0"
-                                placeholder="ETA min"
-                                value={etaDrafts[r._id] || ""}
-                                onChange={(e) => setEtaDrafts({ ...etaDrafts, [r._id]: e.target.value })}
-                                style={{ width: 70 }}
-                              />
+                          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                            <MapsLink coordinates={r.location?.coordinates} />
+                            {r.status === "pending" && (
+                              <>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="ETA min"
+                                  value={etaDrafts[r._id] || ""}
+                                  onChange={(e) => setEtaDrafts({ ...etaDrafts, [r._id]: e.target.value })}
+                                  style={{ width: 70 }}
+                                />
+                                <button
+                                  className="portal-btn primary small"
+                                  disabled={busyId === r._id}
+                                  onClick={() => act(r._id, "accept")}
+                                >
+                                  <Check size={14} /> Accept
+                                </button>
+                                <button
+                                  className="portal-btn danger small"
+                                  disabled={busyId === r._id}
+                                  onClick={() => act(r._id, "decline")}
+                                >
+                                  <X size={14} /> Decline
+                                </button>
+                              </>
+                            )}
+                            {r.status === "accepted" && (
                               <button
                                 className="portal-btn primary small"
                                 disabled={busyId === r._id}
-                                onClick={() => act(r._id, "accept")}
+                                onClick={() => act(r._id, "resolve")}
                               >
-                                <Check size={14} /> Accept
+                                <CheckCheck size={14} /> Resolve
                               </button>
-                              <button
-                                className="portal-btn danger small"
-                                disabled={busyId === r._id}
-                                onClick={() => act(r._id, "decline")}
-                              >
-                                <X size={14} /> Decline
-                              </button>
-                            </div>
-                          )}
-                          {r.status === "accepted" && (
-                            <button
-                              className="portal-btn primary small"
-                              disabled={busyId === r._id}
-                              onClick={() => act(r._id, "resolve")}
-                            >
-                              <CheckCheck size={14} /> Resolve
-                            </button>
-                          )}
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}

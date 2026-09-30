@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Plus, CheckCheck, Trash2, Check, X } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import CoverageMap from "../components/CoverageMap";
+import MapsLink from "../components/MapsLink";
 import { listAlerts, listReports, createReport, updateReportStatus, getFleet, updateFleet } from "../services/firestation";
 import { acceptSOS, declineSOS, resolveSOS } from "../services/sos";
 import { getErrorMessage } from "../services/api";
@@ -189,21 +190,24 @@ function FirestationAlerts() {
                         <td><span className={`portal-badge ${ALERT_BADGE[a.status]}`}>{a.status}</span></td>
                         <td>{new Date(a.createdAt).toLocaleString()}</td>
                         <td style={{ whiteSpace: "nowrap" }}>
-                          {a.status === "pending" && (
-                            <>
-                              <button className="portal-btn primary small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "accept")}>
-                                <Check size={14} /> Accept
+                          <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                            <MapsLink coordinates={a.location?.coordinates} />
+                            {a.status === "pending" && (
+                              <>
+                                <button className="portal-btn primary small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "accept")}>
+                                  <Check size={14} /> Accept
+                                </button>
+                                <button className="portal-btn danger small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "decline")}>
+                                  <X size={14} /> Decline
+                                </button>
+                              </>
+                            )}
+                            {a.status === "accepted" && (
+                              <button className="portal-btn primary small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "resolve")}>
+                                <CheckCheck size={14} /> Resolve
                               </button>
-                              <button className="portal-btn danger small" style={{ marginLeft: 6 }} disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "decline")}>
-                                <X size={14} /> Decline
-                              </button>
-                            </>
-                          )}
-                          {a.status === "accepted" && (
-                            <button className="portal-btn primary small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "resolve")}>
-                              <CheckCheck size={14} /> Resolve
-                            </button>
-                          )}
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}

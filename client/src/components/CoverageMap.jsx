@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import MapsLink from "./MapsLink";
 
 /* Vite doesn't resolve Leaflet's default marker image paths, so point them at the bundled assets. */
 delete L.Icon.Default.prototype._getIconUrl;
@@ -39,7 +40,15 @@ function CoverageMap({ alerts }) {
                 <br />
                 Status: {a.status}
                 <br />
-                {a.citizenId?.phone && <>Phone: {a.citizenId.phone}</>}
+                {a.citizenId?.phone && (
+                  <>
+                    Phone: {a.citizenId.phone}
+                    <br />
+                  </>
+                )}
+                <div style={{ marginTop: 6 }}>
+                  <MapsLink coordinates={a.location.coordinates} />
+                </div>
               </Popup>
             </Marker>
           ))}

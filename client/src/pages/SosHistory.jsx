@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Siren, X } from "lucide-react";
 import AppNavbar from "./AppNavbar";
+import MapsLink from "../components/MapsLink";
 import { myRequests, cancelSOS } from "../services/sos";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
@@ -125,8 +126,9 @@ function SosHistory() {
 
                   <Timeline status={r.status} />
 
-                  {r.status === "pending" && (
-                    <div style={{ marginTop: 12 }}>
+                  <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+                    <MapsLink coordinates={r.location?.coordinates} />
+                    {r.status === "pending" && (
                       <button
                         className="portal-btn danger small"
                         disabled={busyId === r._id}
@@ -134,8 +136,8 @@ function SosHistory() {
                       >
                         <X size={13} /> Cancel this alert
                       </button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
