@@ -24,3 +24,15 @@ export async function resolveSOS(id) {
   const { data } = await api.patch(`/sos/${id}/resolve`);
   return data.request;
 }
+
+/* Civilian side — my own SOS history. */
+
+export async function myRequests() {
+  const { data } = await api.get("/sos/mine");
+  return data.requests;
+}
+
+export async function cancelSOS(id) {
+  const { data } = await api.patch(`/sos/${id}/cancel`);
+  return data.request;
+}
