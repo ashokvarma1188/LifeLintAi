@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
 const HealthRecord = require("../models/HealthRecord");
+const RecordAccessLog = require("../models/RecordAccessLog");
 const { CIVILIAN_ROLES } = require("../constants/roles");
 const {
   serialize,
@@ -101,6 +102,8 @@ const getPatientRecords = async (req, res) => {
       .select("-pdf.data")
       .sort({ recordDate: -1, createdAt: -1 });
 
+    await RecordAccessLog.create({ patientId: patient._id, hospitalId: req.user._id, action: "viewed" });
+
     res.json({ patient: patientCard(patient), records: records.map(serialize) });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
@@ -124,6 +127,13 @@ const createPatientRecord = async (req, res) => {
       hospitalName: trimmed(req.body.hospitalName) || req.user.orgName || req.user.name || "LifeLink Hospital",
       createdBy: "hospital",
       pdf: readPdf(req.file),
+    });
+
+    await RecordAccessLog.create({
+      patientId: patient._id,
+      hospitalId: req.user._id,
+      action: "created",
+      recordId: record._id,
     });
 
     res.status(201).json({

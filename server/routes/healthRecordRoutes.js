@@ -11,12 +11,14 @@ const {
   updateRecord,
   deleteRecord,
   recordStats,
+  getAccessLog,
 } = require("../controllers/healthRecordController");
 
 router.use(protect, requireApproved);
 
-// Declared before "/:recordId" so "stats" is not read as a record id.
+// Declared before "/:recordId" so these aren't read as a record id.
 router.get("/stats/summary", recordStats);
+router.get("/access-log", getAccessLog);
 
 router.post("/", uploadPdf, createRecord);
 router.get("/", getRecords);

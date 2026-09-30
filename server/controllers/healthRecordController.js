@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const HealthRecord = require("../models/HealthRecord");
 const { RECORD_TYPES } = require("../models/HealthRecord");
+const RecordAccessLog = require("../models/RecordAccessLog");
 
 /** Optional numeric form fields arrive as strings; blanks mean "not recorded". */
 const parseOptionalNumber = (value) => {
@@ -268,6 +269,20 @@ const recordStats = async (req, res) => {
   }
 };
 
+/** "Who viewed my records" — every time a hospital viewed or added to this civilian's file. */
+const getAccessLog = async (req, res) => {
+  try {
+    const entries = await RecordAccessLog.find({ patientId: req.user._id })
+      .populate("hospitalId", "name orgName")
+      .sort({ createdAt: -1 })
+      .limit(200);
+
+    res.json({ entries });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
 module.exports = {
   createRecord,
   getRecords,
@@ -276,6 +291,7 @@ module.exports = {
   updateRecord,
   deleteRecord,
   recordStats,
+  getAccessLog,
   serialize,
   readRecordFields,
   readPdf,

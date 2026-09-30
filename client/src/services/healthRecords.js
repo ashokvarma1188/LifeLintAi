@@ -33,6 +33,11 @@ export async function getStats() {
   return data;
 }
 
+export async function getAccessLog() {
+  const { data } = await api.get("/health-records/access-log");
+  return data.entries;
+}
+
 export async function createRecord(form, pdfFile) {
   const { data } = await api.post("/health-records", toFormData(form, pdfFile));
   return data.record;
