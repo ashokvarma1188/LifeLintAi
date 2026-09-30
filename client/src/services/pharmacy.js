@@ -19,3 +19,13 @@ export async function listRequests() {
   const { data } = await api.get("/pharmacy/requests");
   return data.requests;
 }
+
+export async function fulfilRequest(id) {
+  const { data } = await api.patch(`/pharmacy/requests/${id}/fulfil`);
+  return data.request;
+}
+
+export async function declineRequest(id) {
+  const { data } = await api.patch(`/pharmacy/requests/${id}/decline`);
+  return data.request;
+}

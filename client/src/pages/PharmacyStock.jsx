@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Plus, Trash2, Save } from "lucide-react";
 import AppNavbar from "./AppNavbar";
-import { getStock, updateStock, updateAvailability, listRequests } from "../services/pharmacy";
+import { getStock, updateStock, updateAvailability, listRequests, fulfilRequest, declineRequest } from "../services/pharmacy";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
@@ -11,7 +11,8 @@ const REQUEST_BADGE = { pending: "pending", fulfilled: "approved", declined: "re
 
 function PharmacyStock() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("stock");
+  const location = useLocation();
+  const [tab, setTab] = useState(location.state?.tab || "stock");
   const [stock, setStock] = useState([]);
   const [openHours, setOpenHours] = useState("");
   const [isOpen, setIsOpen] = useState(true);
@@ -21,6 +22,7 @@ function PharmacyStock() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [newMed, setNewMed] = useState("");
+  const [busyId, setBusyId] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -67,6 +69,19 @@ function PharmacyStock() {
       setError(getErrorMessage(err, "Could not save stock."));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const respond = async (id, action) => {
+    setBusyId(id);
+    setError("");
+    try {
+      const updated = action === "fulfil" ? await fulfilRequest(id) : await declineRequest(id);
+      setRequests((prev) => prev.map((r) => (r._id === updated._id ? updated : r)));
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not update this request."));
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -228,6 +243,7 @@ function PharmacyStock() {
                       <th>Notes</th>
                       <th>Status</th>
                       <th>Requested</th>
+                      <th />
                     </tr>
                   </thead>
                   <tbody>
@@ -238,6 +254,28 @@ function PharmacyStock() {
                         <td>{r.notes || "—"}</td>
                         <td><span className={`portal-badge ${REQUEST_BADGE[r.status]}`}>{r.status}</span></td>
                         <td>{new Date(r.createdAt).toLocaleString()}</td>
+                        <td>
+                          {r.status === "pending" && (
+                            <div style={{ display: "flex", gap: 6 }}>
+                              <button
+                                className="portal-btn primary small"
+                                type="button"
+                                disabled={busyId === r._id}
+                                onClick={() => respond(r._id, "fulfil")}
+                              >
+                                Fulfil
+                              </button>
+                              <button
+                                className="portal-btn danger small"
+                                type="button"
+                                disabled={busyId === r._id}
+                                onClick={() => respond(r._id, "decline")}
+                              >
+                                Decline
+                              </button>
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>

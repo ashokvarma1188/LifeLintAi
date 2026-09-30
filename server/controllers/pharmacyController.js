@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const User = require("../models/User");
 const MedicineRequest = require("../models/MedicineRequest");
 
@@ -65,4 +66,35 @@ const listRequests = async (req, res) => {
   }
 };
 
-module.exports = { getStock, updateStock, updateAvailability, listRequests };
+/** Only the pharmacy the request was sent to can fulfil/decline it, and only while pending. */
+const setRequestStatus = (status) => async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    const request = await MedicineRequest.findOneAndUpdate(
+      { _id: id, pharmacyId: req.user._id, status: "pending" },
+      { status },
+      { new: true }
+    ).populate("requestedBy", "name phone");
+
+    if (!request) {
+      return res.status(404).json({ message: "Request not found or already handled" });
+    }
+
+    res.json({ message: `Request marked as ${status}`, request });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+module.exports = {
+  getStock,
+  updateStock,
+  updateAvailability,
+  listRequests,
+  fulfilRequest: setRequestStatus("fulfilled"),
+  declineRequest: setRequestStatus("declined"),
+};
