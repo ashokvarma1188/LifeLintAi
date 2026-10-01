@@ -40,14 +40,16 @@ const getNearbyHospitals = async (req, res) => {
   try {
     const { longitude, latitude } = req.query;
 
+    // No $maxDistance cap: in a real emergency a hospital 40km away is far
+    // more useful than "no hospitals found" because the nearest one happened
+    // to be 10.1km out. Just return the closest ones, nearest first.
     const hospitals = await Hospital.find({
       location: {
         $near: {
           $geometry: { type: "Point", coordinates: [parseFloat(longitude), parseFloat(latitude)] },
-          $maxDistance: 10000,
         },
       },
-    });
+    }).limit(20);
 
     res.json(hospitals);
   } catch (err) {

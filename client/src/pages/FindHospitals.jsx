@@ -66,7 +66,7 @@ function FindHospitals() {
       <div className="fh-content">
         <div className="fh-header">
           <h1>Nearby Hospitals</h1>
-          <p>Hospitals within 10 km of your current location, closest first.</p>
+          <p>Nearest hospitals to your current location.</p>
         </div>
 
         <div className="fh-search-bar">
