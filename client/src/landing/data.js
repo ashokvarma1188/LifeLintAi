@@ -85,8 +85,8 @@ export const EMERGENCY_POINTS = [
 
 export const DONORS = [
   { name: "Ashok varma", group: "O−", distance: "1.2 km", eta: "4 min", status: "accepted" },
-  { name: "R. Mehta", group: "O−", distance: "2.4 km", eta: "7 min", status: "pending" },
-  { name: "K. Iyer", group: "O−", distance: "3.1 km", eta: "9 min", status: "pending" },
+  { name: "Charan", group: "O−", distance: "2.4 km", eta: "7 min", status: "pending" },
+  { name: "Siraj", group: "O−", distance: "3.1 km", eta: "9 min", status: "pending" },
 ];
 
 /* Hero blood drops — fixed positions/timings so the fall pattern is stable
