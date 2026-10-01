@@ -18,6 +18,7 @@ import FirestationAlerts from "./pages/FirestationAlerts";
 import PharmacyStock from "./pages/PharmacyStock";
 import BloodDonation from "./pages/BloodDonation";
 import FindPharmacies from "./pages/FindPharmacies";
+import FindEmergencyServices from "./pages/FindEmergencyServices";
 import SosHistory from "./pages/SosHistory";
 import MedicalId from "./pages/MedicalId";
 import Privacy from "./landing/pages/Privacy";
@@ -123,6 +124,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FindPharmacies />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/find-emergency-services"
+            element={
+              <ProtectedRoute>
+                <FindEmergencyServices />
               </ProtectedRoute>
             }
           />

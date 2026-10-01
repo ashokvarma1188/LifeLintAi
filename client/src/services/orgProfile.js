@@ -10,6 +10,11 @@ export async function updateOrgProfile(fields) {
   return data.profile;
 }
 
+export async function updateOrgLocation(latitude, longitude) {
+  const { data } = await api.put("/org-profile/location", { latitude, longitude });
+  return data.profile;
+}
+
 export async function listStaff() {
   const { data } = await api.get("/org-profile/staff");
   return data.staff;

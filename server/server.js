@@ -24,6 +24,7 @@ const donorRoutes = require("./routes/donorRoutes");
 const pharmacyDirectoryRoutes = require("./routes/pharmacyDirectoryRoutes");
 const orgProfileRoutes = require("./routes/orgProfileRoutes");
 const announcementRoutes = require("./routes/announcementRoutes");
+const emergencyServicesRoutes = require("./routes/emergencyServicesRoutes");
 
 const app = express();
 
@@ -90,6 +91,7 @@ app.use("/api/donors", donorRoutes);
 app.use("/api/pharmacies", pharmacyDirectoryRoutes);
 app.use("/api/org-profile", orgProfileRoutes);
 app.use("/api/announcements", announcementRoutes);
+app.use("/api/emergency-services", emergencyServicesRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)

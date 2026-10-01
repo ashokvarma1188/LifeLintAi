@@ -47,6 +47,14 @@ const userSchema = new mongoose.Schema(
     ],
     openHours: { type: String },
     isOpen: { type: Boolean, default: true },
+
+    // Police/fire station/pharmacy location, set by the org itself (hospitals
+    // instead get their location via the separate Hospital record they claim).
+    // Powers the civilian-facing "nearby police & fire stations" directory.
+    location: {
+      type: { type: String, enum: ["Point"] },
+      coordinates: { type: [Number] },
+    },
     // Licence/registration number an organisation account provides at signup,
     // shown to admins reviewing the approval request.
     licenseNumber: { type: String },
@@ -90,5 +98,7 @@ const userSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+userSchema.index({ location: "2dsphere" });
 
 module.exports = mongoose.model("User", userSchema);

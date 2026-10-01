@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Save, UserPlus, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, UserPlus, Trash2, MapPin } from "lucide-react";
 import AppNavbar from "./AppNavbar";
-import { getOrgProfile, updateOrgProfile, listStaff, createStaff, removeStaff } from "../services/orgProfile";
+import { getOrgProfile, updateOrgProfile, updateOrgLocation, listStaff, createStaff, removeStaff } from "../services/orgProfile";
+import { getUser } from "../services/auth";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
@@ -19,6 +20,37 @@ function OrgProfile() {
   const [addingStaff, setAddingStaff] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [locating, setLocating] = useState(false);
+
+  const role = getUser()?.role;
+  const canSetLocation = ["police", "firestation", "pharmacy"].includes(role);
+
+  const updateMyLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Location is not supported on this device/browser.");
+      return;
+    }
+    setLocating(true);
+    setError("");
+    setNotice("");
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const updated = await updateOrgLocation(position.coords.latitude, position.coords.longitude);
+          setProfile(updated);
+          setNotice("Location updated — civilians can now find you in the nearby directory.");
+        } catch (err) {
+          setError(getErrorMessage(err, "Could not update location."));
+        } finally {
+          setLocating(false);
+        }
+      },
+      () => {
+        setError("Location access denied.");
+        setLocating(false);
+      }
+    );
+  };
 
   const load = async () => {
     setLoading(true);
@@ -202,6 +234,20 @@ function OrgProfile() {
                 </button>
               </div>
             </form>
+
+            {canSetLocation && (
+              <div className="portal-field" style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--border-color-soft)" }}>
+                <label>Location</label>
+                <span className="hint" style={{ display: "block", marginBottom: 8 }}>
+                  {profile?.location
+                    ? "Your location is set — civilians can find you in the nearby directory."
+                    : "Not set yet — civilians won't see you in the nearby directory until you set this."}
+                </span>
+                <button className="portal-btn ghost small" type="button" onClick={updateMyLocation} disabled={locating}>
+                  <MapPin size={14} /> {locating ? "Getting location…" : "Update to my current location"}
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <>

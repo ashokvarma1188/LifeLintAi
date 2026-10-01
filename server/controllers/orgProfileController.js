@@ -11,6 +11,7 @@ const shape = (user) => ({
   isOpen: user.isOpen !== false,
   phone: user.phone || "",
   verified: user.roleStatus === "approved",
+  location: user.location?.coordinates ? { longitude: user.location.coordinates[0], latitude: user.location.coordinates[1] } : null,
 });
 
 const getOrgProfile = async (req, res) => {
@@ -18,6 +19,28 @@ const getOrgProfile = async (req, res) => {
     return res.status(403).json({ message: "Organisation accounts only" });
   }
   res.json(shape(req.user));
+};
+
+/** Police/fire station/pharmacy set their own location this way (hospitals use their claimed Hospital record instead). */
+const updateOrgLocation = async (req, res) => {
+  try {
+    if (!ORG_ROLES.includes(req.user.role)) {
+      return res.status(403).json({ message: "Organisation accounts only" });
+    }
+
+    const latitude = Number(req.body.latitude);
+    const longitude = Number(req.body.longitude);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      return res.status(400).json({ message: "A valid latitude and longitude are required" });
+    }
+
+    req.user.location = { type: "Point", coordinates: [longitude, latitude] };
+    await req.user.save();
+
+    res.json({ message: "Location updated", profile: shape(req.user) });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
 };
 
 const updateOrgProfile = async (req, res) => {
@@ -119,4 +142,4 @@ const removeStaff = async (req, res) => {
   }
 };
 
-module.exports = { getOrgProfile, updateOrgProfile, listStaff, createStaff, removeStaff };
+module.exports = { getOrgProfile, updateOrgProfile, updateOrgLocation, listStaff, createStaff, removeStaff };

@@ -26,6 +26,7 @@ const FEATURES = {
     { icon: ShieldCheck, title: "Role & Account", desc: "Request a hospital, police, fire station or pharmacy account.", path: "/settings/role" },
     { icon: Droplet, title: "Blood Donation", desc: "Find or offer blood donations by blood group, nearby.", path: "/blood-donation" },
     { icon: Package, title: "Find Pharmacies", desc: "Check medicine stock nearby and request what you need.", path: "/find-pharmacies" },
+    { icon: Map, title: "Nearby Police & Fire", desc: "Find registered police and fire stations near you.", path: "/find-emergency-services" },
     { icon: Bot, title: "AI First-Aid Assistant", desc: "Get quick first-aid guidance while help is on the way. Open it from the chat button in the bottom-right corner.", note: "Live now" },
   ],
   police: [
