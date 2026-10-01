@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Download, Trash2 } from "lucide-react";
 import api from "../services/api";
+import { logout } from "../services/auth";
 import AppNavbar from "./AppNavbar";
 import "./Dashboard.css";
 import "./Profile.css";
+import "./portal.css";
 
 function Profile() {
   const navigate = useNavigate();
@@ -21,6 +24,11 @@ function Profile() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [exporting, setExporting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -101,6 +109,39 @@ function Profile() {
       setError(err.response?.data?.message || "Failed to update profile.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    setExporting(true);
+    try {
+      const res = await api.get("/profile/export");
+      const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "lifelink-my-data.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err.response?.data?.message || "Could not export your data.");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const handleDeleteAccount = async (e) => {
+    e.preventDefault();
+    setDeleting(true);
+    setDeleteError("");
+    try {
+      await api.delete("/profile/me", { data: { password: deletePassword } });
+      logout();
+      navigate("/login", { replace: true });
+    } catch (err) {
+      setDeleteError(err.response?.data?.message || "Could not delete your account.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -248,6 +289,70 @@ function Profile() {
             </div>
           </div>
         </form>
+
+        <div className="profile-card" style={{ marginTop: 20 }}>
+          <div className="profile-section">
+            <div className="profile-section-title">Privacy &amp; Data</div>
+
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid var(--border-color-soft)" }}>
+              <div>
+                <div style={{ fontWeight: 500, fontSize: 14 }}>Download my data</div>
+                <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>
+                  Your profile, health records, and SOS history as a JSON file.
+                </div>
+              </div>
+              <button className="portal-btn ghost small" type="button" onClick={handleExportData} disabled={exporting}>
+                <Download size={14} /> {exporting ? "Preparing…" : "Download"}
+              </button>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
+              <div>
+                <div style={{ fontWeight: 500, fontSize: 14 }}>Delete my account</div>
+                <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>
+                  Permanently removes your account, health records, and SOS history. This can't be undone.
+                </div>
+              </div>
+              <button className="portal-btn danger small" type="button" onClick={() => setShowDeleteConfirm(true)}>
+                <Trash2 size={14} /> Delete account
+              </button>
+            </div>
+
+            {showDeleteConfirm && (
+              <form onSubmit={handleDeleteAccount} style={{ marginTop: 12, padding: 12, border: "1px solid var(--danger)", borderRadius: 10 }}>
+                <p style={{ fontSize: 13, marginTop: 0 }}>
+                  Enter your password to permanently delete your account. This cannot be undone.
+                </p>
+                {deleteError && <div className="auth-message error">{deleteError}</div>}
+                <div className="auth-field">
+                  <input
+                    type="password"
+                    placeholder="Your password"
+                    value={deletePassword}
+                    onChange={(e) => setDeletePassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button className="portal-btn danger small" type="submit" disabled={deleting}>
+                    {deleting ? "Deleting…" : "Confirm delete"}
+                  </button>
+                  <button
+                    className="portal-btn ghost small"
+                    type="button"
+                    onClick={() => {
+                      setShowDeleteConfirm(false);
+                      setDeleteError("");
+                      setDeletePassword("");
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
