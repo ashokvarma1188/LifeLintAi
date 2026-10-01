@@ -110,6 +110,7 @@ const getAnalytics = async (req, res) => {
       sosStatusMap[_id] = count;
     });
     const totalSos = Object.values(sosStatusMap).reduce((a, b) => a + b, 0);
+    const falseAlarmResolvedCount = await EmergencyRequest.countDocuments({ status: "resolved", falseAlarm: true });
 
     // Average time from raised -> accepted, and accepted -> resolved, in minutes.
     const responseTimes = await EmergencyRequest.aggregate([
@@ -136,7 +137,11 @@ const getAnalytics = async (req, res) => {
       sos: {
         byStatus: sosStatusMap,
         total: totalSos,
-        falseAlarmRate: totalSos ? Math.round((sosStatusMap.cancelled / totalSos) * 1000) / 10 : 0,
+        // Counts both the civilian cancelling before anyone responded, and a
+        // responder resolving it and flagging it as a false alarm themselves.
+        falseAlarmRate: totalSos
+          ? Math.round(((sosStatusMap.cancelled + falseAlarmResolvedCount) / totalSos) * 1000) / 10
+          : 0,
         avgAcceptMinutes: responseTimes[0]?.avgAcceptMinutes
           ? Math.round(responseTimes[0].avgAcceptMinutes * 10) / 10
           : null,

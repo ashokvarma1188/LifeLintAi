@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Plus, CheckCheck, Trash2, Check, X } from "lucide-react";
+import { ArrowLeft, Plus, CheckCheck, Trash2, Check, X, Download } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import CoverageMap from "../components/CoverageMap";
 import MapsLink from "../components/MapsLink";
+import AgencyAnalyticsPanel from "../components/AgencyAnalyticsPanel";
 import { listAlerts, listReports, createReport, updateReportStatus, getFleet, updateFleet } from "../services/firestation";
-import { acceptSOS, declineSOS, resolveSOS } from "../services/sos";
+import { acceptSOS, declineSOS, resolveSOS, getMyAnalytics } from "../services/sos";
 import { getErrorMessage } from "../services/api";
+import { playAlertSound } from "../utils/alertSound";
+import { downloadCsv } from "../utils/csv";
 import "./Dashboard.css";
 import "./portal.css";
 
@@ -21,6 +24,7 @@ function FirestationAlerts() {
   const [alerts, setAlerts] = useState([]);
   const [reports, setReports] = useState([]);
   const [fleet, setFleet] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -29,19 +33,29 @@ function FirestationAlerts() {
   const [savingFleet, setSavingFleet] = useState(false);
   const [form, setForm] = useState({ title: "", description: "" });
   const [newUnit, setNewUnit] = useState("");
+  const knownPendingIds = useRef(new Set());
+  const firstLoad = useRef(true);
 
-  const load = async () => {
-    setLoading(true);
+  /** `silent` skips the loading spinner/error banner — used for background polling. */
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
-      const [a, r, f] = await Promise.all([listAlerts(), listReports(), getFleet()]);
+      const [a, r, f, an] = await Promise.all([listAlerts(), listReports(), getFleet(), getMyAnalytics().catch(() => null)]);
+      const pendingIds = new Set(a.filter((x) => x.status === "pending").map((x) => x._id));
+      if (!firstLoad.current && [...pendingIds].some((id) => !knownPendingIds.current.has(id))) {
+        playAlertSound();
+      }
+      knownPendingIds.current = pendingIds;
+      firstLoad.current = false;
       setAlerts(a);
       setReports(r);
       setFleet(f);
+      setAnalytics(an);
       setError("");
     } catch (err) {
-      setError(getErrorMessage(err, "Could not load data."));
+      if (!silent) setError(getErrorMessage(err, "Could not load data."));
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -49,7 +63,19 @@ function FirestationAlerts() {
     (async () => {
       await load();
     })();
+    const interval = setInterval(() => load(true), 20000);
+    return () => clearInterval(interval);
   }, []);
+
+  const exportAlertsCsv = () => {
+    downloadCsv("lifelink-firestation-alerts.csv", alerts, [
+      { label: "Citizen", get: (a) => a.citizenId?.name || "Unknown" },
+      { label: "Phone", get: (a) => a.citizenId?.phone || "" },
+      { label: "Type", get: (a) => a.type },
+      { label: "Status", get: (a) => a.status },
+      { label: "Raised", get: (a) => new Date(a.createdAt).toLocaleString() },
+    ]);
+  };
 
   const submitReport = async (e) => {
     e.preventDefault();
@@ -87,8 +113,9 @@ function FirestationAlerts() {
     try {
       if (action === "accept") await acceptSOS(id);
       else if (action === "decline") await declineSOS(id);
-      else await resolveSOS(id);
-      setNotice(`Alert marked as ${action === "accept" ? "accepted" : action}.`);
+      else if (action === "false-alarm") await resolveSOS(id, true);
+      else await resolveSOS(id, false);
+      setNotice(action === "false-alarm" ? "Alert marked as a false alarm." : `Alert marked as ${action === "accept" ? "accepted" : action}.`);
       await load();
     } catch (err) {
       setError(getErrorMessage(err, "Could not update this alert."));
@@ -150,11 +177,16 @@ function FirestationAlerts() {
             <button className={`portal-btn ${tab === "map" ? "primary" : "ghost"}`} onClick={() => setTab("map")}>
               Coverage map
             </button>
+            <button className={`portal-btn ${tab === "analytics" ? "primary" : "ghost"}`} onClick={() => setTab("analytics")}>
+              Analytics
+            </button>
           </div>
         </div>
 
         {error && <div className="portal-message error">{error}</div>}
         {notice && <div className="portal-message success">{notice}</div>}
+
+        {tab === "analytics" && <AgencyAnalyticsPanel data={analytics} />}
 
         {tab === "map" && (
           <div className="portal-panel">
@@ -164,6 +196,13 @@ function FirestationAlerts() {
 
         {tab === "alerts" && (
           <div className="portal-panel">
+            {alerts.length > 0 && (
+              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+                <button className="portal-btn ghost small" onClick={exportAlertsCsv}>
+                  <Download size={14} /> Export CSV
+                </button>
+              </div>
+            )}
             {loading ? (
               <div className="portal-empty">Loading alerts…</div>
             ) : alerts.length === 0 ? (
@@ -187,7 +226,10 @@ function FirestationAlerts() {
                         <td>{a.citizenId?.name || "Unknown"}</td>
                         <td>{a.citizenId?.phone || "—"}</td>
                         <td>{a.type}</td>
-                        <td><span className={`portal-badge ${ALERT_BADGE[a.status]}`}>{a.status}</span></td>
+                        <td>
+                          <span className={`portal-badge ${ALERT_BADGE[a.status]}`}>{a.status}</span>
+                          {a.falseAlarm && <span className="portal-badge rejected" style={{ marginLeft: 6 }}>false alarm</span>}
+                        </td>
                         <td>{new Date(a.createdAt).toLocaleString()}</td>
                         <td style={{ whiteSpace: "nowrap" }}>
                           <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
@@ -203,9 +245,14 @@ function FirestationAlerts() {
                               </>
                             )}
                             {a.status === "accepted" && (
-                              <button className="portal-btn primary small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "resolve")}>
-                                <CheckCheck size={14} /> Resolve
-                              </button>
+                              <>
+                                <button className="portal-btn primary small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "resolve")}>
+                                  <CheckCheck size={14} /> Resolve
+                                </button>
+                                <button className="portal-btn ghost small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "false-alarm")}>
+                                  False alarm
+                                </button>
+                              </>
                             )}
                           </div>
                         </td>

@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Check, CheckCheck, X } from "lucide-react";
+import { ArrowLeft, Check, CheckCheck, X, Download } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import CoverageMap from "../components/CoverageMap";
 import MapsLink from "../components/MapsLink";
-import { listSOS, acceptSOS, declineSOS, resolveSOS } from "../services/sos";
+import AgencyAnalyticsPanel from "../components/AgencyAnalyticsPanel";
+import { listSOS, acceptSOS, declineSOS, resolveSOS, getMyAnalytics } from "../services/sos";
 import { getErrorMessage } from "../services/api";
+import { playAlertSound } from "../utils/alertSound";
+import { downloadCsv } from "../utils/csv";
 import "./Dashboard.css";
 import "./portal.css";
 
@@ -26,14 +29,25 @@ function IncomingPatients() {
   const [notice, setNotice] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [etaDrafts, setEtaDrafts] = useState({});
+  const [analytics, setAnalytics] = useState(null);
+  const knownPendingIds = useRef(new Set());
+  const firstLoad = useRef(true);
 
-  const load = async () => {
+  /** `silent` skips the loading spinner/error banner — used for background polling. */
+  const load = async (silent = false) => {
     try {
-      const data = await listSOS();
+      const [data, an] = await Promise.all([listSOS(), getMyAnalytics().catch(() => null)]);
+      const pendingIds = new Set(data.filter((x) => x.status === "pending").map((x) => x._id));
+      if (!firstLoad.current && [...pendingIds].some((id) => !knownPendingIds.current.has(id))) {
+        playAlertSound();
+      }
+      knownPendingIds.current = pendingIds;
+      firstLoad.current = false;
       setRequests(data);
+      setAnalytics(an);
       setError("");
     } catch (err) {
-      setError(getErrorMessage(err, "Could not load incoming requests."));
+      if (!silent) setError(getErrorMessage(err, "Could not load incoming requests."));
     } finally {
       setLoading(false);
     }
@@ -43,7 +57,19 @@ function IncomingPatients() {
     (async () => {
       await load();
     })();
+    const interval = setInterval(() => load(true), 20000);
+    return () => clearInterval(interval);
   }, []);
+
+  const exportRequestsCsv = () => {
+    downloadCsv("lifelink-incoming-patients.csv", visible, [
+      { label: "Patient", get: (r) => r.citizenId?.name || "Unknown" },
+      { label: "Phone", get: (r) => r.citizenId?.phone || "" },
+      { label: "Type", get: (r) => r.type },
+      { label: "Status", get: (r) => r.status },
+      { label: "Raised", get: (r) => new Date(r.createdAt).toLocaleString() },
+    ]);
+  };
 
   const act = async (id, action) => {
     setBusyId(id);
@@ -52,8 +78,9 @@ function IncomingPatients() {
     try {
       if (action === "accept") await acceptSOS(id, etaDrafts[id] ? Number(etaDrafts[id]) : undefined);
       else if (action === "decline") await declineSOS(id);
-      else await resolveSOS(id);
-      setNotice(`Request marked as ${action === "accept" ? "accepted" : action}.`);
+      else if (action === "false-alarm") await resolveSOS(id, true);
+      else await resolveSOS(id, false);
+      setNotice(action === "false-alarm" ? "Request marked as a false alarm." : `Request marked as ${action === "accept" ? "accepted" : action}.`);
       await load();
     } catch (err) {
       setError(getErrorMessage(err, "Could not update this request."));
@@ -91,18 +118,30 @@ function IncomingPatients() {
             <button className={`portal-btn ${view === "map" ? "primary" : "ghost"}`} onClick={() => setView("map")}>
               Coverage map
             </button>
+            <button className={`portal-btn ${view === "analytics" ? "primary" : "ghost"}`} onClick={() => setView("analytics")}>
+              Analytics
+            </button>
           </div>
         </div>
 
         {error && <div className="portal-message error">{error}</div>}
         {notice && <div className="portal-message success">{notice}</div>}
 
-        {view === "map" ? (
+        {view === "analytics" ? (
+          <AgencyAnalyticsPanel data={analytics} />
+        ) : view === "map" ? (
           <div className="portal-panel">
             <CoverageMap alerts={requests.filter((r) => r.status === "pending" || r.status === "accepted")} />
           </div>
         ) : (
           <div className="portal-panel">
+            {visible.length > 0 && (
+              <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 12 }}>
+                <button className="portal-btn ghost small" onClick={exportRequestsCsv}>
+                  <Download size={14} /> Export CSV
+                </button>
+              </div>
+            )}
             {loading ? (
               <div className="portal-empty">Loading requests…</div>
             ) : visible.length === 0 ? (
@@ -130,6 +169,7 @@ function IncomingPatients() {
                         <td>{r.assignedHospitalId?.name || "—"}</td>
                         <td>
                           <span className={`portal-badge ${STATUS_BADGE[r.status]}`}>{r.status}</span>
+                          {r.falseAlarm && <span className="portal-badge rejected" style={{ marginLeft: 6 }}>false alarm</span>}
                           {r.etaMinutes != null && r.status === "accepted" && (
                             <div style={{ fontSize: 11.5, color: "var(--text-secondary)", marginTop: 4 }}>
                               ETA {r.etaMinutes} min
@@ -167,13 +207,22 @@ function IncomingPatients() {
                               </>
                             )}
                             {r.status === "accepted" && (
-                              <button
-                                className="portal-btn primary small"
-                                disabled={busyId === r._id}
-                                onClick={() => act(r._id, "resolve")}
-                              >
-                                <CheckCheck size={14} /> Resolve
-                              </button>
+                              <>
+                                <button
+                                  className="portal-btn primary small"
+                                  disabled={busyId === r._id}
+                                  onClick={() => act(r._id, "resolve")}
+                                >
+                                  <CheckCheck size={14} /> Resolve
+                                </button>
+                                <button
+                                  className="portal-btn ghost small"
+                                  disabled={busyId === r._id}
+                                  onClick={() => act(r._id, "false-alarm")}
+                                >
+                                  False alarm
+                                </button>
+                              </>
                             )}
                           </div>
                         </td>

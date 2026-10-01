@@ -11,24 +11,11 @@ import {
   getAnalytics, getAuditLog, roleLabel,
 } from "../services/admin";
 import { listAllAnnouncements, createAnnouncement, deactivateAnnouncement } from "../services/announcements";
+import { downloadCsv } from "../utils/csv";
 import "./Dashboard.css";
 import "./portal.css";
 
 const SOS_COLORS = { pending: "#e5a72a", accepted: "#2a9df4", resolved: "#0f9d63", cancelled: "#e5484d" };
-
-/** Builds a CSV file client-side from already-fetched rows — no extra backend endpoint needed. */
-function downloadCsv(filename, rows, columns) {
-  const escape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
-  const header = columns.map((c) => escape(c.label)).join(",");
-  const body = rows.map((row) => columns.map((c) => escape(c.get(row))).join(",")).join("\n");
-  const blob = new Blob([`${header}\n${body}`], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(url);
-}
 
 function StatCard({ label, value, sub }) {
   return (

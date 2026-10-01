@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const EmergencyRequest = require("../models/EmergencyRequest");
 const Hospital = require("../models/Hospital");
+const User = require("../models/User");
 
 const VALID_TARGETS = ["hospital", "police", "firestation"];
 
@@ -151,6 +152,9 @@ const setStatus = (status) => async (req, res) => {
       const eta = Number(req.body.etaMinutes);
       if (Number.isFinite(eta) && eta >= 0) update.etaMinutes = eta;
     }
+    if (status === "resolved" && req.body.falseAlarm !== undefined) {
+      update.falseAlarm = Boolean(req.body.falseAlarm);
+    }
 
     const request = await EmergencyRequest.findOneAndUpdate(
       { _id: id, targets: req.user.role, status: REQUIRED_PRIOR_STATUS[status] },
@@ -177,11 +181,56 @@ const setStatus = (status) => async (req, res) => {
   }
 };
 
+/** A responder's own stats — covers the org owner plus any staff accounts under it, not just one login. */
+const getMyAnalytics = async (req, res) => {
+  try {
+    if (!RESPONDER_ROLES.includes(req.user.role)) {
+      return res.status(403).json({ message: "Only response services have analytics" });
+    }
+
+    const orgRootId = req.user.parentOrgId || req.user._id;
+    const orgUserIds = await User.find({ $or: [{ _id: orgRootId }, { parentOrgId: orgRootId }] }).distinct("_id");
+
+    const byStatus = await EmergencyRequest.aggregate([
+      { $match: { respondedBy: { $in: orgUserIds } } },
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]);
+    const statusMap = { accepted: 0, resolved: 0, declined: 0 };
+    byStatus.forEach(({ _id, count }) => {
+      statusMap[_id] = count;
+    });
+    const total = Object.values(statusMap).reduce((a, b) => a + b, 0);
+
+    const falseAlarmCount = await EmergencyRequest.countDocuments({
+      respondedBy: { $in: orgUserIds },
+      status: "resolved",
+      falseAlarm: true,
+    });
+
+    const acceptTimes = await EmergencyRequest.aggregate([
+      { $match: { respondedBy: { $in: orgUserIds }, status: { $in: ["accepted", "resolved"] } } },
+      { $project: { acceptMinutes: { $divide: [{ $subtract: ["$updatedAt", "$createdAt"] }, 60000] } } },
+      { $group: { _id: null, avgAcceptMinutes: { $avg: "$acceptMinutes" } } },
+    ]);
+
+    res.json({
+      total,
+      byStatus: statusMap,
+      falseAlarmCount,
+      falseAlarmRate: total ? Math.round((falseAlarmCount / total) * 1000) / 10 : 0,
+      avgAcceptMinutes: acceptTimes[0]?.avgAcceptMinutes ? Math.round(acceptTimes[0].avgAcceptMinutes * 10) / 10 : null,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
 module.exports = {
   createSOS,
   listSOS,
   myRequests,
   cancelSOS,
+  getMyAnalytics,
   acceptSOS: setStatus("accepted"),
   declineSOS: setStatus("declined"),
   resolveSOS: setStatus("resolved"),

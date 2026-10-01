@@ -20,8 +20,8 @@ export async function declineSOS(id) {
   return data.request;
 }
 
-export async function resolveSOS(id) {
-  const { data } = await api.patch(`/sos/${id}/resolve`);
+export async function resolveSOS(id, falseAlarm) {
+  const { data } = await api.patch(`/sos/${id}/resolve`, falseAlarm !== undefined ? { falseAlarm } : {});
   return data.request;
 }
 
@@ -35,4 +35,10 @@ export async function myRequests() {
 export async function cancelSOS(id) {
   const { data } = await api.patch(`/sos/${id}/cancel`);
   return data.request;
+}
+
+/** A responder's own stats — covers the org owner plus any staff accounts under it. */
+export async function getMyAnalytics() {
+  const { data } = await api.get("/sos/my-analytics");
+  return data;
 }

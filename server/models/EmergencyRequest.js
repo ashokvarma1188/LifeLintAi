@@ -20,6 +20,10 @@ const emergencyRequestSchema = new mongoose.Schema(
     respondedByRole: { type: String, enum: ["hospital", "police", "firestation"] },
     etaMinutes: { type: Number },
 
+    // Set by the responder on resolve — distinct from the civilian's own "cancel",
+    // this is the responder's call that there was nothing to respond to.
+    falseAlarm: { type: Boolean, default: false },
+
     /*
      * Which services the civilian chose to alert — controls who sees this request.
      * "pharmacy" isn't included: there's no pharmacy alerts inbox to respond from,
