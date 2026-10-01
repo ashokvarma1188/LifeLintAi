@@ -1,6 +1,6 @@
-import { useState } from "react";
 import Particles from "./components/Particles";
 import ThemeToggle from "./components/ThemeToggle";
+import { useLightTheme } from "./useLightTheme";
 import Navbar from "./components/Navbar";
 import EmergencyBanner from "./components/EmergencyBanner";
 import Hero from "./components/Hero";
@@ -13,8 +13,8 @@ import "./theme.css";
 import "./landing.css";
 
 function Landing() {
-  // The landing ships dark like the reference; this only swaps its own palette.
-  const [light, setLight] = useState(false);
+  // Shared with the auth pages (login/signup/etc.) so the choice carries over between them.
+  const [light, setLight] = useLightTheme();
 
   return (
     <div className={`ll-root${light ? " ll-light" : ""}`}>

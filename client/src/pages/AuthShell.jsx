@@ -2,6 +2,8 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, AlertCircle, CheckCircle2 } from "lucide-react";
 import BloodDrop from "../landing/components/BloodDrop";
+import ThemeToggle from "../landing/components/ThemeToggle";
+import { useLightTheme } from "../landing/useLightTheme";
 import "../landing/theme.css";
 import "./auth.css";
 
@@ -10,8 +12,12 @@ import "./auth.css";
  * glass card, and the error/success message slots.
  */
 function AuthShell({ title, subtitle, error, success, children, footer }) {
+  // Shared with the landing page so the choice carries over between them.
+  const [light, setLight] = useLightTheme();
+
   return (
-    <div className="ll-root">
+    <div className={`ll-root${light ? " ll-light" : ""}`}>
+      <ThemeToggle light={light} onToggle={() => setLight((v) => !v)} />
       <div className="auth-page">
         <div className="ll-grid-bg auth-grid" aria-hidden="true" />
 
