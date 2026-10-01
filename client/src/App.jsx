@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Landing from "./landing/Landing";
@@ -39,8 +39,17 @@ import OrgProfile from "./pages/OrgProfile";
 import AiAssistantWidget from "./components/AiAssistantWidget";
 import { isAuthenticated } from "./services/auth";
 
-/** Available to every signed-in role — first-aid guidance is useful for staff too, not just civilians. */
+const AUTH_PAGE_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-email"];
+
+/**
+ * Available to every signed-in role — first-aid guidance is useful for staff
+ * too, not just civilians. Hidden on the auth pages even if a stale token is
+ * still in localStorage (e.g. someone navigated back to /login without
+ * logging out) — those pages only show the theme toggle.
+ */
 function SignedInAssistant() {
+  const { pathname } = useLocation();
+  if (AUTH_PAGE_PREFIXES.some((p) => pathname.startsWith(p))) return null;
   if (!isAuthenticated()) return null;
   return <AiAssistantWidget />;
 }
