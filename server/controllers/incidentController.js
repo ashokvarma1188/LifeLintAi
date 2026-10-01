@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const EmergencyRequest = require("../models/EmergencyRequest");
 const IncidentReport = require("../models/IncidentReport");
+const { redactMedicalId } = require("../utils/sosHelpers");
 
 /** Only alerts the civilian chose to send to this responder's own service (police/firestation). */
 const listAlerts = async (req, res) => {
@@ -9,11 +10,11 @@ const listAlerts = async (req, res) => {
       status: { $in: ["pending", "accepted"] },
       targets: req.user.role,
     })
-      .populate("citizenId", "name phone")
+      .populate("citizenId", "name phone bloodGroup allergies medicalHistory")
       .sort({ createdAt: -1 })
       .limit(200);
 
-    res.json({ requests });
+    res.json({ requests: requests.map(redactMedicalId) });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
   }

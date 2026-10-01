@@ -32,6 +32,9 @@ const healthRecordSchema = new mongoose.Schema(
     notes: { type: String, trim: true },
     recommendations: { type: String, trim: true },
 
+    // Plain date string like recordDate — powers the Dashboard's upcoming-reminders banner.
+    followUpDate: { type: String, trim: true },
+
     // "self" when the patient adds it, "hospital" when staff do.
     createdBy: { type: String, enum: ["self", "hospital"], default: "self" },
 

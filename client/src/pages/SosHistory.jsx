@@ -11,10 +11,15 @@ import "./portal.css";
 const STATUS_BADGE = { pending: "pending", accepted: "hospital", resolved: "approved", cancelled: "rejected" };
 const TIMELINE_STEPS = ["pending", "accepted", "resolved"];
 const STEP_LABEL = { pending: "Sent", accepted: "Accepted", resolved: "Resolved" };
+const CANCEL_REASON_LABEL = { safe_now: "I'm safe now", sent_by_mistake: "Sent by mistake", other: "Other" };
 
-function Timeline({ status }) {
+function Timeline({ status, cancelReason }) {
   if (status === "cancelled") {
-    return <div className="portal-badge rejected" style={{ display: "inline-block" }}>Cancelled by you</div>;
+    return (
+      <div className="portal-badge rejected" style={{ display: "inline-block" }}>
+        Cancelled by you{cancelReason ? ` — ${CANCEL_REASON_LABEL[cancelReason]}` : ""}
+      </div>
+    );
   }
   const currentIndex = TIMELINE_STEPS.indexOf(status);
   return (
@@ -49,6 +54,7 @@ function SosHistory() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busyId, setBusyId] = useState(null);
+  const [cancelingId, setCancelingId] = useState(null);
 
   const load = async () => {
     try {
@@ -68,12 +74,13 @@ function SosHistory() {
     })();
   }, []);
 
-  const doCancel = async (id) => {
+  const doCancel = async (id, reason) => {
     setBusyId(id);
+    setCancelingId(null);
     setNotice("");
     setError("");
     try {
-      await cancelSOS(id);
+      await cancelSOS(id, reason);
       setNotice("SOS request cancelled.");
       await load();
     } catch (err) {
@@ -124,18 +131,35 @@ function SosHistory() {
                     <span className={`portal-badge ${STATUS_BADGE[r.status]}`}>{r.status}</span>
                   </div>
 
-                  <Timeline status={r.status} />
+                  <Timeline status={r.status} cancelReason={r.cancelReason} />
 
-                  <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
+                  <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
                     <MapsLink coordinates={r.location?.coordinates} />
-                    {r.status === "pending" && (
+                    {r.status === "pending" && cancelingId !== r._id && (
                       <button
                         className="portal-btn danger small"
                         disabled={busyId === r._id}
-                        onClick={() => doCancel(r._id)}
+                        onClick={() => setCancelingId(r._id)}
                       >
                         <X size={13} /> Cancel this alert
                       </button>
+                    )}
+                    {r.status === "pending" && cancelingId === r._id && (
+                      <>
+                        <span style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>Why?</span>
+                        <button className="portal-btn ghost small" disabled={busyId === r._id} onClick={() => doCancel(r._id, "safe_now")}>
+                          I&apos;m safe now
+                        </button>
+                        <button className="portal-btn ghost small" disabled={busyId === r._id} onClick={() => doCancel(r._id, "sent_by_mistake")}>
+                          Sent by mistake
+                        </button>
+                        <button className="portal-btn ghost small" disabled={busyId === r._id} onClick={() => doCancel(r._id, "other")}>
+                          Other
+                        </button>
+                        <button className="portal-back" style={{ margin: 0 }} onClick={() => setCancelingId(null)}>
+                          Back
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>

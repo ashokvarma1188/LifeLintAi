@@ -24,6 +24,13 @@ const emergencyRequestSchema = new mongoose.Schema(
     // this is the responder's call that there was nothing to respond to.
     falseAlarm: { type: Boolean, default: false },
 
+    // Civilian's own reason when they cancel a still-pending alert themselves.
+    cancelReason: { type: String, enum: ["safe_now", "sent_by_mistake", "other"] },
+
+    // Opt-in per alert — when true, responders additionally see blood group,
+    // allergies and medical history alongside name/phone.
+    shareMedicalId: { type: Boolean, default: false },
+
     /*
      * Which services the civilian chose to alert — controls who sees this request.
      * "pharmacy" isn't included: there's no pharmacy alerts inbox to respond from,

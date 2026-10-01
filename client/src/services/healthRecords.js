@@ -38,6 +38,11 @@ export async function getAccessLog() {
   return data.entries;
 }
 
+export async function getReminders() {
+  const { data } = await api.get("/health-records/reminders");
+  return data.reminders;
+}
+
 export async function createRecord(form, pdfFile) {
   const { data } = await api.post("/health-records", toFormData(form, pdfFile));
   return data.record;

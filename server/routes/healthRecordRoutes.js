@@ -12,6 +12,7 @@ const {
   deleteRecord,
   recordStats,
   getAccessLog,
+  getReminders,
 } = require("../controllers/healthRecordController");
 
 router.use(protect, requireApproved);
@@ -19,6 +20,7 @@ router.use(protect, requireApproved);
 // Declared before "/:recordId" so these aren't read as a record id.
 router.get("/stats/summary", recordStats);
 router.get("/access-log", getAccessLog);
+router.get("/reminders", getReminders);
 
 router.post("/", uploadPdf, createRecord);
 router.get("/", getRecords);

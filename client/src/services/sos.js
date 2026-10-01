@@ -32,8 +32,8 @@ export async function myRequests() {
   return data.requests;
 }
 
-export async function cancelSOS(id) {
-  const { data } = await api.patch(`/sos/${id}/cancel`);
+export async function cancelSOS(id, reason) {
+  const { data } = await api.patch(`/sos/${id}/cancel`, reason ? { reason } : {});
   return data.request;
 }
 

@@ -19,6 +19,7 @@ import PharmacyStock from "./pages/PharmacyStock";
 import BloodDonation from "./pages/BloodDonation";
 import FindPharmacies from "./pages/FindPharmacies";
 import FindEmergencyServices from "./pages/FindEmergencyServices";
+import EmergencyNumbers from "./pages/EmergencyNumbers";
 import SosHistory from "./pages/SosHistory";
 import MedicalId from "./pages/MedicalId";
 import Privacy from "./landing/pages/Privacy";
@@ -132,6 +133,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <FindEmergencyServices />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/emergency-numbers"
+            element={
+              <ProtectedRoute>
+                <EmergencyNumbers />
               </ProtectedRoute>
             }
           />

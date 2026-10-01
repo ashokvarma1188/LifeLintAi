@@ -1,13 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   User, Hospital, Droplet, Bot, FileHeart, Siren, ShieldCheck, Map, ClipboardList,
-  BedDouble, Ambulance, Truck, Package, Clock, Inbox, Users, History, HeartPulse, Building2,
+  BedDouble, Ambulance, Truck, Package, Clock, Inbox, Users, History, HeartPulse, Building2, Phone,
 } from "lucide-react";
 import api, { getErrorMessage } from "../services/api";
 import { getUser, resendVerification } from "../services/auth";
 import { roleLabel, refreshCurrentUser } from "../services/admin";
 import { listActiveAnnouncements } from "../services/announcements";
+import { getReminders } from "../services/healthRecords";
 import AppNavbar from "./AppNavbar";
 import "./Dashboard.css";
 import "./portal.css";
@@ -27,6 +28,7 @@ const FEATURES = {
     { icon: Droplet, title: "Blood Donation", desc: "Find or offer blood donations by blood group, nearby.", path: "/blood-donation" },
     { icon: Package, title: "Find Pharmacies", desc: "Check medicine stock nearby and request what you need.", path: "/find-pharmacies" },
     { icon: Map, title: "Nearby Police & Fire", desc: "Find registered police and fire stations near you.", path: "/find-emergency-services" },
+    { icon: Phone, title: "Emergency Numbers", desc: "Quick-dial reference for Police, Ambulance, Fire and more.", path: "/emergency-numbers" },
     { icon: Bot, title: "AI First-Aid Assistant", desc: "Get quick first-aid guidance while help is on the way. Open it from the chat button in the bottom-right corner.", note: "Live now" },
   ],
   police: [
@@ -71,9 +73,12 @@ function Dashboard() {
   const [sosResult, setSosResult] = useState(null);
   const [sosError, setSosError] = useState("");
   const [sosTargets, setSosTargets] = useState(["hospital", "police", "firestation"]);
+  const [shareMedicalId, setShareMedicalId] = useState(false);
   const [verifySending, setVerifySending] = useState(false);
   const [verifyNotice, setVerifyNotice] = useState("");
   const [announcements, setAnnouncements] = useState([]);
+  const [reminders, setReminders] = useState([]);
+  const locationWatchId = useRef(null);
 
   useEffect(() => {
     (async () => {
@@ -87,6 +92,15 @@ function Dashboard() {
       const fresh = await refreshCurrentUser().catch(() => null);
       if (fresh) setUser(fresh);
     })();
+    (async () => {
+      const data = await getReminders().catch(() => []);
+      setReminders(data);
+    })();
+
+    // Stop sharing live location if the user navigates away mid-emergency.
+    return () => {
+      if (locationWatchId.current !== null) navigator.geolocation.clearWatch(locationWatchId.current);
+    };
   }, []);
 
   const handleResendVerification = async () => {
@@ -128,8 +142,9 @@ function Dashboard() {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          const res = await api.post("/sos", { latitude, longitude, type: "medical", targets: sosTargets });
+          const res = await api.post("/sos", { latitude, longitude, type: "medical", targets: sosTargets, shareMedicalId });
           setSosResult(res.data);
+          startLiveLocationSharing(res.data.emergencyRequest._id);
         } catch (err) {
           setSosError(err.response?.data?.message || "Failed to send SOS. Please try again.");
         } finally {
@@ -140,6 +155,31 @@ function Dashboard() {
         setSosError("Location access denied. Please allow location to use SOS.");
         setSosLoading(false);
       }
+    );
+  };
+
+  /** Keeps responders' map pin current while the alert is active and this tab stays open. */
+  const startLiveLocationSharing = (requestId) => {
+    if (!navigator.geolocation?.watchPosition) return;
+    if (locationWatchId.current !== null) navigator.geolocation.clearWatch(locationWatchId.current);
+
+    locationWatchId.current = navigator.geolocation.watchPosition(
+      (position) => {
+        api
+          .patch(`/sos/${requestId}/location`, {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          })
+          .catch(() => {
+            // The alert may have already been resolved/cancelled — stop watching rather than retry forever.
+            if (locationWatchId.current !== null) {
+              navigator.geolocation.clearWatch(locationWatchId.current);
+              locationWatchId.current = null;
+            }
+          });
+      },
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 10000 }
     );
   };
 
@@ -165,6 +205,22 @@ function Dashboard() {
             📢 {a.message}
           </div>
         ))}
+
+        {reminders.length > 0 && (
+          <div className="portal-message error" style={{ marginBottom: 16 }}>
+            <strong>Follow-up reminder:</strong>{" "}
+            {reminders.map((r, i) => (
+              <span key={r.id}>
+                {i > 0 && ", "}
+                &quot;{r.title}&quot; {r.overdue ? "was due" : "is due"} {r.followUpDate}
+              </span>
+            ))}
+            {" — "}
+            <button className="portal-back" style={{ margin: 0 }} onClick={() => navigate("/health-records")}>
+              View Health Records
+            </button>
+          </div>
+        )}
 
         {(isPending || isRejected) && (
           <div className="portal-panel" style={{ marginBottom: 24 }}>
@@ -211,6 +267,15 @@ function Dashboard() {
                   </label>
                 ))}
               </div>
+
+              <label className="sos-target-option" style={{ marginTop: 10 }}>
+                <input
+                  type="checkbox"
+                  checked={shareMedicalId}
+                  onChange={(e) => setShareMedicalId(e.target.checked)}
+                />
+                Share my Medical ID (blood group, allergies, conditions) with responders
+              </label>
 
               {sosResult && (
                 <div className="sos-status success">

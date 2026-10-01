@@ -31,6 +31,7 @@ const serialize = (record) => ({
   weight: record.weight ?? null,
   notes: record.notes || "",
   recommendations: record.recommendations || "",
+  followUpDate: record.followUpDate || "",
   createdBy: record.createdBy || "self",
   pdf: record.pdf?.filename
     ? {
@@ -59,6 +60,7 @@ const readRecordFields = (body) => {
     weight: parseOptionalNumber(body.weight),
     notes: trimmed(body.notes),
     recommendations: trimmed(body.recommendations),
+    followUpDate: trimmed(body.followUpDate),
   };
 };
 
@@ -283,6 +285,33 @@ const getAccessLog = async (req, res) => {
   }
 };
 
+/** Follow-ups due today, overdue, or within the next 3 days — for the Dashboard banner. */
+const getReminders = async (req, res) => {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const upperBound = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    const records = await HealthRecord.find({
+      userId: req.user._id,
+      followUpDate: { $ne: "", $lte: upperBound },
+    })
+      .select("title followUpDate recordType")
+      .sort({ followUpDate: 1 });
+
+    res.json({
+      reminders: records.map((r) => ({
+        id: r._id,
+        title: r.title,
+        followUpDate: r.followUpDate,
+        recordType: r.recordType,
+        overdue: r.followUpDate < today,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
 module.exports = {
   createRecord,
   getRecords,
@@ -292,6 +321,7 @@ module.exports = {
   deleteRecord,
   recordStats,
   getAccessLog,
+  getReminders,
   serialize,
   readRecordFields,
   readPdf,

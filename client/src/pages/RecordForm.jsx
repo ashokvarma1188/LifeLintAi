@@ -13,6 +13,7 @@ const EMPTY = {
   weight: "",
   notes: "",
   recommendations: "",
+  followUpDate: "",
 };
 
 /**
@@ -140,6 +141,12 @@ function RecordForm({ initial, onSubmit, onCancel, submitLabel = "Save report", 
       <div className="portal-field">
         <label htmlFor="recommendations">Recommendations</label>
         <textarea id="recommendations" name="recommendations" value={form.recommendations} onChange={change} placeholder="Medication, follow-up, advice…" />
+      </div>
+
+      <div className="portal-field">
+        <label htmlFor="followUpDate">Follow-up / reminder date</label>
+        <input id="followUpDate" type="date" name="followUpDate" value={form.followUpDate} onChange={change} />
+        <span className="hint">Optional — shows a reminder on your dashboard a few days before this date.</span>
       </div>
 
       <div className="portal-field">

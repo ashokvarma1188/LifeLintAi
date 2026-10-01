@@ -2,12 +2,13 @@ const mongoose = require("mongoose");
 const EmergencyRequest = require("../models/EmergencyRequest");
 const Hospital = require("../models/Hospital");
 const User = require("../models/User");
+const { redactMedicalId } = require("../utils/sosHelpers");
 
 const VALID_TARGETS = ["hospital", "police", "firestation"];
 
 const createSOS = async (req, res) => {
   try {
-    const { longitude, latitude, type, targets } = req.body;
+    const { longitude, latitude, type, targets, shareMedicalId } = req.body;
 
     const cleanTargets = Array.isArray(targets)
       ? targets.filter((t) => VALID_TARGETS.includes(t))
@@ -31,6 +32,7 @@ const createSOS = async (req, res) => {
       location: { type: "Point", coordinates: [longitude, latitude] },
       assignedHospitalId: nearestHospital ? nearestHospital._id : null,
       targets: finalTargets,
+      shareMedicalId: Boolean(shareMedicalId),
     });
 
     res.status(201).json({
@@ -66,12 +68,12 @@ const listSOS = async (req, res) => {
     }
 
     const requests = await EmergencyRequest.find(filter)
-      .populate("citizenId", "name phone bloodGroup")
+      .populate("citizenId", "name phone bloodGroup allergies medicalHistory")
       .populate("assignedHospitalId", "name")
       .sort({ createdAt: -1 })
       .limit(200);
 
-    res.json({ requests });
+    res.json({ requests: requests.map(redactMedicalId) });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
   }
@@ -90,6 +92,8 @@ const myRequests = async (req, res) => {
   }
 };
 
+const CANCEL_REASONS = ["safe_now", "sent_by_mistake", "other"];
+
 /** Only the citizen who raised it can cancel, and only while it's still pending. */
 const cancelSOS = async (req, res) => {
   try {
@@ -107,9 +111,42 @@ const cancelSOS = async (req, res) => {
     }
 
     request.status = "cancelled";
+    if (CANCEL_REASONS.includes(req.body.reason)) {
+      request.cancelReason = req.body.reason;
+    }
     await request.save();
 
     res.json({ message: "SOS request cancelled", request });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+/** Live location updates while an alert is still active — civilian-owned, pending/accepted only. */
+const updateLocation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    const longitude = Number(req.body.longitude);
+    const latitude = Number(req.body.latitude);
+    if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+      return res.status(400).json({ message: "A valid latitude and longitude are required" });
+    }
+
+    const request = await EmergencyRequest.findOneAndUpdate(
+      { _id: id, citizenId: req.userId, status: { $in: ["pending", "accepted"] } },
+      { location: { type: "Point", coordinates: [longitude, latitude] } },
+      { new: true }
+    );
+
+    if (!request) {
+      return res.status(404).json({ message: "Request not found or no longer active" });
+    }
+
+    res.json({ request });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
   }
@@ -161,7 +198,7 @@ const setStatus = (status) => async (req, res) => {
       update,
       { new: true }
     ).populate([
-      { path: "citizenId", select: "name phone bloodGroup" },
+      { path: "citizenId", select: "name phone bloodGroup allergies medicalHistory" },
       { path: "assignedHospitalId", select: "name" },
       { path: "respondedBy", select: "name orgName" },
     ]);
@@ -175,7 +212,7 @@ const setStatus = (status) => async (req, res) => {
       });
     }
 
-    res.json({ message: `Request marked as ${status}`, request });
+    res.json({ message: `Request marked as ${status}`, request: redactMedicalId(request) });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
   }
@@ -230,6 +267,7 @@ module.exports = {
   listSOS,
   myRequests,
   cancelSOS,
+  updateLocation,
   getMyAnalytics,
   acceptSOS: setStatus("accepted"),
   declineSOS: setStatus("declined"),
