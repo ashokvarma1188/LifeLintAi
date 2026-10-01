@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { register } from "../services/auth";
+import { register, googleSignIn } from "../services/auth";
 import { getErrorMessage } from "../services/api";
 import AuthShell from "./AuthShell";
 import PasswordField from "./PasswordField";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 import { REQUESTABLE_ROLES, roleNeedsOrg } from "../services/admin";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
@@ -30,6 +31,24 @@ function Signup() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     if (error) setError("");
+  };
+
+  const handleGoogleCredential = async (credential) => {
+    setError("");
+    setLoading(true);
+    try {
+      const result = await googleSignIn(credential);
+      if (result?.requires2FA) {
+        setError("This account has 2-factor authentication on — please sign in from the Login page instead.");
+        setLoading(false);
+        return;
+      }
+      setSuccess("Signed in with Google. Taking you to your dashboard…");
+      setTimeout(() => navigate("/dashboard", { replace: true }), 600);
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not sign in with Google."));
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -208,6 +227,15 @@ function Signup() {
           )}
         </button>
       </form>
+
+      {!needsOrg && (
+        <>
+          <div className="auth-divider">
+            <span>or</span>
+          </div>
+          <GoogleSignInButton onCredential={handleGoogleCredential} disabled={loading} />
+        </>
+      )}
     </AuthShell>
   );
 }

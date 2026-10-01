@@ -289,6 +289,22 @@
 }
 .auth-forgot-link:hover { color: var(--ll-primary); }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.25rem 0;
+  color: var(--ll-muted-foreground);
+  font-size: 0.8125rem;
+}
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--ll-border);
+}
+
 @media (max-width: 480px) {
   .auth-card { padding: 1.5rem 1.25rem; }
   .auth-row { grid-template-columns: 1fr; }

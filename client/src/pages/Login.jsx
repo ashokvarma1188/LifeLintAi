@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { login, verifyTwoFactor } from "../services/auth";
+import { login, verifyTwoFactor, googleSignIn } from "../services/auth";
 import { getErrorMessage } from "../services/api";
 import AuthShell from "./AuthShell";
 import PasswordField from "./PasswordField";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 function Login() {
   const navigate = useNavigate();
@@ -40,6 +41,23 @@ function Login() {
       }
     } catch (err) {
       setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleCredential = async (credential) => {
+    setError("");
+    setLoading(true);
+    try {
+      const result = await googleSignIn(credential);
+      if (result?.requires2FA) {
+        setPending2FA({ userId: result.userId, devCode: result.devCode });
+      } else {
+        navigate(redirectTo, { replace: true });
+      }
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not sign in with Google."));
     } finally {
       setLoading(false);
     }
@@ -152,6 +170,11 @@ function Login() {
           )}
         </button>
       </form>
+
+      <div className="auth-divider">
+        <span>or</span>
+      </div>
+      <GoogleSignInButton onCredential={handleGoogleCredential} disabled={loading} />
     </AuthShell>
   );
 }

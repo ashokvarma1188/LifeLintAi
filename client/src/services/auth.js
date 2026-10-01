@@ -17,6 +17,13 @@ export async function login({ email, password }) {
   return persistSession(data);
 }
 
+/** Same shape as login() — creates a civilian account the first time, signs in otherwise. */
+export async function googleSignIn(credential) {
+  const { data } = await api.post("/auth/google", { credential });
+  if (data.requires2FA) return data;
+  return persistSession(data);
+}
+
 export async function verifyTwoFactor(userId, code) {
   const { data } = await api.post("/auth/verify-2fa", { userId, code });
   return persistSession(data);

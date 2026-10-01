@@ -1,9 +1,12 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
 const { VALID_ROLES, isCivilian, isOrgRole } = require("../constants/roles");
 const { sendPasswordResetEmail, sendVerificationEmail, sendTwoFactorCode } = require("../utils/mailer");
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const hashToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
 
@@ -118,6 +121,46 @@ const register = async (req, res) => {
   }
 };
 
+/**
+ * Shared tail end of both password login and Google sign-in: suspended check,
+ * legacy-account role backfill, then either the 2FA challenge or a real token.
+ */
+const completeLogin = async (user, res) => {
+  if (user.suspended) {
+    return res.status(403).json({ message: "Your account has been suspended. Contact support if you think this is a mistake." });
+  }
+
+  // Accounts created before roles existed are backfilled on first login.
+  if (!user.roleStatus) {
+    user.role = user.role || "civilian";
+    user.roleStatus = "approved";
+    await user.save();
+  }
+
+  if (user.twoFactorEnabled) {
+    const code = generateOtp();
+    user.twoFactorCode = hashToken(code);
+    user.twoFactorCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    const { sent } = await sendTwoFactorCode(user.email, code);
+
+    return res.json({
+      requires2FA: true,
+      userId: user._id,
+      message: "Enter the 6-digit code sent to your email to finish signing in.",
+      // Dev-mode fallback, same pattern as the other flows — remove once email is configured.
+      ...(sent ? {} : { devCode: code }),
+    });
+  }
+
+  res.json({
+    message: "Login successful",
+    token: signToken(user),
+    user: publicUser(user),
+  });
+};
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -136,39 +179,57 @@ const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    if (user.suspended) {
-      return res.status(403).json({ message: "Your account has been suspended. Contact support if you think this is a mistake." });
+    await completeLogin(user, res);
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+/**
+ * Verifies the Google ID token the frontend got from Google Identity Services,
+ * then signs the matching account in — creating a new civilian account the
+ * first time. Org roles still have to go through the full signup form (they
+ * need an org name and admin approval), so this always lands as civilian.
+ */
+const googleSignIn = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ message: "Missing Google credential" });
+    }
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      return res.status(503).json({ message: "Google sign-in is not configured yet." });
     }
 
-    // Accounts created before roles existed are backfilled on first login.
-    if (!user.roleStatus) {
-      user.role = user.role || "civilian";
-      user.roleStatus = "approved";
-      await user.save();
+    let payload;
+    try {
+      const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: process.env.GOOGLE_CLIENT_ID });
+      payload = ticket.getPayload();
+    } catch {
+      return res.status(400).json({ message: "Could not verify Google sign-in" });
     }
 
-    if (user.twoFactorEnabled) {
-      const code = generateOtp();
-      user.twoFactorCode = hashToken(code);
-      user.twoFactorCodeExpires = new Date(Date.now() + 10 * 60 * 1000);
-      await user.save();
+    const email = String(payload.email || "").trim().toLowerCase();
+    if (!email) {
+      return res.status(400).json({ message: "That Google account has no email" });
+    }
 
-      const { sent } = await sendTwoFactorCode(user.email, code);
-
-      return res.json({
-        requires2FA: true,
-        userId: user._id,
-        message: "Enter the 6-digit code sent to your email to finish signing in.",
-        // Dev-mode fallback, same pattern as the other flows — remove once email is configured.
-        ...(sent ? {} : { devCode: code }),
+    let user = await User.findOne({ email });
+    if (!user) {
+      // No password was ever set for this account — a random hash just satisfies the
+      // schema; the user can set a real one later via "forgot password" if they want to.
+      const randomPassword = crypto.randomBytes(24).toString("hex");
+      user = await User.create({
+        name: payload.name || email.split("@")[0],
+        email,
+        password: await bcrypt.hash(randomPassword, 10),
+        role: "civilian",
+        roleStatus: "approved",
+        emailVerified: Boolean(payload.email_verified),
       });
     }
 
-    res.json({
-      message: "Login successful",
-      token: signToken(user),
-      user: publicUser(user),
-    });
+    await completeLogin(user, res);
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
   }
@@ -432,6 +493,7 @@ const resendVerification = async (req, res) => {
 module.exports = {
   register,
   login,
+  googleSignIn,
   verifyTwoFactor,
   setTwoFactor,
   logoutEverywhere,

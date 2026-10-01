@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   register,
   login,
+  googleSignIn,
   verifyTwoFactor,
   setTwoFactor,
   logoutEverywhere,
@@ -19,6 +20,7 @@ const { uploadPdf } = require("../middleware/uploadMiddleware");
 
 router.post("/register", uploadPdf, register);
 router.post("/login", login);
+router.post("/google", googleSignIn);
 router.post("/verify-2fa", verifyTwoFactor);
 router.post("/2fa", protect, setTwoFactor);
 router.post("/logout-everywhere", protect, logoutEverywhere);
