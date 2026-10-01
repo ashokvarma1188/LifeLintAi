@@ -18,6 +18,7 @@ function Signup() {
     phone: "",
     role: "civilian",
     orgName: "",
+    licenseNumber: "",
   });
   const [docFile, setDocFile] = useState(null);
   const [error, setError] = useState("");
@@ -132,6 +133,19 @@ function Signup() {
                 value={form.orgName}
                 onChange={handleChange}
               />
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="licenseNumber">Licence / registration number</label>
+              <input
+                id="licenseNumber"
+                type="text"
+                name="licenseNumber"
+                placeholder="e.g. your hospital/pharmacy registration number"
+                value={form.licenseNumber}
+                onChange={handleChange}
+              />
+              <span className="hint">Optional, but helps admin verify your organisation faster.</span>
             </div>
 
             <div className="auth-field">

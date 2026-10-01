@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const User = require("../models/User");
-const { VALID_ROLES, isCivilian } = require("../constants/roles");
+const { VALID_ROLES, isCivilian, isOrgRole } = require("../constants/roles");
 const { sendPasswordResetEmail, sendVerificationEmail, sendTwoFactorCode } = require("../utils/mailer");
 
 const hashToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
@@ -40,6 +40,7 @@ const publicUser = (user) => ({
   role: user.role || "civilian",
   roleStatus: user.roleStatus || "approved",
   orgName: user.orgName || null,
+  licenseNumber: user.licenseNumber || null,
   bloodGroup: user.bloodGroup,
   phone: user.phone,
   suspended: Boolean(user.suspended),
@@ -47,6 +48,7 @@ const publicUser = (user) => ({
   twoFactorEnabled: Boolean(user.twoFactorEnabled),
   hasVerificationDoc: Boolean(user.verificationDoc?.filename),
   isDemo: Boolean(user.isDemo),
+  twoFactorMandatory: twoFactorIsMandatory(user),
 });
 
 const register = async (req, res) => {
@@ -54,6 +56,7 @@ const register = async (req, res) => {
     const { name, email, password, bloodGroup, phone } = req.body;
     const role = (req.body.role || "civilian").trim().toLowerCase();
     const orgName = (req.body.orgName || "").trim();
+    const licenseNumber = (req.body.licenseNumber || "").trim();
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Name, email and password are required" });
@@ -90,6 +93,7 @@ const register = async (req, res) => {
       role,
       roleStatus,
       orgName: orgName || undefined,
+      licenseNumber: licenseNumber || undefined,
       bloodGroup,
       phone,
       verificationDoc: req.file
@@ -203,9 +207,17 @@ const verifyTwoFactor = async (req, res) => {
 };
 
 /** Toggling is immediate — no separate enrolment step, kept deliberately simple. */
+/** Agency and admin accounts are required to keep 2FA on — the demo account is exempt. */
+const twoFactorIsMandatory = (user) => (isOrgRole(user.role) || user.role === "admin") && !user.isDemo;
+
 const setTwoFactor = async (req, res) => {
   try {
-    req.user.twoFactorEnabled = Boolean(req.body.enable);
+    const enable = Boolean(req.body.enable);
+    if (!enable && twoFactorIsMandatory(req.user)) {
+      return res.status(400).json({ message: "Two-factor authentication is required for your account type and can't be turned off." });
+    }
+
+    req.user.twoFactorEnabled = enable;
     await req.user.save();
     res.json({
       message: req.user.twoFactorEnabled ? "Two-factor authentication enabled." : "Two-factor authentication disabled.",

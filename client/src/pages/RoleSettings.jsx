@@ -191,12 +191,18 @@ function RoleSettings() {
             <div>
               <div style={{ fontWeight: 500, fontSize: 14 }}>Two-factor authentication</div>
               <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>
-                {user.twoFactorEnabled ? "Enabled — a code is emailed to you at every login." : "Off — add a login code sent to your email."}
+                {user.twoFactorMandatory
+                  ? "Required for this account type — a code is emailed to you at every login."
+                  : user.twoFactorEnabled
+                    ? "Enabled — a code is emailed to you at every login."
+                    : "Off — add a login code sent to your email."}
               </div>
             </div>
-            <button className={`portal-btn ${user.twoFactorEnabled ? "danger" : "primary"} small`} onClick={handleToggle2FA} disabled={twoFAsaving}>
-              <ShieldCheck size={14} /> {twoFAsaving ? "Saving…" : user.twoFactorEnabled ? "Disable" : "Enable"}
-            </button>
+            {!user.twoFactorMandatory && (
+              <button className={`portal-btn ${user.twoFactorEnabled ? "danger" : "primary"} small`} onClick={handleToggle2FA} disabled={twoFAsaving}>
+                <ShieldCheck size={14} /> {twoFAsaving ? "Saving…" : user.twoFactorEnabled ? "Disable" : "Enable"}
+              </button>
+            )}
           </div>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>

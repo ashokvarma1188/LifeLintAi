@@ -3,7 +3,8 @@ const EmergencyRequest = require("../models/EmergencyRequest");
 const IncidentReport = require("../models/IncidentReport");
 const RecordAccessLog = require("../models/RecordAccessLog");
 const { publicUser } = require("./authController");
-const { ORG_ROLES, ALL_ROLES } = require("../constants/roles");
+const { ORG_ROLES, ALL_ROLES, ROLE_LABELS } = require("../constants/roles");
+const { sendAccountStatusEmail } = require("../utils/mailer");
 
 /** Organisation accounts waiting on a decision, oldest request first. */
 const listPending = async (req, res) => {
@@ -41,7 +42,17 @@ const setRoleStatus = (status, successMessage) => async (req, res) => {
     }
 
     user.roleStatus = status;
+    // Agency accounts must use 2FA — enforced here (not just at signup) so it also
+    // applies to existing accounts the moment they're approved. The demo account
+    // is exempt so it can keep switching roles instantly with no extra step.
+    if (status === "approved" && ORG_ROLES.includes(user.role) && !user.isDemo) {
+      user.twoFactorEnabled = true;
+    }
     await user.save();
+
+    sendAccountStatusEmail(user.email, { approved: status === "approved", roleLabel: ROLE_LABELS[user.role] || user.role }).catch(
+      () => {}
+    );
 
     res.json({ message: successMessage, user: publicUser(user) });
   } catch (err) {

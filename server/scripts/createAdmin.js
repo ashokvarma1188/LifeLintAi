@@ -53,6 +53,7 @@ const ask = (question) => new Promise((resolve) => rl.question(question, (a) => 
     existing.role = "admin";
     existing.roleStatus = "approved";
     existing.password = await bcrypt.hash(password, 10);
+    existing.twoFactorEnabled = true;
     await existing.save();
     console.log(`\n✓ ${email} is now an admin.`);
   } else {
@@ -62,6 +63,7 @@ const ask = (question) => new Promise((resolve) => rl.question(question, (a) => 
       password: await bcrypt.hash(password, 10),
       role: "admin",
       roleStatus: "approved",
+      twoFactorEnabled: true,
     });
     console.log(`\n✓ Admin account created for ${email}.`);
   }

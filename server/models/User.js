@@ -47,6 +47,9 @@ const userSchema = new mongoose.Schema(
     ],
     openHours: { type: String },
     isOpen: { type: Boolean, default: true },
+    // Licence/registration number an organisation account provides at signup,
+    // shown to admins reviewing the approval request.
+    licenseNumber: { type: String },
 
     // Organisation profile depth — available to any org role (hospital/police/firestation/pharmacy).
     // "Verified" badge is just roleStatus === "approved"; no separate field needed for that.

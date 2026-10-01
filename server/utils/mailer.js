@@ -131,4 +131,27 @@ const sendTwoFactorCode = (to, code) =>
     html: `<p>Your sign-in code is <strong style="font-size:20px">${code}</strong>. It expires in 10 minutes.</p>`,
   });
 
-module.exports = { sendPasswordResetEmail, sendVerificationEmail, sendTwoFactorCode, isConfigured };
+const sendAccountStatusEmail = (to, { approved, roleLabel }) =>
+  trySend(
+    approved
+      ? {
+          to,
+          subject: "Your LifeLink AI organisation account was approved",
+          text: `Good news — your ${roleLabel} account has been approved. You can now sign in and access your dashboard.`,
+          html: `<p>Good news — your <strong>${roleLabel}</strong> account has been approved. You can now sign in and access your dashboard.</p>`,
+        }
+      : {
+          to,
+          subject: "Your LifeLink AI organisation request was not approved",
+          text: `Your request for a ${roleLabel} account was not approved. You can sign in and submit a different request from Role & Account settings.`,
+          html: `<p>Your request for a <strong>${roleLabel}</strong> account was not approved. You can sign in and submit a different request from Role &amp; Account settings.</p>`,
+        }
+  );
+
+module.exports = {
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+  sendTwoFactorCode,
+  sendAccountStatusEmail,
+  isConfigured,
+};

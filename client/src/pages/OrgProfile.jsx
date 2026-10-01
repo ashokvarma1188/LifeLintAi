@@ -11,7 +11,7 @@ function OrgProfile() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("profile");
   const [profile, setProfile] = useState(null);
-  const [form, setForm] = useState({ orgName: "", logoUrl: "", serviceRadiusKm: "", openHours: "", isOpen: true, phone: "" });
+  const [form, setForm] = useState({ orgName: "", licenseNumber: "", logoUrl: "", serviceRadiusKm: "", openHours: "", isOpen: true, phone: "" });
   const [staff, setStaff] = useState([]);
   const [staffForm, setStaffForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(true);
@@ -27,6 +27,7 @@ function OrgProfile() {
       setProfile(p);
       setForm({
         orgName: p.orgName || "",
+        licenseNumber: p.licenseNumber || "",
         logoUrl: p.logoUrl || "",
         serviceRadiusKm: p.serviceRadiusKm ?? "",
         openHours: p.openHours || "",
@@ -145,6 +146,11 @@ function OrgProfile() {
                   <label htmlFor="phone">Phone</label>
                   <input id="phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
                 </div>
+              </div>
+
+              <div className="portal-field">
+                <label htmlFor="licenseNumber">Licence / registration number</label>
+                <input id="licenseNumber" value={form.licenseNumber} onChange={(e) => setForm({ ...form, licenseNumber: e.target.value })} />
               </div>
 
               <div className="portal-field">

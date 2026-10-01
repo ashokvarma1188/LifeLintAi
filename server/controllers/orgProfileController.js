@@ -4,6 +4,7 @@ const { ORG_ROLES } = require("../constants/roles");
 
 const shape = (user) => ({
   orgName: user.orgName || "",
+  licenseNumber: user.licenseNumber || "",
   logoUrl: user.logoUrl || "",
   serviceRadiusKm: user.serviceRadiusKm ?? null,
   openHours: user.openHours || "",
@@ -25,8 +26,9 @@ const updateOrgProfile = async (req, res) => {
       return res.status(403).json({ message: "Organisation accounts only" });
     }
 
-    const { orgName, logoUrl, serviceRadiusKm, openHours, isOpen, phone } = req.body;
+    const { orgName, licenseNumber, logoUrl, serviceRadiusKm, openHours, isOpen, phone } = req.body;
     if (orgName !== undefined) req.user.orgName = String(orgName).trim();
+    if (licenseNumber !== undefined) req.user.licenseNumber = String(licenseNumber).trim();
     if (logoUrl !== undefined) req.user.logoUrl = String(logoUrl).trim();
     if (serviceRadiusKm !== undefined) {
       const radius = Number(serviceRadiusKm);

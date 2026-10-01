@@ -156,6 +156,7 @@ function AdminConsole() {
     downloadCsv(`lifelink-accounts-${tab}.csv`, users, [
       { label: "Name", get: (u) => u.name },
       { label: "Organisation", get: (u) => u.orgName || "" },
+      { label: "Licence #", get: (u) => u.licenseNumber || "" },
       { label: "Email", get: (u) => u.email },
       { label: "Role", get: (u) => roleLabel(u.role) },
       { label: "Status", get: (u) => u.roleStatus },
@@ -234,6 +235,7 @@ function AdminConsole() {
                     <tr>
                       <th>Name</th>
                       <th>Organisation</th>
+                      <th>Licence #</th>
                       <th>Email</th>
                       <th>Role</th>
                       <th>Status</th>
@@ -246,6 +248,7 @@ function AdminConsole() {
                       <tr key={user.id}>
                         <td>{user.name}</td>
                         <td>{user.orgName || "—"}</td>
+                        <td>{user.licenseNumber || "—"}</td>
                         <td>{user.email}</td>
                         <td>{roleLabel(user.role)}</td>
                         <td style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
