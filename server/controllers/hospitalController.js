@@ -4,7 +4,10 @@ const geocodeAddress = require("../utils/geocode");
 
 const addHospital = async (req, res) => {
   try {
-    const { name, phone, address, totalBeds, availableBeds, ambulanceAvailable } = req.body;
+    const {
+      name, phone, address, totalBeds, availableBeds, icuBeds, icuAvailableBeds,
+      ambulanceAvailable, ambulanceCount, bloodBankAvailable, oxygenAvailable,
+    } = req.body;
 
     if (!address) {
       return res.status(400).json({ message: "Address is required" });
@@ -19,7 +22,12 @@ const addHospital = async (req, res) => {
       location: { type: "Point", coordinates: [longitude, latitude] },
       totalBeds,
       availableBeds,
+      icuBeds,
+      icuAvailableBeds,
       ambulanceAvailable,
+      ambulanceCount,
+      bloodBankAvailable,
+      oxygenAvailable,
     });
 
     res.status(201).json({ message: "Hospital added successfully", hospital });
@@ -89,11 +97,17 @@ const updateHospital = async (req, res) => {
       return res.status(403).json({ message: "You can only update a hospital your account manages" });
     }
 
-    const { totalBeds, availableBeds, ambulanceAvailable, bloodBankAvailable, oxygenAvailable } = req.body;
+    const {
+      totalBeds, availableBeds, icuBeds, icuAvailableBeds,
+      ambulanceAvailable, ambulanceCount, bloodBankAvailable, oxygenAvailable,
+    } = req.body;
     const update = {};
     if (totalBeds !== undefined) update.totalBeds = totalBeds;
     if (availableBeds !== undefined) update.availableBeds = availableBeds;
+    if (icuBeds !== undefined) update.icuBeds = icuBeds;
+    if (icuAvailableBeds !== undefined) update.icuAvailableBeds = icuAvailableBeds;
     if (ambulanceAvailable !== undefined) update.ambulanceAvailable = ambulanceAvailable;
+    if (ambulanceCount !== undefined) update.ambulanceCount = ambulanceCount;
     if (bloodBankAvailable !== undefined) update.bloodBankAvailable = bloodBankAvailable;
     if (oxygenAvailable !== undefined) update.oxygenAvailable = oxygenAvailable;
     if (isUnclaimed && req.user.role === "hospital") update.ownerId = req.user._id;

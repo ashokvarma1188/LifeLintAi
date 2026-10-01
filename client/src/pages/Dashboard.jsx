@@ -40,7 +40,8 @@ const FEATURES = {
   hospital: [
     { icon: Users, title: "Patient Records", desc: "Look up a patient by phone and file medical reports.", path: "/hospital/patients" },
     { icon: Ambulance, title: "Incoming Patients", desc: "Patients heading your way from SOS alerts.", path: "/hospital/incoming" },
-    { icon: BedDouble, title: "Bed Availability", desc: "Keep your bed and ambulance counts up to date.", path: "/hospital/beds" },
+    { icon: BedDouble, title: "Bed Availability", desc: "Keep your bed, ICU and ambulance counts up to date.", path: "/hospital/beds" },
+    { icon: Droplet, title: "Blood Requests", desc: "Request blood for a patient — matched to compatible donors nearby.", path: "/blood-donation" },
     { icon: Building2, title: "Organisation Profile", desc: "Logo, hours, service radius, and staff accounts.", path: "/org-profile" },
   ],
   firestation: [

@@ -116,8 +116,15 @@ function FindHospitals() {
                   <div className="fh-beds">
                     <strong>{h.availableBeds ?? "-"}</strong> / {h.totalBeds ?? "-"} beds free
                   </div>
+                  {h.icuBeds > 0 && (
+                    <div className="fh-beds" style={{ marginTop: 2 }}>
+                      <strong>{h.icuAvailableBeds ?? 0}</strong> / {h.icuBeds} ICU beds free
+                    </div>
+                  )}
                   <span className={`fh-ambulance ${h.ambulanceAvailable ? "available" : "unavailable"}`}>
-                    {h.ambulanceAvailable ? "Ambulance available" : "No ambulance"}
+                    {h.ambulanceAvailable
+                      ? `Ambulance available${h.ambulanceCount ? ` (${h.ambulanceCount})` : ""}`
+                      : "No ambulance"}
                   </span>
                   <span className={`fh-ambulance ${h.bloodBankAvailable ? "available" : "unavailable"}`} style={{ marginTop: 6 }}>
                     {h.bloodBankAvailable ? "Blood bank available" : "No blood bank"}

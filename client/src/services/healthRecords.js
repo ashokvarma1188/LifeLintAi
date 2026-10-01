@@ -91,3 +91,9 @@ export async function createPatientRecord(patientId, form, pdfFile) {
   );
   return data.record;
 }
+
+/** Patients this hospital has previously viewed/filed a report for, most recent first. */
+export async function listRecentPatients() {
+  const { data } = await api.get("/hospital/patients/recent");
+  return data.patients;
+}

@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Search, Plus } from "lucide-react";
+import { ArrowLeft, Search, Plus, Clock } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import RecordForm from "./RecordForm";
 import RecordCard from "./RecordCard";
-import { searchPatient, getPatientRecords, createPatientRecord } from "../services/healthRecords";
+import { searchPatient, getPatientRecords, createPatientRecord, listRecentPatients } from "../services/healthRecords";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
@@ -18,11 +18,21 @@ function HospitalPatients() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [adding, setAdding] = useState(false);
+  const [recentPatients, setRecentPatients] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const data = await listRecentPatients().catch(() => []);
+      setRecentPatients(data);
+    })();
+  }, []);
 
   const loadRecords = async (patientId) => {
     const data = await getPatientRecords(patientId);
     setPatient(data.patient);
     setRecords(data.records);
+    const recent = await listRecentPatients().catch(() => []);
+    setRecentPatients(recent);
   };
 
   const doSearch = async (e) => {
@@ -38,6 +48,19 @@ function HospitalPatients() {
       await loadRecords(found.id);
     } catch (err) {
       setError(getErrorMessage(err, "Could not search for that patient."));
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const openRecent = async (patientId) => {
+    setError("");
+    setNotice("");
+    setSearching(true);
+    try {
+      await loadRecords(patientId);
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not open this patient's file."));
     } finally {
       setSearching(false);
     }
@@ -123,8 +146,37 @@ function HospitalPatients() {
         )}
 
         {!patient && !searching && !error && (
-          <div className="portal-empty">
-            Search for a patient by their registered phone number to view their file.
+          <div className="portal-panel">
+            <h3 style={{ marginTop: 0, fontSize: 15, display: "flex", alignItems: "center", gap: 6 }}>
+              <Clock size={15} /> Recently viewed patients
+            </h3>
+            {recentPatients.length === 0 ? (
+              <div className="portal-empty">
+                Search for a patient by their registered phone number to view their file — patients you look up will appear here next time.
+              </div>
+            ) : (
+              <div className="portal-table-wrap">
+                <table className="portal-table">
+                  <thead>
+                    <tr><th>Name</th><th>Phone</th><th>Blood group</th><th /></tr>
+                  </thead>
+                  <tbody>
+                    {recentPatients.map((p) => (
+                      <tr key={p.id}>
+                        <td>{p.name}</td>
+                        <td>{p.phone || "—"}</td>
+                        <td>{p.bloodGroup || "—"}</td>
+                        <td>
+                          <button className="portal-btn ghost small" onClick={() => openRecent(p.id)}>
+                            Open file
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>

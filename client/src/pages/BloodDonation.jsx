@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Droplet, Phone, Check, X, Plus } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import api from "../services/api";
+import { getUser } from "../services/auth";
 import { listDonors, setDonorStatus } from "../services/donors";
 import {
   createBloodRequest,
@@ -20,7 +21,8 @@ const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 
 function BloodDonation() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("requests");
+  const isCivilian = ["civilian", "citizen", undefined].includes(getUser()?.role);
+  const [tab, setTab] = useState(isCivilian ? "requests" : "post");
 
   // Donor profile
   const [myBloodGroup, setMyBloodGroup] = useState("");
@@ -171,9 +173,11 @@ function BloodDonation() {
             <p>Post a real request for compatible donors, or offer to donate yourself.</p>
           </div>
           <div className="portal-toolbar" style={{ margin: 0 }}>
-            <button className={`portal-btn ${tab === "requests" ? "primary" : "ghost"}`} onClick={() => setTab("requests")}>
-              Requests for you
-            </button>
+            {isCivilian && (
+              <button className={`portal-btn ${tab === "requests" ? "primary" : "ghost"}`} onClick={() => setTab("requests")}>
+                Requests for you
+              </button>
+            )}
             <button className={`portal-btn ${tab === "post" ? "primary" : "ghost"}`} onClick={() => setTab("post")}>
               Request blood
             </button>
@@ -189,21 +193,23 @@ function BloodDonation() {
         {error && <div className="portal-message error">{error}</div>}
         {notice && <div className="portal-message success">{notice}</div>}
 
-        <div className="portal-panel" style={{ marginBottom: 20 }}>
-          <div className="portal-head" style={{ marginBottom: 0 }}>
-            <div>
-              <h1 style={{ fontSize: 16 }}>
-                {myBloodGroup ? `Your blood group: ${myBloodGroup}` : "Blood group not set"}
-              </h1>
-              <p>{available ? "You are listed as an available donor." : "You are not currently listed as a donor."}</p>
+        {isCivilian && (
+          <div className="portal-panel" style={{ marginBottom: 20 }}>
+            <div className="portal-head" style={{ marginBottom: 0 }}>
+              <div>
+                <h1 style={{ fontSize: 16 }}>
+                  {myBloodGroup ? `Your blood group: ${myBloodGroup}` : "Blood group not set"}
+                </h1>
+                <p>{available ? "You are listed as an available donor." : "You are not currently listed as a donor."}</p>
+              </div>
+              <button className={`portal-btn ${available ? "danger" : "primary"}`} onClick={toggleAvailable} disabled={saving}>
+                <Droplet size={16} /> {saving ? "Saving…" : available ? "Stop showing as donor" : "I'm available to donate"}
+              </button>
             </div>
-            <button className={`portal-btn ${available ? "danger" : "primary"}`} onClick={toggleAvailable} disabled={saving}>
-              <Droplet size={16} /> {saving ? "Saving…" : available ? "Stop showing as donor" : "I'm available to donate"}
-            </button>
           </div>
-        </div>
+        )}
 
-        {tab === "requests" && (
+        {tab === "requests" && isCivilian && (
           <div className="portal-panel">
             {!available || !myBloodGroup ? (
               <div className="portal-empty">Mark yourself as an available donor above to see requests you're compatible with.</div>

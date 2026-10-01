@@ -8,12 +8,14 @@ const {
   getPatient,
   getPatientRecords,
   createPatientRecord,
+  listRecentPatients,
 } = require("../controllers/hospitalPatientController");
 
 router.use(protect, requireHospital);
 
-// Declared before "/:patientId" so "search" is not read as a patient id.
+// Declared before "/:patientId" so these aren't read as a patient id.
 router.get("/search", searchPatient);
+router.get("/recent", listRecentPatients);
 
 router.get("/:patientId", getPatient);
 router.get("/:patientId/records", getPatientRecords);

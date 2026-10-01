@@ -11,7 +11,10 @@ function HospitalBeds() {
   const navigate = useNavigate();
   const [hospitals, setHospitals] = useState([]);
   const [selectedId, setSelectedId] = useState("");
-  const [form, setForm] = useState({ totalBeds: "", availableBeds: "", ambulanceAvailable: true, bloodBankAvailable: false, oxygenAvailable: true });
+  const [form, setForm] = useState({
+    totalBeds: "", availableBeds: "", icuBeds: "", icuAvailableBeds: "",
+    ambulanceAvailable: true, ambulanceCount: "", bloodBankAvailable: false, oxygenAvailable: true,
+  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -38,7 +41,10 @@ function HospitalBeds() {
       setForm({
         totalBeds: h.totalBeds ?? "",
         availableBeds: h.availableBeds ?? "",
+        icuBeds: h.icuBeds ?? "",
+        icuAvailableBeds: h.icuAvailableBeds ?? "",
         ambulanceAvailable: h.ambulanceAvailable ?? true,
+        ambulanceCount: h.ambulanceCount ?? "",
         bloodBankAvailable: h.bloodBankAvailable ?? false,
         oxygenAvailable: h.oxygenAvailable ?? true,
       });
@@ -58,7 +64,10 @@ function HospitalBeds() {
       const updated = await updateHospital(selectedId, {
         totalBeds: Number(form.totalBeds) || 0,
         availableBeds: Number(form.availableBeds) || 0,
+        icuBeds: Number(form.icuBeds) || 0,
+        icuAvailableBeds: Number(form.icuAvailableBeds) || 0,
         ambulanceAvailable: form.ambulanceAvailable,
+        ambulanceCount: Number(form.ambulanceCount) || 0,
         bloodBankAvailable: form.bloodBankAvailable,
         oxygenAvailable: form.oxygenAvailable,
       });
@@ -128,6 +137,38 @@ function HospitalBeds() {
                         min="0"
                         value={form.availableBeds}
                         onChange={(e) => setForm({ ...form, availableBeds: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="portal-row">
+                    <div className="portal-field">
+                      <label htmlFor="icuBeds">ICU beds</label>
+                      <input
+                        id="icuBeds"
+                        type="number"
+                        min="0"
+                        value={form.icuBeds}
+                        onChange={(e) => setForm({ ...form, icuBeds: e.target.value })}
+                      />
+                    </div>
+                    <div className="portal-field">
+                      <label htmlFor="icuAvailableBeds">ICU beds available</label>
+                      <input
+                        id="icuAvailableBeds"
+                        type="number"
+                        min="0"
+                        value={form.icuAvailableBeds}
+                        onChange={(e) => setForm({ ...form, icuAvailableBeds: e.target.value })}
+                      />
+                    </div>
+                    <div className="portal-field">
+                      <label htmlFor="ambulanceCount">Ambulances available</label>
+                      <input
+                        id="ambulanceCount"
+                        type="number"
+                        min="0"
+                        value={form.ambulanceCount}
+                        onChange={(e) => setForm({ ...form, ambulanceCount: e.target.value })}
                       />
                     </div>
                   </div>

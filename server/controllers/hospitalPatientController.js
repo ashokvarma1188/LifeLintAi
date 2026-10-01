@@ -146,4 +146,38 @@ const createPatientRecord = async (req, res) => {
   }
 };
 
-module.exports = { searchPatient, getPatient, getPatientRecords, createPatientRecord };
+/** Patients this hospital has viewed or filed a report for, most recent first — so staff don't need to already know a phone number. */
+const listRecentPatients = async (req, res) => {
+  try {
+    const logs = await RecordAccessLog.find({ hospitalId: req.user._id })
+      .sort({ createdAt: -1 })
+      .limit(200)
+      .select("patientId createdAt");
+
+    const orderedIds = [];
+    const seen = new Set();
+    for (const log of logs) {
+      const id = String(log.patientId);
+      if (seen.has(id)) continue;
+      seen.add(id);
+      orderedIds.push({ id: log.patientId, lastSeen: log.createdAt });
+      if (orderedIds.length >= 20) break;
+    }
+
+    const patients = await User.find({ _id: { $in: orderedIds.map((o) => o.id) } }).select("-password");
+    const byId = new Map(patients.map((p) => [String(p._id), p]));
+
+    const result = orderedIds
+      .map(({ id, lastSeen }) => {
+        const patient = byId.get(String(id));
+        return patient ? { ...patientCard(patient), lastSeen } : null;
+      })
+      .filter(Boolean);
+
+    res.json({ patients: result });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+module.exports = { searchPatient, getPatient, getPatientRecords, createPatientRecord, listRecentPatients };
