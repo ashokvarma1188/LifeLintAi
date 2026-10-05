@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -38,6 +39,7 @@ import VerifyEmail from "./pages/VerifyEmail";
 import OrgProfile from "./pages/OrgProfile";
 import Support from "./pages/Support";
 import AiAssistantWidget from "./components/AiAssistantWidget";
+import FaqAssistantWidget from "./components/FaqAssistantWidget";
 import { isAuthenticated } from "./services/auth";
 
 const AUTH_PAGE_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-email"];
@@ -50,9 +52,25 @@ const AUTH_PAGE_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-pas
  */
 function SignedInAssistant() {
   const { pathname } = useLocation();
+  // Only one of the two floating chat panels can be open at a time — both are
+  // bottom-right and would overlap otherwise.
+  const [openWidget, setOpenWidget] = useState(null);
+
   if (AUTH_PAGE_PREFIXES.some((p) => pathname.startsWith(p))) return null;
   if (!isAuthenticated()) return null;
-  return <AiAssistantWidget />;
+
+  return (
+    <>
+      <AiAssistantWidget
+        open={openWidget === "ai"}
+        onToggle={() => setOpenWidget((w) => (w === "ai" ? null : "ai"))}
+      />
+      <FaqAssistantWidget
+        open={openWidget === "faq"}
+        onToggle={() => setOpenWidget((w) => (w === "faq" ? null : "faq"))}
+      />
+    </>
+  );
 }
 
 function App() {

@@ -6,8 +6,7 @@ import "./AiAssistantWidget.css";
 
 const MAX_PHOTO_BYTES = 6 * 1024 * 1024;
 
-function AiAssistantWidget() {
-  const [open, setOpen] = useState(false);
+function AiAssistantWidget({ open, onToggle }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [photo, setPhoto] = useState(null);
@@ -78,7 +77,7 @@ function AiAssistantWidget() {
               <h4>AI First-Aid Assistant</h4>
               <p>Quick guidance while help is on the way</p>
             </div>
-            <button className="ai-widget-close" onClick={() => setOpen(false)} aria-label="Close">
+            <button className="ai-widget-close" onClick={onToggle} aria-label="Close">
               <X size={18} />
             </button>
           </div>
@@ -142,7 +141,7 @@ function AiAssistantWidget() {
         </div>
       )}
 
-      <button className="ai-widget-btn" onClick={() => setOpen((o) => !o)} aria-label="Open AI assistant">
+      <button className="ai-widget-btn" onClick={onToggle} aria-label="Open AI assistant">
         {open ? <X size={24} /> : <Bot size={26} />}
       </button>
     </>
