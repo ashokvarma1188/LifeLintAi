@@ -43,9 +43,9 @@ function Support() {
     setError("");
     try {
       await createTicket(form.subject.trim(), form.message.trim());
+      await load();
       setForm({ subject: "", message: "" });
       setCreating(false);
-      await load();
     } catch (err) {
       setError(getErrorMessage(err, "Could not submit your ticket."));
     } finally {
