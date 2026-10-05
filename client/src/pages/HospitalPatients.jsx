@@ -111,7 +111,7 @@ function HospitalPatients() {
                 <div>
                   <h1 style={{ fontSize: 20 }}>{patient.name}</h1>
                   <p>
-                    {patient.phone}
+                    {patient.phone && <a href={`tel:${patient.phone}`} style={{ color: "inherit" }}>{patient.phone}</a>}
                     {patient.email ? ` · ${patient.email}` : ""}
                     {patient.bloodGroup ? ` · Blood group ${patient.bloodGroup}` : ""}
                     {patient.age ? ` · ${patient.age} yrs` : ""}
@@ -164,7 +164,7 @@ function HospitalPatients() {
                     {recentPatients.map((p) => (
                       <tr key={p.id}>
                         <td>{p.name}</td>
-                        <td>{p.phone || "—"}</td>
+                        <td>{p.phone ? <a href={`tel:${p.phone}`} style={{ color: "inherit" }}>{p.phone}</a> : "—"}</td>
                         <td>{p.bloodGroup || "—"}</td>
                         <td>
                           <button className="portal-btn ghost small" onClick={() => openRecent(p.id)}>

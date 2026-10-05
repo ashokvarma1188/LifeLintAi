@@ -164,7 +164,7 @@ function IncomingPatients() {
                     {visible.map((r) => (
                       <tr key={r._id}>
                         <td>{r.citizenId?.name || "Unknown"}</td>
-                        <td>{r.citizenId?.phone || "—"}</td>
+                        <td>{r.citizenId?.phone ? <a href={`tel:${r.citizenId.phone}`} style={{ color: "inherit" }}>{r.citizenId.phone}</a> : "—"}</td>
                         <td>{r.type}</td>
                         <td>{r.assignedHospitalId?.name || "—"}</td>
                         <td>
