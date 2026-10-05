@@ -11,6 +11,7 @@ const {
   reactivateUser,
   getAnalytics,
   getAuditLog,
+  getActionLog,
   getVerificationDoc,
 } = require("../controllers/adminController");
 const {
@@ -29,6 +30,7 @@ router.post("/suspend/:userId", suspendUser);
 router.post("/reactivate/:userId", reactivateUser);
 router.get("/analytics", getAnalytics);
 router.get("/audit-log", getAuditLog);
+router.get("/action-log", getActionLog);
 router.get("/document/:userId", getVerificationDoc);
 router.get("/announcements", listAllAdmin);
 router.post("/announcements", createAnnouncement);

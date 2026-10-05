@@ -64,6 +64,11 @@ export async function getAuditLog() {
   return data.entries;
 }
 
+export async function getActionLog() {
+  const { data } = await api.get("/admin/action-log");
+  return data.entries;
+}
+
 export async function requestRoleChange(role, orgName) {
   const { data } = await api.post("/auth/request-role-change", { role, orgName });
   return data;

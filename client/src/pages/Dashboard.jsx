@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   User, Hospital, Droplet, Bot, FileHeart, Siren, ShieldCheck, Map, ClipboardList,
-  BedDouble, Ambulance, Truck, Package, Clock, Inbox, Users, History, HeartPulse, Building2, Phone, BarChart3,
+  BedDouble, Ambulance, Truck, Package, Clock, Inbox, Users, History, HeartPulse, Building2, Phone, BarChart3, Megaphone,
 } from "lucide-react";
 import api, { getErrorMessage } from "../services/api";
 import { getUser, resendVerification } from "../services/auth";
@@ -60,8 +60,12 @@ const FEATURES = {
     { icon: Building2, title: "Organisation Profile", desc: "Logo, service radius, and staff accounts.", path: "/org-profile" },
   ],
   admin: [
-    { icon: ShieldCheck, title: "Admin Console", desc: "Approve or reject organisation account requests.", path: "/admin" },
-    { icon: Users, title: "All Accounts", desc: "Browse every account registered on LifeLink.", path: "/admin" },
+    { icon: ShieldCheck, title: "Pending Approvals", desc: "Approve or reject organisation account requests.", path: "/admin", tab: "pending" },
+    { icon: Users, title: "All Accounts", desc: "Browse, search and manage every account on LifeLink.", path: "/admin", tab: "all" },
+    { icon: BarChart3, title: "Analytics", desc: "Platform-wide SOS, response time and user stats.", path: "/admin", tab: "analytics" },
+    { icon: ClipboardList, title: "Audit Log", desc: "Hospital access to patient records.", path: "/admin", tab: "audit" },
+    { icon: History, title: "Admin Activity", desc: "Who approved, rejected or suspended which account.", path: "/admin", tab: "actionlog" },
+    { icon: Megaphone, title: "Announcements", desc: "Post or remove the banner shown to every user.", path: "/admin", tab: "announcements" },
   ],
 };
 

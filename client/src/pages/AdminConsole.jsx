@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { ArrowLeft, Check, X, Ban, RotateCcw, FileText, Download, Plus, Megaphone } from "lucide-react";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
@@ -8,7 +8,7 @@ import AppNavbar from "./AppNavbar";
 import api, { getErrorMessage } from "../services/api";
 import {
   listPending, listAllUsers, approveUser, rejectUser, suspendUser, reactivateUser,
-  getAnalytics, getAuditLog, roleLabel,
+  getAnalytics, getAuditLog, getActionLog, roleLabel,
 } from "../services/admin";
 import { listAllAnnouncements, createAnnouncement, deactivateAnnouncement } from "../services/announcements";
 import { downloadCsv } from "../utils/csv";
@@ -29,10 +29,12 @@ function StatCard({ label, value, sub }) {
 
 function AdminConsole() {
   const navigate = useNavigate();
-  const [tab, setTab] = useState("pending");
+  const location = useLocation();
+  const [tab, setTab] = useState(location.state?.tab || "pending");
   const [users, setUsers] = useState([]);
   const [analytics, setAnalytics] = useState(null);
   const [auditEntries, setAuditEntries] = useState([]);
+  const [actionLogEntries, setActionLogEntries] = useState([]);
   const [announcements, setAnnouncements] = useState([]);
   const [newAnnouncement, setNewAnnouncement] = useState("");
   const [postingAnnouncement, setPostingAnnouncement] = useState(false);
@@ -41,6 +43,8 @@ function AdminConsole() {
   const [notice, setNotice] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("all");
 
   const load = () => setReloadKey((k) => k + 1);
 
@@ -61,6 +65,10 @@ function AdminConsole() {
           const data = await getAuditLog();
           if (cancelled) return;
           setAuditEntries(data);
+        } else if (tab === "actionlog") {
+          const data = await getActionLog();
+          if (cancelled) return;
+          setActionLogEntries(data);
         } else if (tab === "announcements") {
           const data = await listAllAnnouncements();
           if (cancelled) return;
@@ -139,8 +147,19 @@ function AdminConsole() {
     }
   };
 
+  const visibleUsers = users.filter((u) => {
+    if (roleFilter !== "all" && u.role !== roleFilter) return false;
+    if (!search.trim()) return true;
+    const q = search.trim().toLowerCase();
+    return (
+      u.name?.toLowerCase().includes(q) ||
+      u.orgName?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q)
+    );
+  });
+
   const exportAccountsCsv = () => {
-    downloadCsv(`lifelink-accounts-${tab}.csv`, users, [
+    downloadCsv(`lifelink-accounts-${tab}.csv`, visibleUsers, [
       { label: "Name", get: (u) => u.name },
       { label: "Organisation", get: (u) => u.orgName || "" },
       { label: "Licence #", get: (u) => u.licenseNumber || "" },
@@ -156,6 +175,17 @@ function AdminConsole() {
       { label: "Patient", get: (e) => e.patientId?.name || "" },
       { label: "Hospital", get: (e) => e.hospitalId?.orgName || e.hospitalId?.name || "" },
       { label: "Action", get: (e) => e.action },
+      { label: "When", get: (e) => new Date(e.createdAt).toLocaleString() },
+    ]);
+  };
+
+  const exportActionLogCsv = () => {
+    downloadCsv("lifelink-admin-action-log.csv", actionLogEntries, [
+      { label: "Admin", get: (e) => e.adminId?.name || e.adminId?.email || "Unknown" },
+      { label: "Action", get: (e) => e.action },
+      { label: "Target account", get: (e) => e.targetUserId?.orgName || e.targetUserId?.name || "Unknown" },
+      { label: "Target email", get: (e) => e.targetUserId?.email || "" },
+      { label: "Target role", get: (e) => roleLabel(e.targetUserId?.role) },
       { label: "When", get: (e) => new Date(e.createdAt).toLocaleString() },
     ]);
   };
@@ -184,6 +214,7 @@ function AdminConsole() {
               { key: "all", label: "All accounts" },
               { key: "analytics", label: "Analytics" },
               { key: "audit", label: "Audit log" },
+              { key: "actionlog", label: "Admin activity" },
               { key: "announcements", label: "Announcements" },
             ].map((t) => (
               <button
@@ -203,7 +234,22 @@ function AdminConsole() {
         {(tab === "pending" || tab === "all") && (
           <div className="portal-panel">
             {!loading && users.length > 0 && (
-              <div className="portal-form-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
+              <div className="portal-toolbar" style={{ marginBottom: 12, justifyContent: "space-between" }}>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    placeholder="Search name, org or email…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                  <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}>
+                    <option value="all">All roles</option>
+                    <option value="civilian">Civilian</option>
+                    <option value="hospital">Hospital</option>
+                    <option value="police">Police</option>
+                    <option value="firestation">Fire Station</option>
+                    <option value="pharmacy">Pharmacy</option>
+                  </select>
+                </div>
                 <button className="portal-btn ghost small" onClick={exportAccountsCsv}>
                   <Download size={14} /> Export CSV
                 </button>
@@ -215,6 +261,8 @@ function AdminConsole() {
               <div className="portal-empty">
                 {tab === "pending" ? "No organisation accounts are waiting for approval." : "No accounts found."}
               </div>
+            ) : visibleUsers.length === 0 ? (
+              <div className="portal-empty">No accounts match that search.</div>
             ) : (
               <div className="portal-table-wrap">
                 <table className="portal-table">
@@ -231,7 +279,7 @@ function AdminConsole() {
                     </tr>
                   </thead>
                   <tbody>
-                    {users.map((user) => (
+                    {visibleUsers.map((user) => (
                       <tr key={user.id}>
                         <td>{user.name}</td>
                         <td>{user.orgName || "—"}</td>
@@ -405,6 +453,42 @@ function AdminConsole() {
                         <td>{e.patientId?.name || "Unknown"}</td>
                         <td>{e.hospitalId?.orgName || e.hospitalId?.name || "Unknown"}</td>
                         <td>{e.action === "viewed" ? "Viewed file" : "Added report"}</td>
+                        <td>{new Date(e.createdAt).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {tab === "actionlog" && (
+          <div className="portal-panel">
+            {!loading && actionLogEntries.length > 0 && (
+              <div className="portal-form-actions" style={{ justifyContent: "flex-end", marginBottom: 12 }}>
+                <button className="portal-btn ghost small" onClick={exportActionLogCsv}>
+                  <Download size={14} /> Export CSV
+                </button>
+              </div>
+            )}
+            {loading ? (
+              <div className="portal-empty">Loading admin activity…</div>
+            ) : actionLogEntries.length === 0 ? (
+              <div className="portal-empty">No moderation actions have been taken yet.</div>
+            ) : (
+              <div className="portal-table-wrap">
+                <table className="portal-table">
+                  <thead>
+                    <tr><th>Admin</th><th>Action</th><th>Account</th><th>Role</th><th>When</th></tr>
+                  </thead>
+                  <tbody>
+                    {actionLogEntries.map((e) => (
+                      <tr key={e._id}>
+                        <td>{e.adminId?.name || e.adminId?.email || "Unknown"}</td>
+                        <td><span className={`portal-badge ${e.action === "approved" || e.action === "reactivated" ? "approved" : "rejected"}`}>{e.action}</span></td>
+                        <td>{e.targetUserId?.orgName || e.targetUserId?.name || "Unknown"}</td>
+                        <td>{roleLabel(e.targetUserId?.role)}</td>
                         <td>{new Date(e.createdAt).toLocaleString()}</td>
                       </tr>
                     ))}

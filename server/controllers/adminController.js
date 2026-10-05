@@ -2,6 +2,7 @@ const User = require("../models/User");
 const EmergencyRequest = require("../models/EmergencyRequest");
 const IncidentReport = require("../models/IncidentReport");
 const RecordAccessLog = require("../models/RecordAccessLog");
+const AdminActionLog = require("../models/AdminActionLog");
 const { publicUser } = require("./authController");
 const { ORG_ROLES, ALL_ROLES, ROLE_LABELS } = require("../constants/roles");
 const { sendAccountStatusEmail } = require("../utils/mailer");
@@ -50,6 +51,7 @@ const setRoleStatus = (status, successMessage) => async (req, res) => {
     }
     await user.save();
 
+    AdminActionLog.create({ adminId: req.user._id, targetUserId: user._id, action: status }).catch(() => {});
     sendAccountStatusEmail(user.email, { approved: status === "approved", roleLabel: ROLE_LABELS[user.role] || user.role }).catch(
       () => {}
     );
@@ -76,6 +78,12 @@ const setSuspended = (suspended, successMessage) => async (req, res) => {
     // user stays fully signed in until their 7-day token naturally expires.
     if (suspended) user.tokenVersion = (user.tokenVersion || 0) + 1;
     await user.save();
+
+    AdminActionLog.create({
+      adminId: req.user._id,
+      targetUserId: user._id,
+      action: suspended ? "suspended" : "reactivated",
+    }).catch(() => {});
 
     res.json({ message: successMessage, user: publicUser(user) });
   } catch (err) {
@@ -168,6 +176,21 @@ const getAuditLog = async (req, res) => {
   }
 };
 
+/** Who approved/rejected/suspended/reactivated which account, and when — admin's own moderation trail. */
+const getActionLog = async (req, res) => {
+  try {
+    const entries = await AdminActionLog.find({})
+      .populate("adminId", "name email")
+      .populate("targetUserId", "name orgName email role")
+      .sort({ createdAt: -1 })
+      .limit(300);
+
+    res.json({ entries });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
 /** Streams an org account's proof document back to the admin. */
 const getVerificationDoc = async (req, res) => {
   try {
@@ -196,5 +219,6 @@ module.exports = {
   reactivateUser: setSuspended(false, "Account reactivated"),
   getAnalytics,
   getAuditLog,
+  getActionLog,
   getVerificationDoc,
 };
