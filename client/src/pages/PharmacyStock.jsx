@@ -93,6 +93,7 @@ function PharmacyStock() {
   const exportRequestsCsv = () => {
     downloadCsv("lifelink-pharmacy-requests.csv", visibleRequests, [
       { label: "Requested by", get: (r) => r.requestedBy?.name || "Unknown" },
+      { label: "Phone", get: (r) => r.requestedBy?.phone || "" },
       { label: "Medicine", get: (r) => r.medicineName },
       { label: "Notes", get: (r) => r.notes || "" },
       { label: "Status", get: (r) => r.status },
@@ -268,6 +269,7 @@ function PharmacyStock() {
                   <thead>
                     <tr>
                       <th>Requested by</th>
+                      <th>Phone</th>
                       <th>Medicine</th>
                       <th>Notes</th>
                       <th>Status</th>
@@ -279,6 +281,13 @@ function PharmacyStock() {
                     {visibleRequests.map((r) => (
                       <tr key={r._id}>
                         <td>{r.requestedBy?.name || "Unknown"}</td>
+                        <td>
+                          {r.requestedBy?.phone ? (
+                            <a href={`tel:${r.requestedBy.phone}`} style={{ color: "inherit" }}>{r.requestedBy.phone}</a>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
                         <td>{r.medicineName}</td>
                         <td>{r.notes || "—"}</td>
                         <td><span className={`portal-badge ${REQUEST_BADGE[r.status]}`}>{r.status}</span></td>
