@@ -1,7 +1,7 @@
 import { Component, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Float, ContactShadows, Environment } from "@react-three/drei";
-import { MathUtils, Object3D, Vector3 } from "three";
+import { MathUtils, Object3D, Vector3, Shape } from "three";
 import { useReducedMotion } from "framer-motion";
 import { createRandom } from "../random";
 
@@ -308,6 +308,106 @@ function DnaHelix({ frozen }) {
   );
 }
 
+/* Standard parametric heart outline, drawn point-down — flipped upright via rotation.z below. */
+const HEART_SHAPE = (() => {
+  const shape = new Shape();
+  shape.moveTo(0, 0.35);
+  shape.bezierCurveTo(0, 0.55, -0.2, 0.75, -0.45, 0.75);
+  shape.bezierCurveTo(-0.75, 0.75, -0.9, 0.5, -0.9, 0.25);
+  shape.bezierCurveTo(-0.9, -0.1, -0.55, -0.45, 0, -0.95);
+  shape.bezierCurveTo(0.55, -0.45, 0.9, -0.1, 0.9, 0.25);
+  shape.bezierCurveTo(0.9, 0.5, 0.75, 0.75, 0.45, 0.75);
+  shape.bezierCurveTo(0.2, 0.75, 0, 0.55, 0, 0.35);
+  return shape;
+})();
+
+const HEART_EXTRUDE_SETTINGS = {
+  depth: 0.3,
+  bevelEnabled: true,
+  bevelThickness: 0.04,
+  bevelSize: 0.04,
+  bevelSegments: 3,
+  curveSegments: 24,
+};
+
+/** A glossy heart with a "lub-dub" pulse — the app's own namesake, floating off to the left. */
+function PulsingHeart({ frozen }) {
+  const group = useRef(null);
+  const geometryRef = useRef(null);
+
+  useEffect(() => {
+    geometryRef.current?.center();
+  }, []);
+
+  useFrame(({ clock }) => {
+    if (frozen || !group.current) return;
+    const t = clock.getElapsedTime();
+    // Two quick beats then a rest, same shape as a real cardiac cycle, just sped up for visual effect.
+    const phase = (t % 1.1) / 1.1;
+    let pulse = 0;
+    if (phase < 0.14) pulse = Math.sin((phase / 0.14) * Math.PI) * 0.16;
+    else if (phase > 0.22 && phase < 0.36) pulse = Math.sin(((phase - 0.22) / 0.14) * Math.PI) * 0.1;
+    group.current.scale.setScalar(0.9 * (1 + pulse));
+    group.current.position.y = 1.5 + Math.sin(t * 0.6) * 0.15;
+    group.current.rotation.y = Math.sin(t * 0.3) * 0.3;
+  });
+
+  return (
+    <group ref={group} position={[-3.3, 1.5, -0.6]} rotation={[0, 0, Math.PI]} scale={0.9}>
+      <mesh castShadow>
+        <extrudeGeometry ref={geometryRef} args={[HEART_SHAPE, HEART_EXTRUDE_SETTINGS]} />
+        <meshPhysicalMaterial
+          color="#dc2626"
+          emissive="#7f1d1d"
+          emissiveIntensity={0.5}
+          roughness={0.15}
+          metalness={0.1}
+          clearcoat={1}
+          clearcoatRoughness={0.1}
+        />
+      </mesh>
+    </group>
+  );
+}
+
+/** A dome-capped half of a pill — two of these, mirrored and recoloured, make the capsule below. */
+function PillHalf({ color, direction }) {
+  const radius = 0.22;
+  const length = 0.35;
+  return (
+    <group position={[direction * length * 0.5, 0, 0]}>
+      <mesh rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[radius, radius, length, 24, 1, true]} />
+        <meshPhysicalMaterial color={color} roughness={0.2} clearcoat={0.7} clearcoatRoughness={0.15} />
+      </mesh>
+      <mesh position={[direction * length * 0.5, 0, 0]} rotation={[0, direction > 0 ? -Math.PI / 2 : Math.PI / 2, 0]}>
+        <sphereGeometry args={[radius, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
+        <meshPhysicalMaterial color={color} roughness={0.2} clearcoat={0.7} clearcoatRoughness={0.15} />
+      </mesh>
+    </group>
+  );
+}
+
+/** A two-tone medicine capsule, tumbling slowly — a nod to the Pharmacy side of the app. */
+function PillCapsule({ frozen }) {
+  const group = useRef(null);
+
+  useFrame(({ clock }) => {
+    if (frozen || !group.current) return;
+    const t = clock.getElapsedTime();
+    group.current.rotation.x = t * 0.55;
+    group.current.rotation.z = t * 0.35;
+    group.current.position.y = -1 + Math.sin(t * 0.8) * 0.25;
+  });
+
+  return (
+    <group ref={group} position={[-3, -1, 0.6]} scale={1.15}>
+      <PillHalf color="#f0f4f8" direction={-1} />
+      <PillHalf color="#dc2626" direction={1} />
+    </group>
+  );
+}
+
 /**
  * The drei `Environment` preset streams an HDR from a CDN. If that request is
  * blocked the scene should still render, just with plainer reflections.
@@ -381,6 +481,8 @@ function Scene({ frozen }) {
       <FloatingParticles count={25} frozen={frozen} />
       <DnaHelix frozen={frozen} />
       <Ambulance frozen={frozen} />
+      <PulsingHeart frozen={frozen} />
+      <PillCapsule frozen={frozen} />
 
       <ContactShadows position={[0, -1.65, 0]} opacity={0.5} scale={10} blur={2.8} far={4} />
       <OptionalEnvironment>
