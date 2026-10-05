@@ -29,6 +29,7 @@ const FEATURES = {
     { icon: Package, title: "Find Pharmacies", desc: "Check medicine stock nearby and request what you need.", path: "/find-pharmacies" },
     { icon: Map, title: "Nearby Police & Fire", desc: "Find registered police and fire stations near you.", path: "/find-emergency-services" },
     { icon: Phone, title: "Emergency Numbers", desc: "Quick-dial reference for Police, Ambulance, Fire and more.", path: "/emergency-numbers" },
+    { icon: Inbox, title: "Support", desc: "Raise a ticket and get help from the admin team.", path: "/support" },
     { icon: Bot, title: "AI First-Aid Assistant", desc: "Get quick first-aid guidance while help is on the way. Open it from the chat button in the bottom-right corner.", note: "Live now" },
   ],
   police: [
@@ -66,6 +67,7 @@ const FEATURES = {
     { icon: ClipboardList, title: "Audit Log", desc: "Hospital access to patient records.", path: "/admin", tab: "audit" },
     { icon: History, title: "Admin Activity", desc: "Who approved, rejected or suspended which account.", path: "/admin", tab: "actionlog" },
     { icon: Megaphone, title: "Announcements", desc: "Post or remove the banner shown to every user.", path: "/admin", tab: "announcements" },
+    { icon: Inbox, title: "Support Tickets", desc: "Reply to civilian support requests.", path: "/admin", tab: "support" },
   ],
 };
 

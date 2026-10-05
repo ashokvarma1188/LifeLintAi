@@ -36,6 +36,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import OrgProfile from "./pages/OrgProfile";
+import Support from "./pages/Support";
 import AiAssistantWidget from "./components/AiAssistantWidget";
 import { isAuthenticated } from "./services/auth";
 
@@ -102,6 +103,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/support"
+            element={
+              <ProtectedRoute>
+                <Support />
               </ProtectedRoute>
             }
           />

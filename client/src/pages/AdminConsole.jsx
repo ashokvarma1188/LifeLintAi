@@ -11,6 +11,8 @@ import {
   getAnalytics, getAuditLog, getActionLog, roleLabel,
 } from "../services/admin";
 import { listAllAnnouncements, createAnnouncement, deactivateAnnouncement } from "../services/announcements";
+import SupportThread from "../components/SupportThread";
+import { listAllTickets, getTicket as getSupportTicket, replyToTicket, closeTicket } from "../services/support";
 import { downloadCsv } from "../utils/csv";
 import "./Dashboard.css";
 import "./portal.css";
@@ -45,6 +47,8 @@ function AdminConsole() {
   const [reloadKey, setReloadKey] = useState(0);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+  const [tickets, setTickets] = useState([]);
+  const [openTicket, setOpenTicket] = useState(null);
 
   const load = () => setReloadKey((k) => k + 1);
 
@@ -73,6 +77,10 @@ function AdminConsole() {
           const data = await listAllAnnouncements();
           if (cancelled) return;
           setAnnouncements(data);
+        } else if (tab === "support") {
+          const data = await listAllTickets();
+          if (cancelled) return;
+          setTickets(data);
         }
         setError("");
       } catch (err) {
@@ -158,6 +166,26 @@ function AdminConsole() {
     );
   });
 
+  const openSupportThread = async (id) => {
+    try {
+      setOpenTicket(await getSupportTicket(id));
+    } catch (err) {
+      setError(getErrorMessage(err, "Could not open this ticket."));
+    }
+  };
+
+  const handleTicketReply = async (id, message) => {
+    const updated = await replyToTicket(id, message);
+    setOpenTicket(updated);
+    load();
+  };
+
+  const handleTicketClose = async (id) => {
+    await closeTicket(id);
+    await openSupportThread(id);
+    load();
+  };
+
   const exportAccountsCsv = () => {
     downloadCsv(`lifelink-accounts-${tab}.csv`, visibleUsers, [
       { label: "Name", get: (u) => u.name },
@@ -216,6 +244,7 @@ function AdminConsole() {
               { key: "audit", label: "Audit log" },
               { key: "actionlog", label: "Admin activity" },
               { key: "announcements", label: "Announcements" },
+              { key: "support", label: "Support" },
             ].map((t) => (
               <button
                 key={t.key}
@@ -568,7 +597,54 @@ function AdminConsole() {
             </div>
           </>
         )}
+
+        {tab === "support" && (
+          <div className="portal-panel">
+            {loading ? (
+              <div className="portal-empty">Loading support tickets…</div>
+            ) : tickets.length === 0 ? (
+              <div className="portal-empty">No support tickets have been raised yet.</div>
+            ) : (
+              <div className="portal-table-wrap">
+                <table className="portal-table">
+                  <thead>
+                    <tr><th>From</th><th>Subject</th><th>Status</th><th>Last message</th><th>Updated</th><th /></tr>
+                  </thead>
+                  <tbody>
+                    {tickets.map((t) => (
+                      <tr key={t._id}>
+                        <td>{t.createdBy?.name || "Unknown"}</td>
+                        <td>{t.subject}</td>
+                        <td><span className={`portal-badge ${t.status === "open" ? "pending" : "approved"}`}>{t.status}</span></td>
+                        <td style={{ maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {t.lastMessage ? `${t.lastMessage.senderRole === "admin" ? "You: " : ""}${t.lastMessage.text}` : "—"}
+                        </td>
+                        <td>{new Date(t.updatedAt).toLocaleString()}</td>
+                        <td>
+                          <button className="portal-btn ghost small" onClick={() => openSupportThread(t._id)}>
+                            Open
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
       </div>
+
+      {openTicket && (
+        <div className="portal-modal-backdrop" onClick={() => setOpenTicket(null)}>
+          <SupportThread
+            ticket={openTicket}
+            onReply={handleTicketReply}
+            onClose={handleTicketClose}
+            onDone={() => setOpenTicket(null)}
+          />
+        </div>
+      )}
     </div>
   );
 }
