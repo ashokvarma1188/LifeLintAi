@@ -891,6 +891,92 @@
   color: var(--ll-muted-foreground);
 }
 
+/* ---------------------------------------------------------- app showcase */
+
+.ll-showcase-tabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.ll-showcase-tab {
+  padding: 0.5rem 1.125rem;
+  border-radius: 9999px;
+  border: 1px solid var(--ll-glass-border);
+  background: var(--ll-glass-bg);
+  color: var(--ll-muted-foreground);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ll-showcase-tab:hover {
+  color: var(--ll-foreground);
+}
+
+.ll-showcase-tab.is-active {
+  background: var(--ll-primary);
+  color: var(--ll-primary-foreground);
+  border-color: var(--ll-primary);
+}
+
+.ll-browser-frame {
+  border-radius: calc(var(--ll-radius) + 10px);
+  overflow: hidden;
+  border: 1px solid var(--ll-glass-border);
+  background: var(--ll-glass-bg);
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.5);
+  max-width: 56rem;
+  margin-inline: auto;
+}
+
+.ll-browser-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: color-mix(in oklab, var(--ll-foreground) 4%, transparent);
+  border-bottom: 1px solid var(--ll-glass-border);
+}
+
+.ll-browser-dot {
+  height: 0.65rem;
+  width: 0.65rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+.ll-browser-dot-red { background: #ff5f57; }
+.ll-browser-dot-yellow { background: #febc2e; }
+.ll-browser-dot-green { background: #28c840; }
+
+.ll-browser-url {
+  margin-inline: auto;
+  font-size: 0.75rem;
+  color: var(--ll-muted-foreground);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+.ll-browser-body {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background: #f0f4f8;
+}
+
+.ll-browser-screenshot {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
 /* ------------------------------------------------------------ emergency */
 
 .ll-emergency {

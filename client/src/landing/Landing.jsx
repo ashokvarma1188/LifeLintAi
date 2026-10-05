@@ -5,6 +5,7 @@ import Navbar from "./components/Navbar";
 import EmergencyBanner from "./components/EmergencyBanner";
 import Hero from "./components/Hero";
 import RoleShowcase from "./components/RoleShowcase";
+import AppShowcase from "./components/AppShowcase";
 import HowItWorks from "./components/HowItWorks";
 import SosDemo from "./components/SosDemo";
 import ImpactStats from "./components/ImpactStats";
@@ -29,6 +30,7 @@ function Landing() {
         <Navbar />
         <Hero />
         <RoleShowcase />
+        <AppShowcase />
         <HowItWorks />
         <SosDemo />
         <ImpactStats />
