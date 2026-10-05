@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { HelpCircle, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { HelpCircle, X, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import FAQ_CATEGORIES from "../data/faqData";
 import "./FaqAssistantWidget.css";
 
@@ -10,6 +11,7 @@ import "./FaqAssistantWidget.css";
  * one is for "how do I use this app" / account / quick first-aid reference.
  */
 function FaqAssistantWidget({ open, onToggle }) {
+  const navigate = useNavigate();
   const [category, setCategory] = useState(null);
   const [question, setQuestion] = useState(null);
 
@@ -17,6 +19,11 @@ function FaqAssistantWidget({ open, onToggle }) {
     onToggle();
     setCategory(null);
     setQuestion(null);
+  };
+
+  const goToPage = () => {
+    navigate(question.path);
+    toggle();
   };
 
   return (
@@ -69,6 +76,11 @@ function FaqAssistantWidget({ open, onToggle }) {
                 <div className="faq-widget-answer">
                   <div className="faq-widget-q">{question.q}</div>
                   <div className="faq-widget-a">{question.a}</div>
+                  {question.path && (
+                    <button className="faq-widget-goto" onClick={goToPage}>
+                      {question.pathLabel || "Go there"} <ArrowRight size={14} />
+                    </button>
+                  )}
                 </div>
               </>
             )}

@@ -136,6 +136,23 @@
   white-space: pre-wrap;
 }
 
+.faq-widget-goto {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #2a9df4;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 2px;
+}
+.faq-widget-goto:hover { background: #1c8ce0; }
+
 .faq-widget-disclaimer {
   font-size: 10.5px;
   color: var(--text-secondary);
