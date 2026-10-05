@@ -154,11 +154,17 @@ const updateLocation = async (req, res) => {
 
 const RESPONDER_ROLES = ["hospital", "police", "firestation"];
 
-// What status a request must already be in for each transition to be valid —
-// enforced atomically below so two responders racing to act on the same
-// request can't both "win", and a resolved/declined request can't be
-// silently flipped back.
-const REQUIRED_PRIOR_STATUS = { accepted: "pending", declined: "pending", resolved: "accepted" };
+// What status(es) a request must already be in for each transition to be
+// valid — enforced atomically below so two responders racing to act on the
+// same request can't both "win", and a resolved/declined request can't be
+// silently flipped back. "en_route" is optional — a responder can resolve
+// straight from "accepted" without ever marking en route.
+const REQUIRED_PRIOR_STATUS = {
+  accepted: ["pending"],
+  declined: ["pending"],
+  en_route: ["accepted"],
+  resolved: ["accepted", "en_route"],
+};
 
 /**
  * Any of Hospital/Police/Fire Station can act on a request, but only one
@@ -194,7 +200,7 @@ const setStatus = (status) => async (req, res) => {
     }
 
     const request = await EmergencyRequest.findOneAndUpdate(
-      { _id: id, targets: req.user.role, status: REQUIRED_PRIOR_STATUS[status] },
+      { _id: id, targets: req.user.role, status: { $in: REQUIRED_PRIOR_STATUS[status] } },
       update,
       { new: true }
     ).populate([
@@ -271,5 +277,6 @@ module.exports = {
   getMyAnalytics,
   acceptSOS: setStatus("accepted"),
   declineSOS: setStatus("declined"),
+  enRouteSOS: setStatus("en_route"),
   resolveSOS: setStatus("resolved"),
 };

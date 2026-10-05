@@ -20,6 +20,11 @@ export async function declineSOS(id) {
   return data.request;
 }
 
+export async function enRouteSOS(id) {
+  const { data } = await api.patch(`/sos/${id}/en-route`);
+  return data.request;
+}
+
 export async function resolveSOS(id, falseAlarm) {
   const { data } = await api.patch(`/sos/${id}/resolve`, falseAlarm !== undefined ? { falseAlarm } : {});
   return data.request;

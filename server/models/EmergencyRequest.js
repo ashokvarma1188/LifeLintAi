@@ -10,7 +10,7 @@ const emergencyRequestSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "accepted", "declined", "resolved", "cancelled"],
+      enum: ["pending", "accepted", "en_route", "declined", "resolved", "cancelled"],
       default: "pending",
     },
     assignedHospitalId: { type: mongoose.Schema.Types.ObjectId, ref: "Hospital" },

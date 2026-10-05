@@ -3,14 +3,32 @@ const EmergencyRequest = require("../models/EmergencyRequest");
 const IncidentReport = require("../models/IncidentReport");
 const { redactMedicalId } = require("../utils/sosHelpers");
 
-/** Only alerts the civilian chose to send to this responder's own service (police/firestation). */
+const DEFAULT_SERVICE_RADIUS_KM = 25;
+
+/**
+ * Only alerts the civilian chose to send to this responder's own service
+ * (police/firestation), scoped to the officer's own service radius once
+ * they've set a location (via Org Profile) — same pattern as the hospital
+ * side (sosController.listSOS). Accounts with no location set still see
+ * every alert targeted at their service, same as before.
+ */
 const listAlerts = async (req, res) => {
   try {
-    const requests = await EmergencyRequest.find({
-      status: { $in: ["pending", "accepted"] },
+    const filter = {
+      status: { $in: ["pending", "accepted", "en_route"] },
       targets: req.user.role,
-    })
+    };
+
+    if (req.user.location?.coordinates?.length === 2) {
+      const radiusKm = req.user.serviceRadiusKm || DEFAULT_SERVICE_RADIUS_KM;
+      filter.location = {
+        $near: { $geometry: req.user.location, $maxDistance: radiusKm * 1000 },
+      };
+    }
+
+    const requests = await EmergencyRequest.find(filter)
       .populate("citizenId", "name phone bloodGroup allergies medicalHistory")
+      .populate("assignedHospitalId", "name phone address availableBeds ambulanceAvailable ambulanceCount")
       .sort({ createdAt: -1 })
       .limit(200);
 
