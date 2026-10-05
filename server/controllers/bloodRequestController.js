@@ -2,17 +2,37 @@ const mongoose = require("mongoose");
 const BloodRequest = require("../models/BloodRequest");
 const { BLOOD_GROUPS, compatibleDonorGroups } = require("../utils/bloodCompatibility");
 
-const summarize = (request) => ({
-  _id: request._id,
-  requestedBy: request.requestedBy,
-  bloodGroup: request.bloodGroup,
-  unitsNeeded: request.unitsNeeded,
-  notes: request.notes,
-  status: request.status,
-  responses: request.responses,
-  acceptedCount: request.responses.filter((r) => r.status === "accepted").length,
-  createdAt: request.createdAt,
-});
+// Haversine formula: straight-line distance (km) between two lat/lng points.
+function distanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+const summarize = (request, fromCoords) => {
+  let distanceKmFromDonor = null;
+  if (fromCoords && request.location?.coordinates?.length === 2) {
+    const [lng, lat] = request.location.coordinates;
+    distanceKmFromDonor = Math.round(distanceKm(fromCoords.latitude, fromCoords.longitude, lat, lng) * 10) / 10;
+  }
+
+  return {
+    _id: request._id,
+    requestedBy: request.requestedBy,
+    bloodGroup: request.bloodGroup,
+    unitsNeeded: request.unitsNeeded,
+    notes: request.notes,
+    status: request.status,
+    responses: request.responses,
+    acceptedCount: request.responses.filter((r) => r.status === "accepted").length,
+    distanceKm: distanceKmFromDonor,
+    createdAt: request.createdAt,
+  };
+};
 
 const createRequest = async (req, res) => {
   try {
@@ -23,11 +43,16 @@ const createRequest = async (req, res) => {
 
     const unitsNeeded = Number(req.body.unitsNeeded) || 1;
 
+    const longitude = Number(req.body.longitude);
+    const latitude = Number(req.body.latitude);
+    const hasLocation = Number.isFinite(longitude) && Number.isFinite(latitude);
+
     const request = await BloodRequest.create({
       requestedBy: req.user._id,
       bloodGroup,
       unitsNeeded: unitsNeeded >= 1 ? unitsNeeded : 1,
       notes: String(req.body.notes || "").trim(),
+      location: hasLocation ? { type: "Point", coordinates: [longitude, latitude] } : undefined,
     });
 
     res.status(201).json({ message: "Blood request posted", request: summarize(request) });
@@ -36,7 +61,13 @@ const createRequest = async (req, res) => {
   }
 };
 
-/** Open requests this donor is compatible with, hasn't responded to yet, and didn't raise themselves. */
+/**
+ * Open requests this donor is compatible with, hasn't responded to yet, and
+ * didn't raise themselves — nearest first when the donor shares their
+ * current location, same as every other "nearest" feature in the app.
+ * Requests with no location (or a donor who declined location) just keep
+ * the newest-first order, placed after any distance-sorted ones.
+ */
 const listForDonor = async (req, res) => {
   try {
     if (!req.user.donorAvailable || !req.user.bloodGroup) {
@@ -53,7 +84,21 @@ const listForDonor = async (req, res) => {
 
     const compatible = requests.filter((r) => compatibleDonorGroups(r.bloodGroup).includes(req.user.bloodGroup));
 
-    res.json({ requests: compatible.map(summarize) });
+    const longitude = Number(req.query.longitude);
+    const latitude = Number(req.query.latitude);
+    const fromCoords = Number.isFinite(longitude) && Number.isFinite(latitude) ? { latitude, longitude } : null;
+
+    const summarized = compatible.map((r) => summarize(r, fromCoords));
+    if (fromCoords) {
+      summarized.sort((a, b) => {
+        if (a.distanceKm === null && b.distanceKm === null) return 0;
+        if (a.distanceKm === null) return 1;
+        if (b.distanceKm === null) return -1;
+        return a.distanceKm - b.distanceKm;
+      });
+    }
+
+    res.json({ requests: summarized });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
   }

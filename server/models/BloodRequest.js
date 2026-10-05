@@ -9,6 +9,14 @@ const bloodRequestSchema = new mongoose.Schema(
     notes: { type: String, trim: true },
     status: { type: String, enum: ["open", "fulfilled", "cancelled"], default: "open" },
 
+    // Captured from the requester's device at post time, if they allow it —
+    // optional so older requests (and anyone who declines location) still work,
+    // just without distance shown/sorted for donors.
+    location: {
+      type: { type: String, enum: ["Point"] },
+      coordinates: { type: [Number] },
+    },
+
     // One entry per donor who has responded — self-selected, not pre-notified
     // (there's no push-notification system), so only actioned responses are stored.
     responses: [
@@ -21,5 +29,7 @@ const bloodRequestSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+bloodRequestSchema.index({ location: "2dsphere" });
 
 module.exports = mongoose.model("BloodRequest", bloodRequestSchema);

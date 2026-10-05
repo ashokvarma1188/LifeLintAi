@@ -1,13 +1,20 @@
 import api from "./api";
 
-export async function createBloodRequest(bloodGroup, unitsNeeded, notes) {
-  const { data } = await api.post("/blood-requests", { bloodGroup, unitsNeeded, notes });
+export async function createBloodRequest(bloodGroup, unitsNeeded, notes, coords) {
+  const { data } = await api.post("/blood-requests", {
+    bloodGroup,
+    unitsNeeded,
+    notes,
+    latitude: coords?.latitude,
+    longitude: coords?.longitude,
+  });
   return data.request;
 }
 
-/** Open requests this donor is compatible with and hasn't responded to yet. */
-export async function listRequestsForDonor() {
-  const { data } = await api.get("/blood-requests/for-donor");
+/** Open requests this donor is compatible with and hasn't responded to yet — nearest first if coords are given. */
+export async function listRequestsForDonor(coords) {
+  const params = coords ? { latitude: coords.latitude, longitude: coords.longitude } : {};
+  const { data } = await api.get("/blood-requests/for-donor", { params });
   return data.requests;
 }
 

@@ -44,13 +44,14 @@ function BloodDonation() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [coords, setCoords] = useState(null);
 
-  const loadAll = async () => {
+  const loadAll = async (coordsArg) => {
     try {
       const [profile, donorList, forMe, mine] = await Promise.all([
         api.get("/profile/me").then((r) => r.data),
         listDonors(filter),
-        listRequestsForDonor().catch(() => []),
+        listRequestsForDonor(coordsArg).catch(() => []),
         myBloodRequests().catch(() => []),
       ]);
       setMyBloodGroup(profile.bloodGroup || "");
@@ -68,7 +69,18 @@ function BloodDonation() {
 
   useEffect(() => {
     (async () => {
-      await loadAll();
+      if (!navigator.geolocation) {
+        await loadAll();
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const c = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+          setCoords(c);
+          loadAll(c);
+        },
+        () => loadAll()
+      );
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -86,7 +98,7 @@ function BloodDonation() {
       await setDonorStatus(next, myBloodGroup);
       setAvailable(next);
       setNotice(next ? "You're now listed as an available donor." : "You're no longer listed as a donor.");
-      await loadAll();
+      await loadAll(coords);
     } catch (err) {
       setError(getErrorMessage(err, "Could not update your donor status."));
     } finally {
@@ -114,10 +126,10 @@ function BloodDonation() {
     setError("");
     setNotice("");
     try {
-      await createBloodRequest(requestForm.bloodGroup, requestForm.unitsNeeded, requestForm.notes);
+      await createBloodRequest(requestForm.bloodGroup, requestForm.unitsNeeded, requestForm.notes, coords);
       setNotice("Blood request posted — compatible donors nearby can now see and respond to it.");
       setRequestForm({ bloodGroup: "", unitsNeeded: 1, notes: "" });
-      await loadAll();
+      await loadAll(coords);
     } catch (err) {
       setError(getErrorMessage(err, "Could not post this request."));
     } finally {
@@ -132,7 +144,7 @@ function BloodDonation() {
     try {
       await respondToBloodRequest(id, status);
       setNotice(status === "accepted" ? "Thank you for accepting — your phone number is shared with the requester." : "Marked as declined.");
-      await loadAll();
+      await loadAll(coords);
     } catch (err) {
       setError(getErrorMessage(err, "Could not respond to this request."));
     } finally {
@@ -148,7 +160,7 @@ function BloodDonation() {
       if (action === "fulfil") await fulfilBloodRequest(id);
       else await cancelBloodRequest(id);
       setNotice(action === "fulfil" ? "Marked as fulfilled." : "Request cancelled.");
-      await loadAll();
+      await loadAll(coords);
     } catch (err) {
       setError(getErrorMessage(err, "Could not update this request."));
     } finally {
@@ -228,6 +240,7 @@ function BloodDonation() {
                         </h1>
                         <p>
                           Requested by {r.requestedBy?.name || "Unknown"} · {new Date(r.createdAt).toLocaleString()}
+                          {r.distanceKm != null ? ` · ${r.distanceKm} km away` : ""}
                           {r.notes ? ` · ${r.notes}` : ""}
                         </p>
                       </div>
