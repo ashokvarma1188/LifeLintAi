@@ -9,6 +9,7 @@ import AppShowcase from "./components/AppShowcase";
 import HowItWorks from "./components/HowItWorks";
 import SosDemo from "./components/SosDemo";
 import ImpactStats from "./components/ImpactStats";
+import LiveNetwork from "./components/LiveNetwork";
 import TrustBadges from "./components/TrustBadges";
 import DonorBenefits from "./components/DonorBenefits";
 import Testimonials from "./components/Testimonials";
@@ -34,6 +35,7 @@ function Landing() {
         <HowItWorks />
         <SosDemo />
         <ImpactStats />
+        <LiveNetwork />
         <TrustBadges />
         <DonorBenefits />
         <Testimonials />

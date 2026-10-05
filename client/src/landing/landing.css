@@ -110,6 +110,17 @@
   z-index: 50;
 }
 
+.ll-nav-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--ll-primary);
+  transform-origin: left;
+  transform: scaleX(0);
+}
+
 .ll-nav-inner {
   margin-inline: auto;
   max-width: 80rem;
@@ -762,10 +773,85 @@
   color: var(--ll-muted-foreground);
 }
 
+/* ---------------------------------------------------------- live network */
+
+.ll-live-network-wrap {
+  margin-top: 1.5rem;
+}
+
+.ll-live-network {
+  border-radius: calc(var(--ll-radius) + 6px);
+  border: 1px solid var(--ll-glass-border);
+  background: var(--ll-glass-bg);
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.ll-live-network-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ll-muted-foreground);
+  margin-bottom: 1.25rem;
+}
+
+.ll-live-dot {
+  height: 0.5rem;
+  width: 0.5rem;
+  border-radius: 9999px;
+  background: var(--ll-primary);
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--ll-primary) 60%, transparent);
+  animation: ll-live-pulse 2s infinite;
+}
+
+@keyframes ll-live-pulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--ll-primary) 50%, transparent); }
+  70% { box-shadow: 0 0 0 8px color-mix(in oklab, var(--ll-primary) 0%, transparent); }
+  100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--ll-primary) 0%, transparent); }
+}
+
+.ll-live-network-counts {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.ll-live-network-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--ll-muted-foreground);
+}
+
+.ll-live-network-item svg {
+  color: var(--ll-primary);
+}
+
+.ll-live-network-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ll-foreground);
+}
+
+.ll-live-network-item-label {
+  font-size: 0.8125rem;
+}
+
+.ll-live-network-names {
+  margin-top: 1.25rem;
+  font-size: 0.8125rem;
+  color: var(--ll-muted-foreground);
+}
+
 /* ----------------------------------------------------------- trust badges */
 
 .ll-trust-badges-wrap {
-  margin-top: -2rem;
+  margin-top: 2rem;
   margin-bottom: 2rem;
 }
 

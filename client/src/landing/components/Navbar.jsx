@@ -15,6 +15,7 @@ const SECTION_IDS = NAV_LINKS.map((l) => l.href.slice(1));
  */
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [hovered, setHovered] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [capsule, setCapsule] = useState(null);
@@ -23,7 +24,11 @@ function Navbar() {
   const activeIndex = useActiveSection(SECTION_IDS);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 8);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setProgress(max > 0 ? Math.min(1, window.scrollY / max) : 0);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -62,6 +67,7 @@ function Navbar() {
 
   return (
     <header className="ll-nav-wrap">
+      <span className="ll-nav-progress" style={{ transform: `scaleX(${progress})` }} aria-hidden="true" />
       <div className="ll-nav-inner">
         <nav
           className="ll-nav"

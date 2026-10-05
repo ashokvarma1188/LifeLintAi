@@ -27,6 +27,7 @@ const announcementRoutes = require("./routes/announcementRoutes");
 const emergencyServicesRoutes = require("./routes/emergencyServicesRoutes");
 const bloodRequestRoutes = require("./routes/bloodRequestRoutes");
 const supportRoutes = require("./routes/supportRoutes");
+const publicRoutes = require("./routes/publicRoutes");
 
 const app = express();
 
@@ -97,6 +98,7 @@ app.use("/api/announcements", announcementRoutes);
 app.use("/api/emergency-services", emergencyServicesRoutes);
 app.use("/api/blood-requests", bloodRequestRoutes);
 app.use("/api/support", supportRoutes);
+app.use("/api/public", publicRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)
