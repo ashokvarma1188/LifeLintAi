@@ -1,4 +1,5 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -16,6 +17,23 @@ L.Icon.Default.mergeOptions({
 
 const INDIA_CENTER = [20.5937, 78.9629];
 
+/**
+ * MapContainer's `center`/`zoom` props only apply on the very first render —
+ * react-leaflet never re-reads them after that. Since `alerts` usually
+ * arrives a moment AFTER this component first mounts (it's fetched async),
+ * the map would otherwise get stuck on the India-wide default forever, even
+ * once real alerts with real coordinates show up. This re-centers it
+ * whenever the computed center/zoom actually changes.
+ */
+function RecenterOnChange({ center, zoom }) {
+  const map = useMap();
+  useEffect(() => {
+    map.setView(center, zoom);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [center[0], center[1], zoom]);
+  return null;
+}
+
 /** `alerts` are EmergencyRequest documents with a GeoJSON `location.coordinates` [lng, lat]. */
 function CoverageMap({ alerts }) {
   const withCoords = alerts.filter((a) => a.location?.coordinates?.length === 2);
@@ -27,6 +45,7 @@ function CoverageMap({ alerts }) {
     <div>
       <div style={{ height: 460, borderRadius: 12, overflow: "hidden" }}>
         <MapContainer center={center} zoom={withCoords.length ? 12 : 5} style={{ height: "100%", width: "100%" }}>
+          <RecenterOnChange center={center} zoom={withCoords.length ? 12 : 5} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
