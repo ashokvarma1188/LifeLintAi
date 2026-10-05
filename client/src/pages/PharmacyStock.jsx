@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, Save } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, Download } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import { getStock, updateStock, updateAvailability, listRequests, fulfilRequest, declineRequest } from "../services/pharmacy";
 import { getErrorMessage } from "../services/api";
+import { downloadCsv } from "../utils/csv";
 import "./Dashboard.css";
 import "./portal.css";
 
 const REQUEST_BADGE = { pending: "pending", fulfilled: "approved", declined: "rejected" };
+const STATUS_FILTERS = ["all", "pending", "fulfilled", "declined"];
 
 function PharmacyStock() {
   const navigate = useNavigate();
@@ -23,6 +25,7 @@ function PharmacyStock() {
   const [notice, setNotice] = useState("");
   const [newMed, setNewMed] = useState("");
   const [busyId, setBusyId] = useState(null);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const load = async () => {
     setLoading(true);
@@ -83,6 +86,18 @@ function PharmacyStock() {
     } finally {
       setBusyId(null);
     }
+  };
+
+  const visibleRequests = statusFilter === "all" ? requests : requests.filter((r) => r.status === statusFilter);
+
+  const exportRequestsCsv = () => {
+    downloadCsv("lifelink-pharmacy-requests.csv", visibleRequests, [
+      { label: "Requested by", get: (r) => r.requestedBy?.name || "Unknown" },
+      { label: "Medicine", get: (r) => r.medicineName },
+      { label: "Notes", get: (r) => r.notes || "" },
+      { label: "Status", get: (r) => r.status },
+      { label: "Requested", get: (r) => new Date(r.createdAt).toLocaleString() },
+    ]);
   };
 
   const saveAvailability = async () => {
@@ -231,8 +246,22 @@ function PharmacyStock() {
 
         {tab === "requests" && (
           <div className="portal-panel">
+            <div className="portal-toolbar" style={{ marginBottom: 12 }}>
+              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+                {STATUS_FILTERS.map((s) => (
+                  <option key={s} value={s}>{s === "all" ? "All statuses" : s}</option>
+                ))}
+              </select>
+              {visibleRequests.length > 0 && (
+                <button className="portal-btn ghost small" onClick={exportRequestsCsv}>
+                  <Download size={14} /> Export CSV
+                </button>
+              )}
+            </div>
             {requests.length === 0 ? (
               <div className="portal-empty">No medicine requests yet.</div>
+            ) : visibleRequests.length === 0 ? (
+              <div className="portal-empty">No requests with that status.</div>
             ) : (
               <div className="portal-table-wrap">
                 <table className="portal-table">
@@ -247,7 +276,7 @@ function PharmacyStock() {
                     </tr>
                   </thead>
                   <tbody>
-                    {requests.map((r) => (
+                    {visibleRequests.map((r) => (
                       <tr key={r._id}>
                         <td>{r.requestedBy?.name || "Unknown"}</td>
                         <td>{r.medicineName}</td>

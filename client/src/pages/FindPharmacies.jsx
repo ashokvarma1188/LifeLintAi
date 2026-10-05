@@ -9,6 +9,17 @@ import "./portal.css";
 
 const REQUEST_BADGE = { pending: "pending", fulfilled: "approved", declined: "rejected" };
 
+// Haversine formula: calculates straight-line distance (in km) between two lat/lng points
+function getDistanceKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 function FindPharmacies() {
   const navigate = useNavigate();
   const [tab, setTab] = useState("pharmacies");
@@ -20,11 +31,13 @@ function FindPharmacies() {
   const [requesting, setRequesting] = useState(null);
   const [form, setForm] = useState({ medicineName: "", notes: "" });
   const [sending, setSending] = useState(false);
+  const [coords, setCoords] = useState(null);
+  const [medicineSearch, setMedicineSearch] = useState("");
 
-  const load = async () => {
+  const load = async (latitude, longitude) => {
     setLoading(true);
     try {
-      const [p, r] = await Promise.all([listPharmacies(), myMedicineRequests()]);
+      const [p, r] = await Promise.all([listPharmacies(latitude, longitude), myMedicineRequests()]);
       setPharmacies(p);
       setMyRequests(r);
       setError("");
@@ -37,9 +50,28 @@ function FindPharmacies() {
 
   useEffect(() => {
     (async () => {
-      await load();
+      if (!navigator.geolocation) {
+        await load();
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setCoords({ latitude, longitude });
+          load(latitude, longitude);
+        },
+        () => load()
+      );
     })();
   }, []);
+
+  const visiblePharmacies = medicineSearch.trim()
+    ? pharmacies.filter((p) =>
+        (p.stock || []).some(
+          (s) => s.inStock && s.medicineName.toLowerCase().includes(medicineSearch.trim().toLowerCase())
+        )
+      )
+    : pharmacies;
 
   const openRequestForm = (pharmacy) => {
     setRequesting(pharmacy);
@@ -56,7 +88,7 @@ function FindPharmacies() {
       await requestMedicine(requesting._id, form.medicineName.trim(), form.notes.trim());
       setNotice(`Request sent to ${requesting.orgName || requesting.name}.`);
       setRequesting(null);
-      await load();
+      await load(coords?.latitude, coords?.longitude);
     } catch (err) {
       setError(getErrorMessage(err, "Could not send the request."));
     } finally {
@@ -93,10 +125,19 @@ function FindPharmacies() {
 
         {tab === "pharmacies" && (
           <div className="portal-panel">
+            <div className="portal-toolbar" style={{ marginBottom: 12 }}>
+              <input
+                placeholder="Search by medicine, e.g. Paracetamol"
+                value={medicineSearch}
+                onChange={(e) => setMedicineSearch(e.target.value)}
+              />
+            </div>
             {loading ? (
               <div className="portal-empty">Loading pharmacies…</div>
             ) : pharmacies.length === 0 ? (
               <div className="portal-empty">No pharmacies are registered yet.</div>
+            ) : visiblePharmacies.length === 0 ? (
+              <div className="portal-empty">No nearby pharmacy has that medicine in stock right now.</div>
             ) : (
               <div className="portal-table-wrap">
                 <table className="portal-table">
@@ -111,39 +152,49 @@ function FindPharmacies() {
                     </tr>
                   </thead>
                   <tbody>
-                    {pharmacies.map((p) => (
-                      <tr key={p._id}>
-                        <td>{p.orgName || p.name}</td>
-                        <td>
-                          {p.phone ? (
-                            <a href={`tel:${p.phone}`} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
-                              <Phone size={13} /> {p.phone}
-                            </a>
-                          ) : (
-                            "—"
-                          )}
-                        </td>
-                        <td>{p.openHours || "—"}</td>
-                        <td>
-                          <span className={`portal-badge ${p.isOpen !== false ? "approved" : "rejected"}`}>
-                            {p.isOpen !== false ? "Open" : "Closed"}
-                          </span>
-                        </td>
-                        <td>
-                          {(p.stock || []).length === 0
-                            ? "—"
-                            : p.stock
-                                .filter((s) => s.inStock)
-                                .map((s) => s.medicineName)
-                                .join(", ") || "None in stock"}
-                        </td>
-                        <td>
-                          <button className="portal-btn primary small" onClick={() => openRequestForm(p)}>
-                            <Send size={14} /> Request
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {visiblePharmacies.map((p) => {
+                      const [lng, lat] = p.location?.coordinates || [];
+                      const distance =
+                        coords && lat != null ? getDistanceKm(coords.latitude, coords.longitude, lat, lng) : null;
+                      return (
+                        <tr key={p._id}>
+                          <td>
+                            {p.orgName || p.name}
+                            {distance !== null && (
+                              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{distance.toFixed(1)} km away</div>
+                            )}
+                          </td>
+                          <td>
+                            {p.phone ? (
+                              <a href={`tel:${p.phone}`} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+                                <Phone size={13} /> {p.phone}
+                              </a>
+                            ) : (
+                              "—"
+                            )}
+                          </td>
+                          <td>{p.openHours || "—"}</td>
+                          <td>
+                            <span className={`portal-badge ${p.isOpen !== false ? "approved" : "rejected"}`}>
+                              {p.isOpen !== false ? "Open" : "Closed"}
+                            </span>
+                          </td>
+                          <td>
+                            {(p.stock || []).length === 0
+                              ? "—"
+                              : p.stock
+                                  .filter((s) => s.inStock)
+                                  .map((s) => s.medicineName)
+                                  .join(", ") || "None in stock"}
+                          </td>
+                          <td>
+                            <button className="portal-btn primary small" onClick={() => openRequestForm(p)}>
+                              <Send size={14} /> Request
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

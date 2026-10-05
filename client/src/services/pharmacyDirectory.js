@@ -1,7 +1,8 @@
 import api from "./api";
 
-export async function listPharmacies() {
-  const { data } = await api.get("/pharmacies");
+export async function listPharmacies(latitude, longitude) {
+  const params = latitude != null && longitude != null ? { latitude, longitude } : {};
+  const { data } = await api.get("/pharmacies", { params });
   return data.pharmacies;
 }
 

@@ -2,12 +2,31 @@ const mongoose = require("mongoose");
 const User = require("../models/User");
 const MedicineRequest = require("../models/MedicineRequest");
 
-/** Every approved pharmacy — for civilians to browse stock and send requests. */
+/**
+ * Every approved pharmacy — for civilians to browse stock and send requests.
+ * Nearest-first when the civilian's location is passed, same uncapped
+ * "nearest is still useful even if far" pattern as Find Hospitals; falls
+ * back to the old flat (unsorted) list if location wasn't shared.
+ */
 const listPharmacies = async (req, res) => {
   try {
-    const pharmacies = await User.find({ role: "pharmacy", roleStatus: "approved" }).select(
-      "name orgName phone stock openHours isOpen"
-    );
+    const { longitude, latitude } = req.query;
+    const select = "name orgName phone stock openHours isOpen location";
+
+    if (longitude !== undefined && latitude !== undefined) {
+      const pharmacies = await User.find({
+        role: "pharmacy",
+        roleStatus: "approved",
+        location: {
+          $near: { $geometry: { type: "Point", coordinates: [parseFloat(longitude), parseFloat(latitude)] } },
+        },
+      })
+        .select(select)
+        .limit(30);
+      return res.json({ pharmacies });
+    }
+
+    const pharmacies = await User.find({ role: "pharmacy", roleStatus: "approved" }).select(select);
     res.json({ pharmacies });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
