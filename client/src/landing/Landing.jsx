@@ -4,9 +4,13 @@ import { useLightTheme } from "./useLightTheme";
 import Navbar from "./components/Navbar";
 import EmergencyBanner from "./components/EmergencyBanner";
 import Hero from "./components/Hero";
+import RoleShowcase from "./components/RoleShowcase";
 import HowItWorks from "./components/HowItWorks";
+import SosDemo from "./components/SosDemo";
 import ImpactStats from "./components/ImpactStats";
+import TrustBadges from "./components/TrustBadges";
 import DonorBenefits from "./components/DonorBenefits";
+import Testimonials from "./components/Testimonials";
 import EmergencyMode from "./components/EmergencyMode";
 import CtaFooter from "./components/CtaFooter";
 import "./theme.css";
@@ -24,9 +28,13 @@ function Landing() {
       <main className="ll-main">
         <Navbar />
         <Hero />
+        <RoleShowcase />
         <HowItWorks />
+        <SosDemo />
         <ImpactStats />
+        <TrustBadges />
         <DonorBenefits />
+        <Testimonials />
         <EmergencyMode />
         <CtaFooter />
       </main>

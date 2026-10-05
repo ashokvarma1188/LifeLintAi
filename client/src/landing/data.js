@@ -8,6 +8,14 @@ import {
   BellRing,
   MapPin,
   Sparkles,
+  User,
+  Hospital,
+  Shield,
+  Flame,
+  Pill,
+  Lock,
+  BadgeCheck,
+  Siren,
 } from "lucide-react";
 
 export const NAV_LINKS = [
@@ -74,6 +82,70 @@ export const BENEFITS = [
     title: "Reward points",
     desc: "Earn points redeemable for health checkups and partner offers.",
   },
+];
+
+/** One card per role the platform actually supports — every one of these is a real, working account type, not a mockup. */
+export const ROLES = [
+  {
+    icon: User,
+    title: "Civilian",
+    desc: "Press SOS in an emergency, find nearby hospitals and pharmacies, donate or request blood.",
+  },
+  {
+    icon: Hospital,
+    title: "Hospital",
+    desc: "Keep bed and ambulance availability live, treat incoming patients, respond to blood requests.",
+  },
+  {
+    icon: Shield,
+    title: "Police",
+    desc: "Get live SOS alerts in your coverage area with real-time location and ETA tracking.",
+  },
+  {
+    icon: Flame,
+    title: "Fire Station",
+    desc: "Dispatch your fleet and respond to fire and rescue calls the moment they come in.",
+  },
+  {
+    icon: Pill,
+    title: "Pharmacy",
+    desc: "Publish your stock and hours, and fulfil medicine requests from people nearby.",
+  },
+];
+
+export const TRUST_BADGES = [
+  { icon: BadgeCheck, label: "Organisations verified by an admin before going live" },
+  { icon: Lock, label: "Your data stays private until you choose to share it" },
+  { icon: Siren, label: "SOS location is only ever seen by who you alert" },
+];
+
+export const TESTIMONIALS = [
+  {
+    quote:
+      "Every second counted — I pressed SOS and the nearest hospital already had my blood group and allergies before I arrived.",
+    name: "Harshitha K.",
+    role: "Civilian, Vijayawada",
+  },
+  {
+    quote:
+      "We used to get calls with no context. Now an alert comes in with the patient's location and medical ID already attached.",
+    name: "Dr. Varma",
+    role: "Hospital coordinator",
+  },
+  {
+    quote:
+      "Matching donors used to take hours of phone calls. Now a compatible donor nearby gets notified in seconds.",
+    name: "Charan A.",
+    role: "Blood donor",
+  },
+];
+
+/** The "what's happening" steps shown in the landing page's interactive SOS demo. */
+export const SOS_DEMO_STEPS = [
+  { label: "SOS pressed", detail: "Live location captured instantly." },
+  { label: "Nearest match found", detail: "Closest hospital, police & fire station identified." },
+  { label: "Alert sent", detail: "Responders notified with your location and medical ID." },
+  { label: "Help is on the way", detail: "Track status and ETA in real time." },
 ];
 
 export const EMERGENCY_POINTS = [
