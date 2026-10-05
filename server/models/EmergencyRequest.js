@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const emergencyRequestSchema = new mongoose.Schema(
   {
     citizenId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    type: { type: String, enum: ["medical", "accident", "safety", "other"], default: "medical" },
+    type: { type: String, enum: ["medical", "fire", "accident", "safety", "other"], default: "medical" },
     location: {
       type: { type: String, enum: ["Point"], default: "Point" },
       coordinates: { type: [Number], required: true },

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   User, Hospital, Droplet, Bot, FileHeart, Siren, ShieldCheck, Map, ClipboardList,
-  BedDouble, Ambulance, Truck, Package, Clock, Inbox, Users, History, HeartPulse, Building2, Phone,
+  BedDouble, Ambulance, Truck, Package, Clock, Inbox, Users, History, HeartPulse, Building2, Phone, BarChart3,
 } from "lucide-react";
 import api, { getErrorMessage } from "../services/api";
 import { getUser, resendVerification } from "../services/auth";
@@ -35,6 +35,7 @@ const FEATURES = {
     { icon: Siren, title: "Incoming Alerts", desc: "Live SOS alerts raised in your coverage area.", path: "/police/alerts", tab: "alerts" },
     { icon: Map, title: "Coverage Map", desc: "See active incidents plotted across your jurisdiction.", path: "/police/alerts", tab: "map" },
     { icon: ClipboardList, title: "Incident Reports", desc: "File and review reports for responded incidents.", path: "/police/alerts", tab: "reports" },
+    { icon: BarChart3, title: "Analytics", desc: "Response times, acceptance rate and false-alarm rate.", path: "/police/alerts", tab: "analytics" },
     { icon: Building2, title: "Organisation Profile", desc: "Logo, hours, service radius, and staff accounts.", path: "/org-profile" },
   ],
   hospital: [
@@ -48,6 +49,8 @@ const FEATURES = {
     { icon: Siren, title: "Active Calls", desc: "Fire and rescue calls assigned to your station.", path: "/firestation/alerts", tab: "alerts" },
     { icon: Truck, title: "Fleet Status", desc: "Track which engines and crews are available.", path: "/firestation/alerts", tab: "fleet" },
     { icon: Map, title: "Coverage Map", desc: "Live view of incidents across your coverage area.", path: "/firestation/alerts", tab: "map" },
+    { icon: ClipboardList, title: "Incident Reports", desc: "File and review reports for responded calls.", path: "/firestation/alerts", tab: "reports" },
+    { icon: BarChart3, title: "Analytics", desc: "Response times, acceptance rate and false-alarm rate.", path: "/firestation/alerts", tab: "analytics" },
     { icon: Building2, title: "Organisation Profile", desc: "Logo, hours, service radius, and staff accounts.", path: "/org-profile" },
   ],
   pharmacy: [
@@ -74,6 +77,7 @@ function Dashboard() {
   const [sosResult, setSosResult] = useState(null);
   const [sosError, setSosError] = useState("");
   const [sosTargets, setSosTargets] = useState(["hospital", "police", "firestation"]);
+  const [sosType, setSosType] = useState("medical");
   const [shareMedicalId, setShareMedicalId] = useState(false);
   const [verifySending, setVerifySending] = useState(false);
   const [verifyNotice, setVerifyNotice] = useState("");
@@ -143,7 +147,7 @@ function Dashboard() {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          const res = await api.post("/sos", { latitude, longitude, type: "medical", targets: sosTargets, shareMedicalId });
+          const res = await api.post("/sos", { latitude, longitude, type: sosType, targets: sosTargets, shareMedicalId });
           setSosResult(res.data);
           startLiveLocationSharing(res.data.emergencyRequest._id);
         } catch (err) {
@@ -268,6 +272,17 @@ function Dashboard() {
                   </label>
                 ))}
               </div>
+
+              <label className="sos-target-option" style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center" }}>
+                What's happening?
+                <select value={sosType} onChange={(e) => setSosType(e.target.value)}>
+                  <option value="medical">Medical emergency</option>
+                  <option value="fire">Fire</option>
+                  <option value="accident">Accident</option>
+                  <option value="safety">Safety / crime</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
 
               <label className="sos-target-option" style={{ marginTop: 10 }}>
                 <input

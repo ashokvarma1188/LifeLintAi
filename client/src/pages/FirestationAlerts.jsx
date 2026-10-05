@@ -6,14 +6,15 @@ import CoverageMap from "../components/CoverageMap";
 import MapsLink from "../components/MapsLink";
 import AgencyAnalyticsPanel from "../components/AgencyAnalyticsPanel";
 import { listAlerts, listReports, createReport, updateReportStatus, getFleet, updateFleet } from "../services/firestation";
-import { acceptSOS, declineSOS, resolveSOS, getMyAnalytics } from "../services/sos";
+import { acceptSOS, declineSOS, enRouteSOS, resolveSOS, getMyAnalytics } from "../services/sos";
 import { getErrorMessage } from "../services/api";
 import { playAlertSound } from "../utils/alertSound";
 import { downloadCsv } from "../utils/csv";
 import "./Dashboard.css";
 import "./portal.css";
 
-const ALERT_BADGE = { pending: "pending", accepted: "hospital", resolved: "approved" };
+const ALERT_BADGE = { pending: "pending", accepted: "hospital", en_route: "hospital", resolved: "approved" };
+const ALERT_STATUS_LABEL = { en_route: "en route" };
 const REPORT_BADGE = { open: "pending", resolved: "approved" };
 const FLEET_STATUSES = ["available", "dispatched", "maintenance"];
 
@@ -33,6 +34,7 @@ function FirestationAlerts() {
   const [savingFleet, setSavingFleet] = useState(false);
   const [form, setForm] = useState({ title: "", description: "" });
   const [newUnit, setNewUnit] = useState("");
+  const [etaInputs, setEtaInputs] = useState({});
   const knownPendingIds = useRef(new Set());
   const firstLoad = useRef(true);
 
@@ -111,11 +113,15 @@ function FirestationAlerts() {
     setNotice("");
     setError("");
     try {
-      if (action === "accept") await acceptSOS(id);
-      else if (action === "decline") await declineSOS(id);
+      if (action === "accept") {
+        const eta = etaInputs[id];
+        await acceptSOS(id, eta ? Number(eta) : undefined);
+      } else if (action === "decline") await declineSOS(id);
+      else if (action === "en-route") await enRouteSOS(id);
       else if (action === "false-alarm") await resolveSOS(id, true);
       else await resolveSOS(id, false);
-      setNotice(action === "false-alarm" ? "Alert marked as a false alarm." : `Alert marked as ${action === "accept" ? "accepted" : action}.`);
+      const ACTION_LABEL = { accept: "accepted", "en-route": "en route", "false-alarm": "a false alarm" };
+      setNotice(`Alert marked as ${ACTION_LABEL[action] || action}.`);
       await load();
     } catch (err) {
       setError(getErrorMessage(err, "Could not update this alert."));
@@ -215,6 +221,7 @@ function FirestationAlerts() {
                       <th>Citizen</th>
                       <th>Phone</th>
                       <th>Type</th>
+                      <th>Hospital assigned</th>
                       <th>Status</th>
                       <th>Raised</th>
                       <th />
@@ -227,7 +234,25 @@ function FirestationAlerts() {
                         <td>{a.citizenId?.phone || "—"}</td>
                         <td>{a.type}</td>
                         <td>
-                          <span className={`portal-badge ${ALERT_BADGE[a.status]}`}>{a.status}</span>
+                          {a.assignedHospitalId ? (
+                            <div style={{ fontSize: 13 }}>
+                              <div>{a.assignedHospitalId.name}</div>
+                              <div style={{ color: "var(--text-secondary)" }}>
+                                {a.assignedHospitalId.availableBeds ?? "?"} beds free
+                                {" · "}
+                                {a.assignedHospitalId.ambulanceAvailable
+                                  ? `ambulance (${a.assignedHospitalId.ambulanceCount ?? "?"})`
+                                  : "no ambulance"}
+                              </div>
+                            </div>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                        <td>
+                          <span className={`portal-badge ${ALERT_BADGE[a.status]}`}>
+                            {ALERT_STATUS_LABEL[a.status] || a.status}
+                          </span>
                           {a.falseAlarm && <span className="portal-badge rejected" style={{ marginLeft: 6 }}>false alarm</span>}
                         </td>
                         <td>{new Date(a.createdAt).toLocaleString()}</td>
@@ -236,6 +261,14 @@ function FirestationAlerts() {
                             <MapsLink coordinates={a.location?.coordinates} />
                             {a.status === "pending" && (
                               <>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="ETA min"
+                                  value={etaInputs[a._id] || ""}
+                                  onChange={(e) => setEtaInputs({ ...etaInputs, [a._id]: e.target.value })}
+                                  style={{ width: 70 }}
+                                />
                                 <button className="portal-btn primary small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "accept")}>
                                   <Check size={14} /> Accept
                                 </button>
@@ -245,6 +278,22 @@ function FirestationAlerts() {
                               </>
                             )}
                             {a.status === "accepted" && (
+                              <>
+                                {a.etaMinutes != null && (
+                                  <span className="portal-badge pending">ETA {a.etaMinutes}m</span>
+                                )}
+                                <button className="portal-btn primary small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "en-route")}>
+                                  En route
+                                </button>
+                                <button className="portal-btn ghost small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "resolve")}>
+                                  <CheckCheck size={14} /> Resolve
+                                </button>
+                                <button className="portal-btn ghost small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "false-alarm")}>
+                                  False alarm
+                                </button>
+                              </>
+                            )}
+                            {a.status === "en_route" && (
                               <>
                                 <button className="portal-btn primary small" disabled={busyId === a._id} onClick={() => actOnAlert(a._id, "resolve")}>
                                   <CheckCheck size={14} /> Resolve
