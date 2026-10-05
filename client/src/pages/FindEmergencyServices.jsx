@@ -134,7 +134,11 @@ function FindEmergencyServices() {
                     </div>
                     <div className="fh-card-row">
                       <IconPhone width={14} height={14} />
-                      {s.phone || "Not available"}
+                      {s.phone ? (
+                        <a href={`tel:${s.phone}`} style={{ color: "inherit" }}>{s.phone}</a>
+                      ) : (
+                        "Not available"
+                      )}
                     </div>
                   </div>
                 </div>
