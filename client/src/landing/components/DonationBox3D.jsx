@@ -480,9 +480,36 @@ function Scene({ frozen }) {
 
 function DonationBox3D({ className = "" }) {
   const reducedMotion = useReducedMotion();
+  const wrapperRef = useRef(null);
+
+  // Subtle scroll parallax on the whole stage — separate from the cursor-follow
+  // rotation inside the scene, and left alone entirely when reduced motion is on.
+  useEffect(() => {
+    if (reducedMotion) return undefined;
+    let raf = null;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = null;
+        const el = wrapperRef.current;
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        // How far the stage's center is from the viewport's center, as a fraction
+        // of viewport height — 0 when centered, ±1 near the top/bottom edges.
+        const offset = (rect.top + rect.height / 2 - window.innerHeight / 2) / window.innerHeight;
+        el.style.transform = `translateY(${offset * -24}px)`;
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [reducedMotion]);
 
   return (
-    <div className={`ll-stage ${className}`}>
+    <div className={`ll-stage ${className}`} ref={wrapperRef}>
       <Canvas
         camera={{ position: [0, 1.2, 6.5], fov: 42 }}
         dpr={[1, 1.5]}

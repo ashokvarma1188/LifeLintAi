@@ -1,11 +1,13 @@
+import { motion } from "framer-motion";
 import Counter from "./Counter";
 import { STATS } from "../data";
+import { revealUp } from "../motion";
 
 function ImpactStats() {
   return (
     <section id="impact" className="ll-section">
       <div className="ll-container ll-container-6xl">
-        <div className="ll-glass-card ll-impact">
+        <motion.div {...revealUp(0, { y: 20, duration: 0.5 })} className="ll-glass-card ll-impact">
           <div className="ll-grid-bg ll-impact-grid" aria-hidden="true" />
           <span className="ll-impact-rule" aria-hidden="true" />
 
@@ -24,7 +26,7 @@ function ImpactStats() {
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
