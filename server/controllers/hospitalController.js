@@ -100,10 +100,11 @@ const updateHospital = async (req, res) => {
     }
 
     const {
-      totalBeds, availableBeds, icuBeds, icuAvailableBeds,
+      phone, totalBeds, availableBeds, icuBeds, icuAvailableBeds,
       ambulanceAvailable, ambulanceCount, bloodBankAvailable, oxygenAvailable,
     } = req.body;
     const update = {};
+    if (phone !== undefined) update.phone = phone;
     if (totalBeds !== undefined) update.totalBeds = totalBeds;
     if (availableBeds !== undefined) update.availableBeds = availableBeds;
     if (icuBeds !== undefined) update.icuBeds = icuBeds;

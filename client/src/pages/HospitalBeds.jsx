@@ -12,7 +12,7 @@ function HospitalBeds() {
   const [hospitals, setHospitals] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [form, setForm] = useState({
-    totalBeds: "", availableBeds: "", icuBeds: "", icuAvailableBeds: "",
+    phone: "", totalBeds: "", availableBeds: "", icuBeds: "", icuAvailableBeds: "",
     ambulanceAvailable: true, ambulanceCount: "", bloodBankAvailable: false, oxygenAvailable: true,
   });
   const [loading, setLoading] = useState(true);
@@ -39,6 +39,7 @@ function HospitalBeds() {
     const h = hospitals.find((x) => x._id === id);
     if (h) {
       setForm({
+        phone: h.phone ?? "",
         totalBeds: h.totalBeds ?? "",
         availableBeds: h.availableBeds ?? "",
         icuBeds: h.icuBeds ?? "",
@@ -62,6 +63,7 @@ function HospitalBeds() {
     setNotice("");
     try {
       const updated = await updateHospital(selectedId, {
+        phone: form.phone.trim(),
         totalBeds: Number(form.totalBeds) || 0,
         availableBeds: Number(form.availableBeds) || 0,
         icuBeds: Number(form.icuBeds) || 0,
@@ -118,6 +120,16 @@ function HospitalBeds() {
 
               {selectedId && (
                 <>
+                  <div className="portal-field">
+                    <label htmlFor="phone">Contact phone</label>
+                    <input
+                      id="phone"
+                      type="tel"
+                      placeholder="e.g. 9876543210"
+                      value={form.phone}
+                      onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    />
+                  </div>
                   <div className="portal-row">
                     <div className="portal-field">
                       <label htmlFor="totalBeds">Total beds</label>

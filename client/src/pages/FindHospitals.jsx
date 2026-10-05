@@ -108,7 +108,11 @@ function FindHospitals() {
                     </div>
                     <div className="fh-card-row">
                       <IconPhone width={14} height={14} />
-                      {h.phone || "Not available"}
+                      {h.phone ? (
+                        <a href={`tel:${h.phone}`} style={{ color: "inherit" }}>{h.phone}</a>
+                      ) : (
+                        "Not available"
+                      )}
                     </div>
                   </div>
                 </div>
