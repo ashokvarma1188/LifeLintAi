@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import AppNavbar from "./AppNavbar";
+import MapsLink from "../components/MapsLink";
 import { IconMapPin, IconPhone, IconHospital } from "./icons";
 import { listNearbyServices } from "../services/emergencyServices";
 import { getErrorMessage } from "../services/api";
@@ -146,6 +147,9 @@ function FindEmergencyServices() {
                   <span className={`fh-ambulance ${s.isOpen !== false ? "available" : "unavailable"}`}>
                     {s.isOpen !== false ? "Open" : "Closed"}
                   </span>
+                  <div style={{ marginTop: 10 }}>
+                    <MapsLink coordinates={s.location?.coordinates} />
+                  </div>
                 </div>
               </div>
             );

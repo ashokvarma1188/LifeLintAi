@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "../services/api";
 import AppNavbar from "./AppNavbar";
+import MapsLink from "../components/MapsLink";
 import { IconMapPin, IconPhone, IconHospital } from "./icons";
 import "./Dashboard.css";
 import "./FindHospitals.css";
@@ -136,6 +137,9 @@ function FindHospitals() {
                   <span className={`fh-ambulance ${h.oxygenAvailable ? "available" : "unavailable"}`} style={{ marginTop: 6 }}>
                     {h.oxygenAvailable ? "Oxygen available" : "No oxygen"}
                   </span>
+                  <div style={{ marginTop: 10 }}>
+                    <MapsLink coordinates={h.location?.coordinates} />
+                  </div>
                 </div>
               </div>
             );

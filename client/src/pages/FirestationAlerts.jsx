@@ -231,7 +231,7 @@ function FirestationAlerts() {
                     {alerts.map((a) => (
                       <tr key={a._id}>
                         <td>{a.citizenId?.name || "Unknown"}</td>
-                        <td>{a.citizenId?.phone || "—"}</td>
+                        <td>{a.citizenId?.phone ? <a href={`tel:${a.citizenId.phone}`} style={{ color: "inherit" }}>{a.citizenId.phone}</a> : "—"}</td>
                         <td>{a.type}</td>
                         <td>
                           {a.assignedHospitalId ? (

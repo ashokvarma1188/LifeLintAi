@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Phone, Send } from "lucide-react";
 import AppNavbar from "./AppNavbar";
+import MapsLink from "../components/MapsLink";
 import { listPharmacies, requestMedicine, myMedicineRequests } from "../services/pharmacyDirectory";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
@@ -187,10 +188,13 @@ function FindPharmacies() {
                                   .map((s) => s.medicineName)
                                   .join(", ") || "None in stock"}
                           </td>
-                          <td>
-                            <button className="portal-btn primary small" onClick={() => openRequestForm(p)}>
-                              <Send size={14} /> Request
-                            </button>
+                          <td style={{ whiteSpace: "nowrap" }}>
+                            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                              <MapsLink coordinates={p.location?.coordinates} />
+                              <button className="portal-btn primary small" onClick={() => openRequestForm(p)}>
+                                <Send size={14} /> Request
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );

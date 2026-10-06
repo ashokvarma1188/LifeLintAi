@@ -155,7 +155,8 @@ function MedicalId() {
                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                       {profile.emergencyContacts.map((c, i) => (
                         <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13.5 }}>
-                          <Phone size={13} /> {c.name} ({c.relation || "contact"}) — {c.phone}
+                          <Phone size={13} /> {c.name} ({c.relation || "contact"}) —{" "}
+                          {c.phone ? <a href={`tel:${c.phone}`} style={{ color: "inherit" }}>{c.phone}</a> : "—"}
                         </div>
                       ))}
                     </div>

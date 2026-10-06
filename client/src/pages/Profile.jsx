@@ -46,7 +46,7 @@ function Profile() {
             ? data.emergencyContacts
             : [{ name: "", phone: "", relation: "" }],
         });
-      } catch (err) {
+      } catch {
         setError("Failed to load profile. Please try again.");
       } finally {
         setLoading(false);
