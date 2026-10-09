@@ -14,6 +14,7 @@ import { listAllAnnouncements, createAnnouncement, deactivateAnnouncement } from
 import SupportThread from "../components/SupportThread";
 import { SkeletonRows } from "../components/Skeleton";
 import EmptyState from "../components/EmptyState";
+import AdminSosCharts from "../components/AdminSosCharts";
 import { listAllTickets, getTicket as getSupportTicket, replyToTicket, closeTicket } from "../services/support";
 import { downloadCsv } from "../utils/csv";
 import "./Dashboard.css";
@@ -415,6 +416,8 @@ function AdminConsole() {
                   </ResponsiveContainer>
                 )}
               </div>
+
+              <AdminSosCharts sos={analytics.sos} />
 
               <div className="portal-panel" style={{ marginBottom: 16 }}>
                 <h3 style={{ marginTop: 0, fontSize: 14.5 }}>Users by role</h3>

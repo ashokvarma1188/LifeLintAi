@@ -98,14 +98,16 @@ const getAnalytics = async (req, res) => {
       { $group: { _id: { role: "$role", status: "$roleStatus" }, count: { $sum: 1 } } },
     ]);
 
+    // Legacy "citizen" accounts are civilians — folded into one row instead of a second "Civilian" line.
     const usersByRoleMap = {};
-    ALL_ROLES.forEach((role) => {
+    ALL_ROLES.filter((role) => role !== "citizen").forEach((role) => {
       usersByRoleMap[role] = { approved: 0, pending: 0, rejected: 0 };
     });
     usersByRole.forEach(({ _id, count }) => {
-      const role = _id.role || "civilian";
+      const role = !_id.role || _id.role === "citizen" ? "civilian" : _id.role;
       if (!usersByRoleMap[role]) usersByRoleMap[role] = { approved: 0, pending: 0, rejected: 0 };
-      usersByRoleMap[role][_id.status || "approved"] = count;
+      const status = _id.status || "approved";
+      usersByRoleMap[role][status] = (usersByRoleMap[role][status] || 0) + count;
     });
 
     const suspendedCount = await User.countDocuments({ suspended: true });
@@ -131,6 +133,42 @@ const getAnalytics = async (req, res) => {
       { $group: { _id: null, avgAcceptMinutes: { $avg: "$acceptMinutes" }, count: { $sum: 1 } } },
     ]);
 
+    // Charts: alerts per day over the last 14 days, by emergency type, and the busiest ~1 km grid cells.
+    const since = new Date();
+    since.setHours(0, 0, 0, 0);
+    since.setDate(since.getDate() - 13);
+    const [perDayRaw, byTypeRaw, areasRaw] = await Promise.all([
+      EmergencyRequest.aggregate([
+        { $match: { createdAt: { $gte: since } } },
+        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt", timezone: "Asia/Kolkata" } }, count: { $sum: 1 } } },
+      ]),
+      EmergencyRequest.aggregate([{ $group: { _id: "$type", count: { $sum: 1 } } }]),
+      EmergencyRequest.aggregate([
+        { $match: { "location.coordinates.1": { $exists: true } } },
+        {
+          $group: {
+            _id: {
+              lat: { $round: [{ $arrayElemAt: ["$location.coordinates", 1] }, 2] },
+              lng: { $round: [{ $arrayElemAt: ["$location.coordinates", 0] }, 2] },
+            },
+            count: { $sum: 1 },
+          },
+        },
+        { $sort: { count: -1 } },
+        { $limit: 5 },
+      ]),
+    ]);
+    const perDayMap = Object.fromEntries(perDayRaw.map((d) => [d._id, d.count]));
+    const byDay = [];
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(since);
+      d.setDate(since.getDate() + i);
+      const key = new Date(d.getTime() + 5.5 * 3600 * 1000).toISOString().slice(0, 10);
+      byDay.push({ date: key, count: perDayMap[key] || 0 });
+    }
+    const byType = Object.fromEntries(byTypeRaw.map((t) => [t._id || "other", t.count]));
+    const busiestAreas = areasRaw.map((a) => ({ lat: a._id.lat, lng: a._id.lng, count: a.count }));
+
     const reportsByDept = await IncidentReport.aggregate([
       { $group: { _id: { department: "$department", status: "$status" }, count: { $sum: 1 } } },
     ]);
@@ -153,6 +191,9 @@ const getAnalytics = async (req, res) => {
         avgAcceptMinutes: responseTimes[0]?.avgAcceptMinutes
           ? Math.round(responseTimes[0].avgAcceptMinutes * 10) / 10
           : null,
+        byDay,
+        byType,
+        busiestAreas,
       },
       incidentReports: reportsMap,
     });
