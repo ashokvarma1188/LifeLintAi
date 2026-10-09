@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, X, Send, Image as ImageIcon, Mic, MicOff } from "lucide-react";
+import { Bot, X, Send, Image as ImageIcon, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { sendMessage } from "../services/assistant";
 import { getErrorMessage } from "../services/api";
 import "./AiAssistantWidget.css";
@@ -15,6 +15,15 @@ const VOICE_LANGUAGES = [
   { code: "hi-IN", label: "हिन्दी" },
   { code: "te-IN", label: "తెలుగు" },
 ];
+
+/* Read-aloud uses the browser's built-in text-to-speech; the voice language follows the script of the reply. */
+const SpeechSynthesisApi = typeof window !== "undefined" ? window.speechSynthesis : undefined;
+
+function speechLangFor(text) {
+  if (/[ఀ-౿]/.test(text)) return "te-IN";
+  if (/[ऀ-ॿ]/.test(text)) return "hi-IN";
+  return "en-IN";
+}
 
 const VOICE_ERRORS = {
   "not-allowed": "Microphone access was blocked. Allow it in your browser's address bar to use voice.",
@@ -34,6 +43,7 @@ function AiAssistantWidget({ open, onToggle }) {
   const [listening, setListening] = useState(false);
   const [voiceLang, setVoiceLang] = useState("en-IN");
   const [voiceError, setVoiceError] = useState("");
+  const [speakingIndex, setSpeakingIndex] = useState(null);
   const listRef = useRef(null);
   const fileInputRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -44,9 +54,34 @@ function AiAssistantWidget({ open, onToggle }) {
 
   // Don't keep the microphone open once the panel is closed or the page is left.
   useEffect(() => {
-    if (!open) recognitionRef.current?.stop();
+    if (!open) {
+      recognitionRef.current?.stop();
+      SpeechSynthesisApi?.cancel();
+    }
   }, [open]);
-  useEffect(() => () => recognitionRef.current?.abort(), []);
+  useEffect(
+    () => () => {
+      recognitionRef.current?.abort();
+      SpeechSynthesisApi?.cancel();
+    },
+    []
+  );
+
+  const toggleSpeak = (index, text) => {
+    if (!SpeechSynthesisApi) return;
+    const wasSpeakingThis = speakingIndex === index;
+    SpeechSynthesisApi.cancel();
+    if (wasSpeakingThis) {
+      setSpeakingIndex(null);
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = speechLangFor(text);
+    utterance.onend = () => setSpeakingIndex((cur) => (cur === index ? null : cur));
+    utterance.onerror = utterance.onend;
+    setSpeakingIndex(index);
+    SpeechSynthesisApi.speak(utterance);
+  };
 
   const toggleVoice = () => {
     if (listening) {
@@ -112,6 +147,8 @@ function AiAssistantWidget({ open, onToggle }) {
     const text = input.trim();
     if ((!text && !photo) || sending) return;
     recognitionRef.current?.stop();
+    SpeechSynthesisApi?.cancel();
+    setSpeakingIndex(null);
 
     const history = messages.map((m) => ({ role: m.role, content: m.content }));
     setMessages((prev) => [...prev, { role: "user", content: text, image: photoPreview }]);
@@ -158,6 +195,18 @@ function AiAssistantWidget({ open, onToggle }) {
               <div key={i} className={`ai-widget-msg ${m.role}`}>
                 {m.image && <img src={m.image} alt="Attached injury" className="ai-widget-msg-img" />}
                 {m.content}
+                {m.role === "assistant" && SpeechSynthesisApi && (
+                  <button
+                    type="button"
+                    className={`ai-widget-speak${speakingIndex === i ? " speaking" : ""}`}
+                    onClick={() => toggleSpeak(i, m.content)}
+                    aria-label={speakingIndex === i ? "Stop reading aloud" : "Read this reply aloud"}
+                    title={speakingIndex === i ? "Stop" : "Read aloud"}
+                  >
+                    {speakingIndex === i ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                    {speakingIndex === i ? "Stop" : "Listen"}
+                  </button>
+                )}
               </div>
             ))}
             {sending && <div className="ai-widget-msg assistant">Thinking…</div>}
