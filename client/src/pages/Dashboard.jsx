@@ -11,6 +11,7 @@ import { listActiveAnnouncements } from "../services/announcements";
 import { getReminders } from "../services/healthRecords";
 import AppNavbar from "./AppNavbar";
 import VoiceSos from "../components/VoiceSos";
+import { DonateAgainBanner } from "../components/DonationCard";
 import "./Dashboard.css";
 import "./portal.css";
 
@@ -256,6 +257,8 @@ function Dashboard() {
             {verifyNotice && <div style={{ marginTop: 8, wordBreak: "break-all" }}>{verifyNotice}</div>}
           </div>
         )}
+
+        {role === "civilian" && <DonateAgainBanner />}
 
         {role === "civilian" && (
           <div className="sos-card">

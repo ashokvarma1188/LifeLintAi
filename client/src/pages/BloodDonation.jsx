@@ -18,6 +18,7 @@ import {
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
+import { DonationCard } from "../components/DonationCard";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 
@@ -222,6 +223,8 @@ function BloodDonation() {
             </div>
           </div>
         )}
+
+        {isCivilian && <DonationCard onChange={() => loadAll(coords)} />}
 
         {tab === "requests" && isCivilian && (
           <div className="portal-panel">

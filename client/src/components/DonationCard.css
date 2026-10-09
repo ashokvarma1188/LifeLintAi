@@ -1,0 +1,41 @@
+.donation-stats { display: flex; gap: 14px; flex-wrap: wrap; }
+.donation-stat {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--accent-soft-bg);
+  color: var(--accent);
+}
+.donation-stat div { display: flex; flex-direction: column; line-height: 1.2; }
+.donation-stat strong { font-size: 20px; color: var(--text-primary); }
+.donation-stat span { font-size: 12px; color: var(--text-secondary); }
+.donation-stat.badge { background: #fff4d6; color: #b7791f; }
+.donation-stat.badge strong { color: #7a4e0f; }
+
+.donation-next {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+}
+
+.donate-again-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  background: var(--accent-soft-bg);
+  border: 1px solid var(--accent);
+  color: var(--text-primary);
+  font-size: 13.5px;
+}
+.donate-again-banner > span { flex: 1; min-width: 200px; }
+.donate-again-banner svg { color: var(--accent); flex-shrink: 0; }

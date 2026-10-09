@@ -17,6 +17,9 @@ const userSchema = new mongoose.Schema(
 
     bloodGroup: { type: String },
     donorAvailable: { type: Boolean, default: false },
+    // Blood-donation tracking: drives the "you can donate again" reminder and the lives-saved badge.
+    lastDonatedAt: { type: Date },
+    donationCount: { type: Number, default: 0 },
     phone: { type: String },
     age: { type: Number },
     medicalHistory: [{ type: String }],
