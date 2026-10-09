@@ -11,6 +11,7 @@ import { listActiveAnnouncements } from "../services/announcements";
 import { getReminders } from "../services/healthRecords";
 import AppNavbar from "./AppNavbar";
 import VoiceSos from "../components/VoiceSos";
+import SosFollowUp from "../components/SosFollowUp";
 import { DonateAgainBanner } from "../components/DonationCard";
 import "./Dashboard.css";
 import "./portal.css";
@@ -91,6 +92,7 @@ function Dashboard() {
   const [verifyNotice, setVerifyNotice] = useState("");
   const [announcements, setAnnouncements] = useState([]);
   const [reminders, setReminders] = useState([]);
+  const [contacts, setContacts] = useState([]);
   const locationWatchId = useRef(null);
 
   useEffect(() => {
@@ -108,6 +110,11 @@ function Dashboard() {
     (async () => {
       const data = await getReminders().catch(() => []);
       setReminders(data);
+    })();
+    // Family numbers for the one-tap "tell your family" step after an SOS (only civilians have them).
+    (async () => {
+      const profile = await api.get("/profile/me").then((r) => r.data).catch(() => null);
+      if (profile?.emergencyContacts) setContacts(profile.emergencyContacts);
     })();
 
     // Stop sharing live location if the user navigates away mid-emergency.
@@ -319,6 +326,9 @@ function Dashboard() {
                       sosResult.nearestHospital?.name || "none found within 10km, but your alert was recorded"
                     }`}
                 </div>
+              )}
+              {sosResult && (
+                <SosFollowUp result={sosResult} contacts={contacts} userName={user.name} type={sosResult.emergencyRequest?.type} />
               )}
               {sosError && <div className="sos-status error">{sosError}</div>}
             </div>

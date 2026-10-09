@@ -38,6 +38,9 @@ const emergencyRequestSchema = new mongoose.Schema(
     // allergies and medical history alongside name/phone.
     shareMedicalId: { type: Boolean, default: false },
 
+    // Unguessable token behind the public "track this SOS" link the civilian can send to family.
+    shareToken: { type: String, index: true, sparse: true },
+
     /*
      * Which services the civilian chose to alert — controls who sees this request.
      * "pharmacy" isn't included: there's no pharmacy alerts inbox to respond from,

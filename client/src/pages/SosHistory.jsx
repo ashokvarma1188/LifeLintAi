@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Siren, X, History, Phone } from "lucide-react";
+import { ArrowLeft, Siren, X, History, Phone, Share2 } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import MapsLink from "../components/MapsLink";
 import LiveTrackMap from "../components/LiveTrackMap";
 import { distanceKm } from "../utils/maps";
+import { sosMessage, trackUrl } from "../utils/share";
+import { getUser } from "../services/auth";
 import { myRequests, cancelSOS } from "../services/sos";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
@@ -137,6 +139,21 @@ function SosHistory() {
     return () => clearInterval(interval);
   }, [tracking]);
 
+  /** Send family the public live-tracking link — the phone's share sheet where available, otherwise copy it. */
+  const shareLink = async (r) => {
+    const text = sosMessage(getUser()?.name, r.type, r.shareToken);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "LifeLink SOS", text, url: trackUrl(r.shareToken) });
+      } else {
+        await navigator.clipboard.writeText(text);
+        setNotice("Tracking link copied — paste it into WhatsApp or SMS for your family.");
+      }
+    } catch {
+      /* the user closed the share sheet, or the clipboard is blocked */
+    }
+  };
+
   const doCancel = async (id, reason) => {
     setBusyId(id);
     setCancelingId(null);
@@ -200,6 +217,11 @@ function SosHistory() {
 
                   <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
                     <MapsLink coordinates={r.location?.coordinates} />
+                    {r.shareToken && ["pending", "accepted", "en_route"].includes(r.status) && (
+                      <button className="portal-btn ghost small" onClick={() => shareLink(r)}>
+                        <Share2 size={13} /> Share live link
+                      </button>
+                    )}
                     {r.status === "pending" && cancelingId !== r._id && (
                       <button
                         className="portal-btn danger small"

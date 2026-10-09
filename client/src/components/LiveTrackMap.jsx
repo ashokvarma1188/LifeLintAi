@@ -32,25 +32,27 @@ function FitBoth({ points }) {
   return null;
 }
 
-/** `you` and `responder` are GeoJSON [lng, lat] pairs. */
-function LiveTrackMap({ you, responder, responderRole, responderName }) {
+/** `you` and `responder` are GeoJSON [lng, lat] pairs; `responder` is optional until someone accepts. */
+function LiveTrackMap({ you, responder, responderRole, responderName, youLabel = "You" }) {
   const youLatLng = [you[1], you[0]];
-  const responderLatLng = [responder[1], responder[0]];
+  const responderLatLng = responder ? [responder[1], responder[0]] : null;
 
   return (
     <div className="ltm-wrap">
       <MapContainer center={youLatLng} zoom={14} style={{ height: "100%", width: "100%" }}>
-        <FitBoth points={[youLatLng, responderLatLng]} />
+        <FitBoth points={responderLatLng ? [youLatLng, responderLatLng] : [youLatLng, youLatLng]} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <Marker position={youLatLng}>
-          <Popup>You</Popup>
+          <Popup>{youLabel}</Popup>
         </Marker>
-        <Marker position={responderLatLng} icon={responderIcon(responderRole)}>
-          <Popup>{responderName || "Responder"}</Popup>
-        </Marker>
+        {responderLatLng && (
+          <Marker position={responderLatLng} icon={responderIcon(responderRole)}>
+            <Popup>{responderName || "Responder"}</Popup>
+          </Marker>
+        )}
       </MapContainer>
     </div>
   );

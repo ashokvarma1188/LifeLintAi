@@ -38,11 +38,12 @@ import ResetPassword from "./pages/ResetPassword";
 import VerifyEmail from "./pages/VerifyEmail";
 import OrgProfile from "./pages/OrgProfile";
 import Support from "./pages/Support";
+import TrackSos from "./pages/TrackSos";
 import AiAssistantWidget from "./components/AiAssistantWidget";
 import FaqAssistantWidget from "./components/FaqAssistantWidget";
 import { isAuthenticated } from "./services/auth";
 
-const AUTH_PAGE_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-email"];
+const AUTH_PAGE_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-email", "/track/"];
 
 /**
  * Available to every signed-in role — first-aid guidance is useful for staff
@@ -96,6 +97,9 @@ function App() {
           <Route path="/terms" element={<Terms />} />
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/status" element={<Status />} />
+
+          {/* Public, token-protected page opened from a shared SOS link */}
+          <Route path="/track/:token" element={<TrackSos />} />
 
           {/* Signed in, any role */}
           <Route

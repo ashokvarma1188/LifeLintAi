@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const mongoose = require("mongoose");
 const EmergencyRequest = require("../models/EmergencyRequest");
 const Hospital = require("../models/Hospital");
@@ -16,6 +17,7 @@ const createSOS = async (req, res) => {
     const finalTargets = cleanTargets.length ? cleanTargets : ["hospital"];
 
     let nearestHospital = null;
+    let nearbyHospitals = [];
     if (finalTargets.includes("hospital")) {
       // No $maxDistance cap here on purpose — in a real emergency, "the nearest
       // hospital is 40km away" is far more useful than "no hospital found".
@@ -24,6 +26,13 @@ const createSOS = async (req, res) => {
       nearestHospital = await Hospital.findOne({
         location: { $near: { $geometry: { type: "Point", coordinates: [longitude, latitude] } } },
       });
+
+      // A few more options (nearest first) so the civilian can see which have beds free right now.
+      nearbyHospitals = await Hospital.find({
+        location: { $near: { $geometry: { type: "Point", coordinates: [longitude, latitude] } } },
+      })
+        .limit(4)
+        .select("name address phone availableBeds icuAvailableBeds ambulanceAvailable location");
     }
 
     const emergencyRequest = await EmergencyRequest.create({
@@ -33,11 +42,13 @@ const createSOS = async (req, res) => {
       assignedHospitalId: nearestHospital ? nearestHospital._id : null,
       targets: finalTargets,
       shareMedicalId: Boolean(shareMedicalId),
+      shareToken: crypto.randomBytes(12).toString("hex"),
     });
 
     res.status(201).json({
       message: "SOS request created successfully",
       emergencyRequest,
+      nearbyHospitals,
       nearestHospital: finalTargets.includes("hospital")
         ? nearestHospital || "No hospital is registered on the platform yet"
         : "Hospital was not alerted for this request",
