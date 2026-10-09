@@ -40,6 +40,8 @@ import OrgProfile from "./pages/OrgProfile";
 import Support from "./pages/Support";
 import TrackSos from "./pages/TrackSos";
 import PublicMedicalId from "./pages/PublicMedicalId";
+import FirstAidGuide from "./pages/FirstAidGuide";
+import OfflineBanner from "./components/OfflineBanner";
 import AiAssistantWidget from "./components/AiAssistantWidget";
 import FaqAssistantWidget from "./components/FaqAssistantWidget";
 import { isAuthenticated } from "./services/auth";
@@ -102,6 +104,9 @@ function App() {
           {/* Public, token-protected pages opened from a shared SOS link / a scanned Medical ID QR code */}
           <Route path="/track/:token" element={<TrackSos />} />
           <Route path="/id/:token" element={<PublicMedicalId />} />
+
+          {/* Public and offline-capable — bundled content, no API calls */}
+          <Route path="/first-aid" element={<FirstAidGuide />} />
 
           {/* Signed in, any role */}
           <Route
@@ -270,6 +275,7 @@ function App() {
           />
         </Routes>
         <SignedInAssistant />
+        <OfflineBanner />
       </BrowserRouter>
     </ThemeProvider>
   );

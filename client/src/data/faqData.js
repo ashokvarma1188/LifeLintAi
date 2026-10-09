@@ -91,23 +91,33 @@ const FAQ_CATEGORIES = [
     questions: [
       {
         q: "What do I do for a burn?",
-        a: "Cool the burn under running water for 10–20 minutes. Don't apply ice, butter or ointments. Cover loosely with a clean, non-stick cloth. Seek medical help for large, deep, or blistering burns.",
+        a: "Cool the burn under cool running water for 20 minutes. Don't apply ice, butter or ointments. Cover loosely with a clean, non-stick cloth. Seek medical help for large, deep, or blistering burns.",
+        path: "/first-aid",
+        pathLabel: "Open First-Aid Guide",
       },
       {
         q: "What do I do for choking?",
         a: "Encourage them to cough. If they can't breathe, talk, or cough, give 5 back blows between the shoulder blades, then 5 abdominal thrusts (Heimlich). Repeat until it clears or help arrives — call for emergency help right away.",
+        path: "/first-aid",
+        pathLabel: "Open First-Aid Guide",
       },
       {
         q: "What are the steps for CPR?",
         a: "Check responsiveness and breathing. Call for emergency help. Push hard and fast in the center of the chest (about 100–120 compressions/minute), 2 inches deep, letting the chest fully recoil. Continue until help arrives or they respond.",
+        path: "/first-aid",
+        pathLabel: "Open First-Aid Guide",
       },
       {
         q: "What do I do for heavy bleeding?",
         a: "Apply firm, direct pressure with a clean cloth and don't remove it even if it soaks through — add more layers on top. Raise the injured area above heart level if possible. Get emergency help immediately for severe bleeding.",
+        path: "/first-aid",
+        pathLabel: "Open First-Aid Guide",
       },
       {
         q: "What do I do for a snake bite?",
         a: "Keep the person calm and still, keep the bitten limb below heart level, remove tight clothing/jewellery near the bite, and get to a hospital immediately. Do not cut the wound, apply ice, or try to suck out venom.",
+        path: "/first-aid",
+        pathLabel: "Open First-Aid Guide",
       },
     ],
   },

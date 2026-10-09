@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  User, Hospital, Droplet, Bot, FileHeart, Siren, ShieldCheck, Map, ClipboardList,
+  User, Hospital, Droplet, Bot, FileHeart, BookHeart, Siren, ShieldCheck, Map, ClipboardList,
   BedDouble, Ambulance, Truck, Package, Clock, Inbox, Users, History, HeartPulse, Building2, Phone, BarChart3, Megaphone,
 } from "lucide-react";
 import api, { getErrorMessage } from "../services/api";
@@ -32,6 +32,7 @@ const FEATURES = {
     { icon: Package, title: "Find Pharmacies", desc: "Check medicine stock nearby and request what you need.", path: "/find-pharmacies" },
     { icon: Map, title: "Nearby Police & Fire", desc: "Find registered police and fire stations near you.", path: "/find-emergency-services" },
     { icon: Phone, title: "Emergency Numbers", desc: "Quick-dial reference for Police, Ambulance, Fire and more.", path: "/emergency-numbers" },
+    { icon: BookHeart, title: "First-Aid Guide", desc: "Step-by-step help for CPR, choking, bleeding, burns and more — works offline.", path: "/first-aid" },
     { icon: Inbox, title: "Support", desc: "Raise a ticket and get help from the admin team.", path: "/support" },
     { icon: Bot, title: "AI First-Aid Assistant", desc: "Get quick first-aid guidance while help is on the way. Open it from the chat button in the bottom-right corner.", note: "Live now" },
   ],

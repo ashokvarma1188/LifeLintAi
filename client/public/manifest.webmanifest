@@ -1,0 +1,15 @@
+{
+  "name": "LifeLink AI",
+  "short_name": "LifeLink",
+  "description": "Emergency SOS, blood donation and first aid — connecting civilians with hospitals, police and fire stations.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0b1410",
+  "theme_color": "#0f9d63",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

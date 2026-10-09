@@ -1,0 +1,25 @@
+.offline-banner {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #1f2328;
+  color: #fff;
+  font-size: 13px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+.offline-banner a {
+  color: #1fe08a;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
