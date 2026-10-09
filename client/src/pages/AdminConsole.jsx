@@ -384,7 +384,7 @@ function AdminConsole() {
 
         {tab === "analytics" && (
           loading ? (
-            <div className="portal-panel"><div className="portal-empty">Loading analytics…</div></div>
+            <div className="portal-panel"><SkeletonRows rows={4} cols={4} /></div>
           ) : !analytics ? null : (
             <>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 16 }}>

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, FileText } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import RecordForm from "./RecordForm";
 import RecordCard from "./RecordCard";
@@ -15,6 +15,8 @@ import {
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
+import { SkeletonRows } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 
 function HealthRecords() {
   const navigate = useNavigate();
@@ -135,13 +137,16 @@ function HealthRecords() {
         </div>
 
         {loading ? (
-          <div className="portal-empty">Loading your reports…</div>
+          <SkeletonRows rows={4} cols={4} />
         ) : records.length === 0 ? (
-          <div className="portal-empty">
-            {search || typeFilter
-              ? "No reports match your search."
-              : "No medical reports yet. Add your first one to keep your history in one place."}
-          </div>
+          <EmptyState
+            icon={FileText}
+            title={
+              search || typeFilter
+                ? "No reports match your search."
+                : "No medical reports yet. Add your first one to keep your history in one place."
+            }
+          />
         ) : (
           <div className="record-list">
             {records.map((record) => (

@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Hospital } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import { listHospitals, updateHospital } from "../services/hospitals";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
+import { SkeletonRows } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 
 function HospitalBeds() {
   const navigate = useNavigate();
@@ -103,9 +105,9 @@ function HospitalBeds() {
 
         <div className="portal-panel">
           {loading ? (
-            <div className="portal-empty">Loading hospitals…</div>
+            <SkeletonRows rows={4} cols={3} />
           ) : hospitals.length === 0 ? (
-            <div className="portal-empty">No hospitals are registered yet.</div>
+            <EmptyState icon={Hospital} title="No hospitals are registered yet." />
           ) : (
             <form onSubmit={handleSave} className="portal-form">
               <div className="portal-field">

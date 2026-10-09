@@ -10,6 +10,7 @@ import { listRecords, getAccessLog } from "../services/healthRecords";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
+import { SkeletonRows } from "../components/Skeleton";
 
 const VITALS = [
   { key: "heartRate", label: "Heart rate (bpm)", color: "#e5484d" },
@@ -107,7 +108,7 @@ function MedicalId() {
         {error && <div className="portal-message error">{error}</div>}
 
         {loading ? (
-          <div className="portal-empty">Loading…</div>
+          <div className="portal-panel"><SkeletonRows rows={4} cols={3} /></div>
         ) : (
           <>
             {tab === "id" && profile && (

@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Siren, X } from "lucide-react";
+import { ArrowLeft, Siren, X, History } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import MapsLink from "../components/MapsLink";
 import { myRequests, cancelSOS } from "../services/sos";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
+import { SkeletonRows } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 
 const STATUS_BADGE = { pending: "pending", accepted: "hospital", resolved: "approved", cancelled: "rejected" };
 const TIMELINE_STEPS = ["pending", "accepted", "resolved"];
@@ -111,9 +113,9 @@ function SosHistory() {
 
         <div className="portal-panel">
           {loading ? (
-            <div className="portal-empty">Loading your history…</div>
+            <SkeletonRows rows={3} cols={4} />
           ) : requests.length === 0 ? (
-            <div className="portal-empty">You haven't sent any SOS alerts yet.</div>
+            <EmptyState icon={History} title="You haven't sent any SOS alerts yet." hint="Alerts you send from the dashboard will show up here with live status." />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {requests.map((r) => (

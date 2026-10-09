@@ -1,6 +1,8 @@
+import { SkeletonRows } from "./Skeleton";
+
 /** Compact stat row for a responder's own analytics tab (police/fire/hospital). */
 function AgencyAnalyticsPanel({ data }) {
-  if (!data) return <div className="portal-empty">Loading analytics…</div>;
+  if (!data) return <SkeletonRows rows={2} cols={4} />;
 
   const stats = [
     { label: "Total handled", value: data.total },

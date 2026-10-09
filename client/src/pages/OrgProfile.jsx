@@ -7,6 +7,7 @@ import { getUser } from "../services/auth";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
+import { SkeletonRows } from "../components/Skeleton";
 
 function OrgProfile() {
   const navigate = useNavigate();
@@ -159,7 +160,7 @@ function OrgProfile() {
         {notice && <div className="portal-message success">{notice}</div>}
 
         {loading ? (
-          <div className="portal-panel"><div className="portal-empty">Loading…</div></div>
+          <div className="portal-panel"><SkeletonRows rows={4} cols={3} /></div>
         ) : tab === "profile" ? (
           <div className="portal-panel">
             {profile?.verified && (
