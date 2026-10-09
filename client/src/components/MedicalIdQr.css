@@ -1,0 +1,18 @@
+.mid-qr {
+  margin-top: 22px;
+  padding: 16px;
+  border: 1px dashed var(--border-color);
+  border-radius: 12px;
+}
+.mid-qr-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.mid-qr p { margin: 0 0 12px; font-size: 13px; color: var(--text-secondary); }
+.mid-qr-body { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
+.mid-qr-code {
+  background: #fff;
+  padding: 6px;
+  border-radius: 10px;
+  line-height: 0;
+  border: 1px solid var(--border-color);
+}
+.mid-qr-info { flex: 1; min-width: 200px; }
+.mid-qr-actions { display: flex; gap: 8px; flex-wrap: wrap; }

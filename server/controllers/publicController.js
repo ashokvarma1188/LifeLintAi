@@ -66,4 +66,30 @@ const getTrackByToken = async (req, res) => {
   }
 };
 
-module.exports = { getNetworkStats, getTrackByToken };
+/**
+ * What a responder sees after scanning someone's Medical ID QR code. Only exists
+ * once the owner switched it on, and only holds emergency-relevant facts.
+ */
+const getMedicalIdByToken = async (req, res) => {
+  try {
+    if (!TOKEN_PATTERN.test(req.params.token)) return res.status(404).json({ message: "Medical ID not found" });
+
+    const user = await User.findOne({ medicalIdToken: req.params.token }).select(
+      "name age bloodGroup allergies medicalHistory emergencyContacts"
+    );
+    if (!user) return res.status(404).json({ message: "Medical ID not found" });
+
+    res.json({
+      name: user.name,
+      age: user.age ?? null,
+      bloodGroup: user.bloodGroup || null,
+      allergies: user.allergies || [],
+      medicalHistory: user.medicalHistory || [],
+      emergencyContacts: (user.emergencyContacts || []).map((c) => ({ name: c.name, phone: c.phone, relation: c.relation })),
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+module.exports = { getNetworkStats, getTrackByToken, getMedicalIdByToken };

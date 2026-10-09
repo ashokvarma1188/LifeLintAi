@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const HealthRecord = require("../models/HealthRecord");
@@ -31,6 +32,26 @@ const updateProfile = async (req, res) => {
     }
 
     res.json({ message: "Profile updated successfully", user });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+/** Turns the QR-code Medical ID on (or rotates its link, which kills any old printed code). */
+const enableMedicalIdLink = async (req, res) => {
+  try {
+    const token = crypto.randomBytes(16).toString("hex");
+    await User.findByIdAndUpdate(req.userId, { medicalIdToken: token });
+    res.json({ medicalIdToken: token });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+const disableMedicalIdLink = async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.userId, { $unset: { medicalIdToken: 1 } });
+    res.json({ message: "Medical ID link turned off" });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
   }
@@ -100,4 +121,4 @@ const deleteMyAccount = async (req, res) => {
   }
 };
 
-module.exports = { getProfile, updateProfile, exportMyData, deleteMyAccount };
+module.exports = { getProfile, updateProfile, exportMyData, deleteMyAccount, enableMedicalIdLink, disableMedicalIdLink };

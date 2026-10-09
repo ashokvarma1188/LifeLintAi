@@ -39,11 +39,12 @@ import VerifyEmail from "./pages/VerifyEmail";
 import OrgProfile from "./pages/OrgProfile";
 import Support from "./pages/Support";
 import TrackSos from "./pages/TrackSos";
+import PublicMedicalId from "./pages/PublicMedicalId";
 import AiAssistantWidget from "./components/AiAssistantWidget";
 import FaqAssistantWidget from "./components/FaqAssistantWidget";
 import { isAuthenticated } from "./services/auth";
 
-const AUTH_PAGE_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-email", "/track/"];
+const AUTH_PAGE_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-email", "/track/", "/id/"];
 
 /**
  * Available to every signed-in role — first-aid guidance is useful for staff
@@ -98,8 +99,9 @@ function App() {
           <Route path="/cookies" element={<Cookies />} />
           <Route path="/status" element={<Status />} />
 
-          {/* Public, token-protected page opened from a shared SOS link */}
+          {/* Public, token-protected pages opened from a shared SOS link / a scanned Medical ID QR code */}
           <Route path="/track/:token" element={<TrackSos />} />
+          <Route path="/id/:token" element={<PublicMedicalId />} />
 
           {/* Signed in, any role */}
           <Route

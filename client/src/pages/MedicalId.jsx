@@ -11,6 +11,7 @@ import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
 import { SkeletonRows } from "../components/Skeleton";
+import MedicalIdQr from "../components/MedicalIdQr";
 
 const VITALS = [
   { key: "heartRate", label: "Heart rate (bpm)", color: "#e5484d" },
@@ -167,6 +168,8 @@ function MedicalId() {
                     </div>
                   )}
                 </div>
+
+                <MedicalIdQr initialToken={profile.medicalIdToken} />
               </div>
             )}
 
