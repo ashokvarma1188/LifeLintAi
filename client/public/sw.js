@@ -2,6 +2,7 @@
  * LifeLink service worker.
  *  - Offline: keeps the app shell (index.html + the hashed JS/CSS bundles) cached, so the
  *    app — and its First-Aid Guide — still opens with no connection.
+ *  - Push: shows SOS alerts / SOS status updates sent by the server, even when no tab is open.
  * API calls, map tiles and fonts are other origins and always go straight to the network.
  */
 const CACHE = "lifelink-shell-v1";
@@ -80,4 +81,47 @@ self.addEventListener("fetch", (event) => {
       })()
     );
   }
+});
+
+self.addEventListener("push", (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch {
+    data = { body: event.data ? event.data.text() : "" };
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title || "LifeLink", {
+      body: data.body || "",
+      icon: "/icons/icon-192.png",
+      badge: "/icons/badge-96.png",
+      tag: data.tag,
+      renotify: Boolean(data.tag),
+      requireInteraction: Boolean(data.urgent),
+      vibrate: data.urgent ? [300, 120, 300, 120, 300] : [120],
+      data: { url: data.url || "/dashboard" },
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = new URL(event.notification.data?.url || "/dashboard", self.location.origin).href;
+
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const existing = windows.find((client) => new URL(client.url).origin === self.location.origin);
+      if (existing) {
+        try {
+          await existing.navigate(target);
+        } catch {
+          /* a tab this worker doesn't control can't be navigated — just bring it forward */
+        }
+        return existing.focus();
+      }
+      return self.clients.openWindow(target);
+    })()
+  );
 });

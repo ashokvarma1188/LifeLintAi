@@ -4,6 +4,7 @@ const User = require("../models/User");
 const HealthRecord = require("../models/HealthRecord");
 const EmergencyRequest = require("../models/EmergencyRequest");
 const MedicineRequest = require("../models/MedicineRequest");
+const PushSubscription = require("../models/PushSubscription");
 
 const getProfile = async (req, res) => {
   try {
@@ -112,6 +113,7 @@ const deleteMyAccount = async (req, res) => {
       HealthRecord.deleteMany({ userId: req.userId }),
       EmergencyRequest.deleteMany({ citizenId: req.userId }),
       MedicineRequest.deleteMany({ requestedBy: req.userId }),
+      PushSubscription.deleteMany({ userId: req.userId }),
     ]);
     await user.deleteOne();
 

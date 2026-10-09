@@ -28,6 +28,7 @@ const emergencyServicesRoutes = require("./routes/emergencyServicesRoutes");
 const bloodRequestRoutes = require("./routes/bloodRequestRoutes");
 const supportRoutes = require("./routes/supportRoutes");
 const publicRoutes = require("./routes/publicRoutes");
+const pushRoutes = require("./routes/pushRoutes");
 
 const app = express();
 
@@ -99,6 +100,7 @@ app.use("/api/emergency-services", emergencyServicesRoutes);
 app.use("/api/blood-requests", bloodRequestRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/public", publicRoutes);
+app.use("/api/push", pushRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)

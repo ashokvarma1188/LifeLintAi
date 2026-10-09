@@ -4,6 +4,7 @@ const EmergencyRequest = require("../models/EmergencyRequest");
 const Hospital = require("../models/Hospital");
 const User = require("../models/User");
 const { redactMedicalId } = require("../utils/sosHelpers");
+const { notifyRespondersOfSos, notifyCitizenOfStatus } = require("../utils/push");
 
 const VALID_TARGETS = ["hospital", "police", "firestation"];
 
@@ -44,6 +45,9 @@ const createSOS = async (req, res) => {
       shareMedicalId: Boolean(shareMedicalId),
       shareToken: crypto.randomBytes(12).toString("hex"),
     });
+
+    // Fire-and-forget: a slow push service must never delay the SOS response itself.
+    notifyRespondersOfSos(emergencyRequest).catch((err) => console.error("SOS push failed:", err.message));
 
     res.status(201).json({
       message: "SOS request created successfully",
@@ -229,6 +233,8 @@ const setStatus = (status) => async (req, res) => {
           : "Request not found",
       });
     }
+
+    notifyCitizenOfStatus(request).catch((err) => console.error("Status push failed:", err.message));
 
     res.json({ message: `Request marked as ${status}`, request: redactMedicalId(request) });
   } catch (err) {

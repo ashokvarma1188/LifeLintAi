@@ -1,13 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { IconPulse, IconSun, IconMoon } from "./icons";
+import { unlinkPushOnLogout } from "../services/push";
 
 function AppNavbar({ showLogout }) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    // Stop this device getting the account's SOS notifications once it's signed out.
+    await unlinkPushOnLogout();
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");

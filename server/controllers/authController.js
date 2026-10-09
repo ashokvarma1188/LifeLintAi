@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
+const PushSubscription = require("../models/PushSubscription");
 const { VALID_ROLES, isCivilian, isOrgRole } = require("../constants/roles");
 const { sendPasswordResetEmail, sendVerificationEmail, sendTwoFactorCode } = require("../utils/mailer");
 
@@ -294,6 +295,8 @@ const logoutEverywhere = async (req, res) => {
   try {
     req.user.tokenVersion = (req.user.tokenVersion || 0) + 1;
     await req.user.save();
+    // Signed out everywhere means no more notifications on those devices either.
+    await PushSubscription.deleteMany({ userId: req.user._id });
     res.json({ message: "Signed out of all devices. Please log in again." });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });

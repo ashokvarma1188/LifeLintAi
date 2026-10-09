@@ -13,6 +13,8 @@ import AppNavbar from "./AppNavbar";
 import VoiceSos from "../components/VoiceSos";
 import SosFollowUp from "../components/SosFollowUp";
 import { DonateAgainBanner } from "../components/DonationCard";
+import NotificationToggle from "../components/NotificationToggle";
+import { syncPushSubscription } from "../services/push";
 import "./Dashboard.css";
 import "./portal.css";
 
@@ -112,6 +114,9 @@ function Dashboard() {
       const data = await getReminders().catch(() => []);
       setReminders(data);
     })();
+    // Keep this device's push subscription linked to whoever is signed in now.
+    syncPushSubscription();
+
     // Family numbers for the one-tap "tell your family" step after an SOS (only civilians have them).
     (async () => {
       const profile = await api.get("/profile/me").then((r) => r.data).catch(() => null);
@@ -267,6 +272,8 @@ function Dashboard() {
         )}
 
         {role === "civilian" && <DonateAgainBanner />}
+
+        {["civilian", "hospital", "police", "firestation"].includes(role) && status === "approved" && <NotificationToggle role={role} />}
 
         {role === "civilian" && (
           <div className="sos-card">
