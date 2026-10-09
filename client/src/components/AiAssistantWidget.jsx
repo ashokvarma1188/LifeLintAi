@@ -19,7 +19,7 @@ const VOICE_LANGUAGES = [
 const VOICE_ERRORS = {
   "not-allowed": "Microphone access was blocked. Allow it in your browser's address bar to use voice.",
   "service-not-allowed": "Microphone access was blocked. Allow it in your browser's address bar to use voice.",
-  "no-speech": "Didn't catch anything — tap the mic and try again.",
+  "no-speech": "Didn't hear anything. Check your microphone isn't muted, then tap the mic and start speaking right away.",
   "audio-capture": "No microphone was found on this device.",
   network: "Voice needs an internet connection.",
 };
