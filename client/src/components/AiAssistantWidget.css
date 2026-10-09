@@ -21,11 +21,11 @@
 .ai-widget-panel {
   position: fixed;
   right: 24px;
-  bottom: 164px;
+  bottom: 92px;
   width: 340px;
   max-width: calc(100vw - 32px);
   height: 460px;
-  max-height: calc(100vh - 190px);
+  max-height: calc(100vh - 140px);
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 16px;
@@ -229,7 +229,7 @@
     right: 16px;
     left: 16px;
     width: auto;
-    bottom: 156px;
+    bottom: 84px;
   }
   .ai-widget-btn { right: 16px; bottom: 16px; }
 }

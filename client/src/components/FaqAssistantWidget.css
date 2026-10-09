@@ -1,7 +1,7 @@
 .faq-widget-btn {
   position: fixed;
-  right: 24px;
-  bottom: 96px;
+  right: 92px;
+  bottom: 24px;
   width: 56px;
   height: 56px;
   border-radius: 50%;
@@ -21,11 +21,11 @@
 .faq-widget-panel {
   position: fixed;
   right: 24px;
-  bottom: 164px;
+  bottom: 92px;
   width: 340px;
   max-width: calc(100vw - 32px);
   height: 420px;
-  max-height: calc(100vh - 220px);
+  max-height: calc(100vh - 140px);
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 16px;
@@ -167,6 +167,7 @@
     right: 16px;
     left: 16px;
     width: auto;
+    bottom: 84px;
   }
-  .faq-widget-btn { right: 16px; bottom: 88px; }
+  .faq-widget-btn { right: 84px; bottom: 16px; }
 }
