@@ -1,10 +1,28 @@
 import { useState, useRef, useEffect } from "react";
-import { Bot, X, Send, Image as ImageIcon } from "lucide-react";
+import { Bot, X, Send, Image as ImageIcon, Mic, MicOff } from "lucide-react";
 import { sendMessage } from "../services/assistant";
 import { getErrorMessage } from "../services/api";
 import "./AiAssistantWidget.css";
 
 const MAX_PHOTO_BYTES = 6 * 1024 * 1024;
+
+/* The browser's built-in speech-to-text (Chrome/Edge/Android Chrome). Absent elsewhere, in which case the mic is simply not shown. */
+const SpeechRecognitionApi =
+  typeof window !== "undefined" ? window.SpeechRecognition || window.webkitSpeechRecognition : undefined;
+
+const VOICE_LANGUAGES = [
+  { code: "en-IN", label: "English" },
+  { code: "hi-IN", label: "हिन्दी" },
+  { code: "te-IN", label: "తెలుగు" },
+];
+
+const VOICE_ERRORS = {
+  "not-allowed": "Microphone access was blocked. Allow it in your browser's address bar to use voice.",
+  "service-not-allowed": "Microphone access was blocked. Allow it in your browser's address bar to use voice.",
+  "no-speech": "Didn't catch anything — tap the mic and try again.",
+  "audio-capture": "No microphone was found on this device.",
+  network: "Voice needs an internet connection.",
+};
 
 function AiAssistantWidget({ open, onToggle }) {
   const [messages, setMessages] = useState([]);
@@ -13,12 +31,58 @@ function AiAssistantWidget({ open, onToggle }) {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [photoError, setPhotoError] = useState("");
   const [sending, setSending] = useState(false);
+  const [listening, setListening] = useState(false);
+  const [voiceLang, setVoiceLang] = useState("en-IN");
+  const [voiceError, setVoiceError] = useState("");
   const listRef = useRef(null);
   const fileInputRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   useEffect(() => {
     if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [messages, open]);
+
+  // Don't keep the microphone open once the panel is closed or the page is left.
+  useEffect(() => {
+    if (!open) recognitionRef.current?.stop();
+  }, [open]);
+  useEffect(() => () => recognitionRef.current?.abort(), []);
+
+  const toggleVoice = () => {
+    if (listening) {
+      recognitionRef.current?.stop();
+      return;
+    }
+
+    setVoiceError("");
+    const recognition = new SpeechRecognitionApi();
+    recognition.lang = voiceLang;
+    recognition.interimResults = true;
+    recognition.continuous = false;
+
+    // Spoken words are appended to whatever was already typed, and shown live as they're recognised.
+    const typedBefore = input.trim();
+    recognition.onresult = (event) => {
+      let spoken = "";
+      for (let i = 0; i < event.results.length; i++) spoken += event.results[i][0].transcript;
+      setInput(typedBefore ? `${typedBefore} ${spoken}` : spoken);
+    };
+    recognition.onerror = (event) => {
+      if (event.error !== "aborted") setVoiceError(VOICE_ERRORS[event.error] || "Voice input stopped unexpectedly.");
+    };
+    recognition.onend = () => {
+      setListening(false);
+      recognitionRef.current = null;
+    };
+
+    recognitionRef.current = recognition;
+    try {
+      recognition.start();
+      setListening(true);
+    } catch {
+      setVoiceError("Voice input couldn't start. Please try again.");
+    }
+  };
 
   const pickPhoto = (e) => {
     const file = e.target.files?.[0];
@@ -47,6 +111,7 @@ function AiAssistantWidget({ open, onToggle }) {
     e.preventDefault();
     const text = input.trim();
     if ((!text && !photo) || sending) return;
+    recognitionRef.current?.stop();
 
     const history = messages.map((m) => ({ role: m.role, content: m.content }));
     setMessages((prev) => [...prev, { role: "user", content: text, image: photoPreview }]);
@@ -109,6 +174,26 @@ function AiAssistantWidget({ open, onToggle }) {
             </div>
           )}
 
+          {voiceError && <div className="ai-widget-photo-error">{voiceError}</div>}
+          {SpeechRecognitionApi && (
+            <div className="ai-widget-voice-row">
+              <select
+                className="ai-widget-lang"
+                value={voiceLang}
+                onChange={(e) => setVoiceLang(e.target.value)}
+                disabled={listening}
+                aria-label="Voice language"
+              >
+                {VOICE_LANGUAGES.map((l) => (
+                  <option key={l.code} value={l.code}>{l.label}</option>
+                ))}
+              </select>
+              <span className={`ai-widget-voice-status${listening ? " active" : ""}`}>
+                {listening ? "Listening… speak now" : "Tap the mic to speak instead of typing"}
+              </span>
+            </div>
+          )}
+
           <form className="ai-widget-form" onSubmit={submit}>
             <input
               type="file"
@@ -127,8 +212,20 @@ function AiAssistantWidget({ open, onToggle }) {
             >
               <ImageIcon size={16} />
             </button>
+            {SpeechRecognitionApi && (
+              <button
+                type="button"
+                className={`ai-widget-mic${listening ? " listening" : ""}`}
+                onClick={toggleVoice}
+                disabled={sending}
+                aria-label={listening ? "Stop voice input" : "Speak your question"}
+                title={listening ? "Stop listening" : "Speak instead of typing"}
+              >
+                {listening ? <MicOff size={16} /> : <Mic size={16} />}
+              </button>
+            )}
             <input
-              placeholder="Describe what's going on…"
+              placeholder={listening ? "Listening…" : "Describe what's going on…"}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={sending}
