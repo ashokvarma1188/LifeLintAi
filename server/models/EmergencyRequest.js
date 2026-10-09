@@ -20,6 +20,13 @@ const emergencyRequestSchema = new mongoose.Schema(
     respondedByRole: { type: String, enum: ["hospital", "police", "firestation"] },
     etaMinutes: { type: Number },
 
+    // The responder's last reported position once they've accepted — lets the civilian
+    // watch help approach. Not a GeoJSON point on purpose: it is never queried spatially.
+    responderLocation: {
+      coordinates: { type: [Number], default: undefined },
+      updatedAt: { type: Date },
+    },
+
     // Set by the responder on resolve — distinct from the civilian's own "cancel",
     // this is the responder's call that there was nothing to respond to.
     falseAlarm: { type: Boolean, default: false },

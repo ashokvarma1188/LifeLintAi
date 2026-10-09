@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Siren, X, History } from "lucide-react";
+import { ArrowLeft, Siren, X, History, Phone } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import MapsLink from "../components/MapsLink";
+import LiveTrackMap from "../components/LiveTrackMap";
+import { distanceKm } from "../utils/maps";
 import { myRequests, cancelSOS } from "../services/sos";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
@@ -10,9 +12,60 @@ import "./portal.css";
 import { SkeletonRows } from "../components/Skeleton";
 import EmptyState from "../components/EmptyState";
 
-const STATUS_BADGE = { pending: "pending", accepted: "hospital", resolved: "approved", cancelled: "rejected" };
-const TIMELINE_STEPS = ["pending", "accepted", "resolved"];
-const STEP_LABEL = { pending: "Sent", accepted: "Accepted", resolved: "Resolved" };
+const STATUS_BADGE = { pending: "pending", accepted: "hospital", en_route: "hospital", resolved: "approved", cancelled: "rejected" };
+const TIMELINE_STEPS = ["pending", "accepted", "en_route", "resolved"];
+const STEP_LABEL = { pending: "Sent", accepted: "Accepted", en_route: "On the way", resolved: "Resolved" };
+const RESPONDER_LABEL = { hospital: "Ambulance", police: "Police", firestation: "Fire engine" };
+const AVERAGE_SPEED_KMH = 30; // rough city-traffic speed for the arrival estimate
+const POLL_MS = 8000;
+
+const isActive = (r) => r.status === "accepted" || r.status === "en_route";
+
+/** Live "help is coming" card: map with both positions, distance and a rough arrival time. */
+function LiveTracking({ request }) {
+  const you = request.location?.coordinates;
+  const responder = request.responderLocation?.coordinates;
+  const who = RESPONDER_LABEL[request.respondedByRole] || "Help";
+  const name = request.respondedBy?.orgName || request.respondedBy?.name;
+  const phone = request.respondedBy?.phone;
+
+  if (!you || !responder) {
+    return (
+      <div className="portal-message success" style={{ marginTop: 12 }}>
+        {who}{name ? ` from ${name}` : ""} has accepted your alert
+        {request.etaMinutes ? ` — about ${request.etaMinutes} min away` : ""}. Their live position will appear here once
+        they start moving.
+        {phone && (
+          <>
+            {" "}
+            <a href={`tel:${phone}`}><Phone size={12} /> {phone}</a>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  const km = distanceKm(you[1], you[0], responder[1], responder[0]);
+  const minutes = Math.max(1, Math.round((km / AVERAGE_SPEED_KMH) * 60));
+  const arrived = km < 0.1;
+
+  return (
+    <div style={{ marginTop: 12 }}>
+      <div className="portal-message success" style={{ margin: 0 }}>
+        <strong>{arrived ? `${who} has arrived` : `${who} is on the way`}</strong>
+        {name ? ` — ${name}` : ""}
+        {!arrived && ` · ${km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`} away · about ${minutes} min`}
+        {phone && (
+          <>
+            {" · "}
+            <a href={`tel:${phone}`}><Phone size={12} /> {phone}</a>
+          </>
+        )}
+      </div>
+      <LiveTrackMap you={you} responder={responder} responderRole={request.respondedByRole} responderName={name} />
+    </div>
+  );
+}
 const CANCEL_REASON_LABEL = { safe_now: "I'm safe now", sent_by_mistake: "Sent by mistake", other: "Other" };
 
 function Timeline({ status, cancelReason }) {
@@ -76,6 +129,14 @@ function SosHistory() {
     })();
   }, []);
 
+  // While help is on the way, refresh quietly so the responder's marker keeps moving.
+  const tracking = requests.some(isActive);
+  useEffect(() => {
+    if (!tracking) return undefined;
+    const interval = setInterval(load, POLL_MS);
+    return () => clearInterval(interval);
+  }, [tracking]);
+
   const doCancel = async (id, reason) => {
     setBusyId(id);
     setCancelingId(null);
@@ -130,10 +191,12 @@ function SosHistory() {
                         {r.assignedHospitalId?.name ? ` · Nearest hospital: ${r.assignedHospitalId.name}` : ""}
                       </p>
                     </div>
-                    <span className={`portal-badge ${STATUS_BADGE[r.status]}`}>{r.status}</span>
+                    <span className={`portal-badge ${STATUS_BADGE[r.status]}`}>{r.status.replace("_", " ")}</span>
                   </div>
 
                   <Timeline status={r.status} cancelReason={r.cancelReason} />
+
+                  {isActive(r) && <LiveTracking request={r} />}
 
                   <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
                     <MapsLink coordinates={r.location?.coordinates} />

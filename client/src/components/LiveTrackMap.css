@@ -1,0 +1,29 @@
+.ltm-wrap {
+  height: 260px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.ltm-responder-icon span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  font-size: 22px;
+  background: #fff;
+  border-radius: 50%;
+  border: 2px solid #d0021b;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+  animation: ltm-bob 1.6s ease-in-out infinite;
+}
+
+@keyframes ltm-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ltm-responder-icon span { animation: none; }
+}

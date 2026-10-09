@@ -14,6 +14,7 @@ import { playAlertSound } from "../utils/alertSound";
 import { downloadCsv } from "../utils/csv";
 import "./Dashboard.css";
 import "./portal.css";
+import useShareResponderLocation from "../hooks/useShareResponderLocation";
 
 const ALERT_BADGE = { pending: "pending", accepted: "hospital", en_route: "hospital", resolved: "approved" };
 const ALERT_STATUS_LABEL = { en_route: "en route" };
@@ -35,6 +36,9 @@ function PoliceAlerts() {
   const [etaInputs, setEtaInputs] = useState({});
   const knownPendingIds = useRef(new Set());
   const firstLoad = useRef(true);
+
+  // Report this device's position while an accepted/en-route alert is being attended to, so the civilian can follow along.
+  useShareResponderLocation(alerts.some((x) => x.status === "accepted" || x.status === "en_route"));
 
   /** `silent` skips the loading spinner/error banner — used for background polling. */
   const load = async (silent = false) => {

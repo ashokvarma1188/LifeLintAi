@@ -84,6 +84,7 @@ const myRequests = async (req, res) => {
   try {
     const requests = await EmergencyRequest.find({ citizenId: req.userId })
       .populate("assignedHospitalId", "name phone address")
+      .populate("respondedBy", "name orgName phone")
       .sort({ createdAt: -1 });
 
     res.json({ requests });
@@ -137,7 +138,7 @@ const updateLocation = async (req, res) => {
     }
 
     const request = await EmergencyRequest.findOneAndUpdate(
-      { _id: id, citizenId: req.userId, status: { $in: ["pending", "accepted"] } },
+      { _id: id, citizenId: req.userId, status: { $in: ["pending", "accepted", "en_route"] } },
       { location: { type: "Point", coordinates: [longitude, latitude] } },
       { new: true }
     );
@@ -224,6 +225,37 @@ const setStatus = (status) => async (req, res) => {
   }
 };
 
+/**
+ * A responder shares where they are right now. One call updates every active
+ * (accepted / en route) request handled by their organisation — the owner plus
+ * any staff accounts — so the client never has to work out which alerts are "theirs".
+ */
+const updateResponderLocation = async (req, res) => {
+  try {
+    if (!RESPONDER_ROLES.includes(req.user.role)) {
+      return res.status(403).json({ message: "Only response services can share a responder location" });
+    }
+
+    const longitude = Number(req.body.longitude);
+    const latitude = Number(req.body.latitude);
+    if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+      return res.status(400).json({ message: "A valid latitude and longitude are required" });
+    }
+
+    const orgRootId = req.user.parentOrgId || req.user._id;
+    const orgUserIds = await User.find({ $or: [{ _id: orgRootId }, { parentOrgId: orgRootId }] }).distinct("_id");
+
+    const result = await EmergencyRequest.updateMany(
+      { respondedBy: { $in: orgUserIds }, status: { $in: ["accepted", "en_route"] } },
+      { $set: { "responderLocation.coordinates": [longitude, latitude], "responderLocation.updatedAt": new Date() } }
+    );
+
+    res.json({ updated: result.modifiedCount });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
 /** A responder's own stats — covers the org owner plus any staff accounts under it, not just one login. */
 const getMyAnalytics = async (req, res) => {
   try {
@@ -274,6 +306,7 @@ module.exports = {
   myRequests,
   cancelSOS,
   updateLocation,
+  updateResponderLocation,
   getMyAnalytics,
   acceptSOS: setStatus("accepted"),
   declineSOS: setStatus("declined"),

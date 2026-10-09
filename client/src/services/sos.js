@@ -47,3 +47,9 @@ export async function getMyAnalytics() {
   const { data } = await api.get("/sos/my-analytics");
   return data;
 }
+
+/** A responder reports where they are so the civilian can watch help approach. */
+export async function shareResponderLocation(latitude, longitude) {
+  const { data } = await api.patch("/sos/responder-location", { latitude, longitude });
+  return data;
+}
