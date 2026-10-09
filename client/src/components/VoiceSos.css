@@ -1,0 +1,109 @@
+.voice-sos {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.voice-sos-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.voice-sos-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.26); }
+.voice-sos-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.voice-sos-btn.listening {
+  background: #fff;
+  color: #d0021b;
+  animation: voice-sos-pulse 1.4s ease-out infinite;
+}
+
+.voice-sos-lang {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
+  padding: 5px 6px;
+  font-size: 12.5px;
+}
+.voice-sos-lang option { color: #111; }
+
+.voice-sos-hint {
+  font-size: 12.5px;
+  opacity: 0.85;
+}
+
+.voice-sos-error {
+  margin-top: 8px;
+  font-size: 12.5px;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 7px 12px;
+  border-radius: 8px;
+}
+
+.voice-sos-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  padding: 16px;
+}
+
+.voice-sos-modal {
+  width: 100%;
+  max-width: 340px;
+  background: linear-gradient(160deg, #e0122a, #a30019);
+  color: #fff;
+  border-radius: 20px;
+  padding: 28px 24px 22px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+.voice-sos-modal h3 { margin: 6px 0 0; font-size: 17px; font-weight: 600; }
+.voice-sos-modal p { margin: 8px 0 0; font-size: 13px; opacity: 0.88; }
+.voice-sos-modal .voice-sos-heard { font-size: 12px; opacity: 0.75; }
+
+.voice-sos-count {
+  font-size: 84px;
+  line-height: 1.1;
+  font-weight: 800;
+  animation: voice-sos-pop 1s ease-out;
+}
+
+.voice-sos-actions { display: flex; gap: 10px; margin-top: 20px; }
+.voice-sos-actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.voice-sos-cancel { background: #fff; color: #333; }
+.voice-sos-now { background: rgba(0, 0, 0, 0.35); color: #fff; }
+
+@keyframes voice-sos-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6); }
+  100% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+}
+@keyframes voice-sos-pop {
+  0% { transform: scale(1.35); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .voice-sos-btn.listening, .voice-sos-count { animation: none; }
+}

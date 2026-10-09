@@ -10,6 +10,7 @@ import { roleLabel, refreshCurrentUser } from "../services/admin";
 import { listActiveAnnouncements } from "../services/announcements";
 import { getReminders } from "../services/healthRecords";
 import AppNavbar from "./AppNavbar";
+import VoiceSos from "../components/VoiceSos";
 import "./Dashboard.css";
 import "./portal.css";
 
@@ -133,7 +134,7 @@ function Dashboard() {
     );
   };
 
-  const handleSOS = () => {
+  const handleSOS = (overrideType) => {
     setSosError("");
     setSosResult(null);
 
@@ -153,7 +154,7 @@ function Dashboard() {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
-          const res = await api.post("/sos", { latitude, longitude, type: sosType, targets: sosTargets, shareMedicalId });
+          const res = await api.post("/sos", { latitude, longitude, type: overrideType || sosType, targets: sosTargets, shareMedicalId });
           setSosResult(res.data);
           startLiveLocationSharing(res.data.emergencyRequest._id);
         } catch (err) {
@@ -299,6 +300,14 @@ function Dashboard() {
                 Share my Medical ID (blood group, allergies, conditions) with responders
               </label>
 
+              <VoiceSos
+                disabled={sosLoading}
+                onTrigger={(spokenType) => {
+                  if (spokenType) setSosType(spokenType);
+                  handleSOS(spokenType);
+                }}
+              />
+
               {sosResult && (
                 <div className="sos-status success">
                   SOS sent to {sosTargets.join(", ")}
@@ -310,7 +319,7 @@ function Dashboard() {
               )}
               {sosError && <div className="sos-status error">{sosError}</div>}
             </div>
-            <button className="sos-button" onClick={handleSOS} disabled={sosLoading}>
+            <button className="sos-button" onClick={() => handleSOS()} disabled={sosLoading}>
               <Siren size={22} />
               {sosLoading ? "Sending" : "SOS"}
             </button>
