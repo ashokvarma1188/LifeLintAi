@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Plus, CheckCheck, Trash2, Check, X, Download } from "lucide-react";
+import { ArrowLeft, Plus, CheckCheck, Trash2, Check, X, Download, Flame } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import CoverageMap from "../components/CoverageMap";
 import MapsLink from "../components/MapsLink";
 import AgencyAnalyticsPanel from "../components/AgencyAnalyticsPanel";
+import { SkeletonRows } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 import { listAlerts, listReports, createReport, updateReportStatus, getFleet, updateFleet } from "../services/firestation";
 import { acceptSOS, declineSOS, enRouteSOS, resolveSOS, getMyAnalytics } from "../services/sos";
 import { getErrorMessage } from "../services/api";
@@ -210,9 +212,9 @@ function FirestationAlerts() {
               </div>
             )}
             {loading ? (
-              <div className="portal-empty">Loading alerts…</div>
+              <SkeletonRows rows={5} cols={6} />
             ) : alerts.length === 0 ? (
-              <div className="portal-empty">No open calls right now.</div>
+              <EmptyState icon={Flame} title="No open calls right now." hint="New fire and rescue calls in your coverage area will show up here." />
             ) : (
               <div className="portal-table-wrap">
                 <table className="portal-table">

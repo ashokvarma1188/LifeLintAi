@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Droplet, Phone, Check, X, Plus } from "lucide-react";
 import AppNavbar from "./AppNavbar";
+import { SkeletonRows, SkeletonCards } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 import api from "../services/api";
 import { getUser } from "../services/auth";
 import { listDonors, setDonorStatus } from "../services/donors";
@@ -226,9 +228,9 @@ function BloodDonation() {
             {!available || !myBloodGroup ? (
               <div className="portal-empty">Mark yourself as an available donor above to see requests you're compatible with.</div>
             ) : loading ? (
-              <div className="portal-empty">Loading…</div>
+              <SkeletonCards count={2} />
             ) : requestsForMe.length === 0 ? (
-              <div className="portal-empty">No open requests match your blood group right now.</div>
+              <EmptyState icon={Droplet} title="No open requests match your blood group right now." hint="Compatible requests nearby will show up here." />
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {requestsForMe.map((r) => (
@@ -312,9 +314,9 @@ function BloodDonation() {
         {tab === "mine" && (
           <div className="portal-panel">
             {loading ? (
-              <div className="portal-empty">Loading…</div>
+              <SkeletonCards count={2} />
             ) : myRequests.length === 0 ? (
-              <div className="portal-empty">You haven't posted any blood requests yet.</div>
+              <EmptyState icon={Droplet} title="You haven't posted any blood requests yet." />
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {myRequests.map((r) => (
@@ -392,7 +394,7 @@ function BloodDonation() {
 
             <div className="portal-panel">
               {loading ? (
-                <div className="portal-empty">Loading donors…</div>
+                <SkeletonRows rows={4} cols={3} />
               ) : donors.length === 0 ? (
                 <div className="portal-empty">No available donors {filter ? `for ${filter}` : ""} right now.</div>
               ) : (

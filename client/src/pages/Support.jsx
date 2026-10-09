@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, MessageCircle } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import SupportThread from "../components/SupportThread";
+import { SkeletonRows } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 import { createTicket, myTickets, getTicket, replyToTicket, closeTicket } from "../services/support";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
@@ -96,9 +98,9 @@ function Support() {
 
         <div className="portal-panel">
           {loading ? (
-            <div className="portal-empty">Loading your tickets…</div>
+            <SkeletonRows rows={3} cols={4} />
           ) : tickets.length === 0 ? (
-            <div className="portal-empty">You haven't raised any support tickets yet.</div>
+            <EmptyState icon={MessageCircle} title="You haven't raised any support tickets yet." hint="Tap “New ticket” above if you need help from the admin team." />
           ) : (
             <div className="portal-table-wrap">
               <table className="portal-table">

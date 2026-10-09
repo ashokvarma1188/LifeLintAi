@@ -1,10 +1,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Plus, CheckCheck, Check, X, Download } from "lucide-react";
+import { ArrowLeft, Plus, CheckCheck, Check, X, Download, Siren } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import CoverageMap from "../components/CoverageMap";
 import MapsLink from "../components/MapsLink";
 import AgencyAnalyticsPanel from "../components/AgencyAnalyticsPanel";
+import { SkeletonRows } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 import { listAlerts, listReports, createReport, updateReportStatus } from "../services/police";
 import { acceptSOS, declineSOS, enRouteSOS, resolveSOS, getMyAnalytics } from "../services/sos";
 import { getErrorMessage } from "../services/api";
@@ -176,9 +178,9 @@ function PoliceAlerts() {
               </div>
             )}
             {loading ? (
-              <div className="portal-empty">Loading alerts…</div>
+              <SkeletonRows rows={5} cols={6} />
             ) : alerts.length === 0 ? (
-              <div className="portal-empty">No open alerts right now.</div>
+              <EmptyState icon={Siren} title="No open alerts right now." hint="New SOS alerts in your coverage area will show up here." />
             ) : (
               <div className="portal-table-wrap">
                 <table className="portal-table">

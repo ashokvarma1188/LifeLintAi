@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Check, X, Ban, RotateCcw, FileText, Download, Plus, Megaphone } from "lucide-react";
+import { ArrowLeft, Check, X, Ban, RotateCcw, FileText, Download, Plus, Megaphone, Users } from "lucide-react";
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
 } from "recharts";
@@ -12,6 +12,8 @@ import {
 } from "../services/admin";
 import { listAllAnnouncements, createAnnouncement, deactivateAnnouncement } from "../services/announcements";
 import SupportThread from "../components/SupportThread";
+import { SkeletonRows } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 import { listAllTickets, getTicket as getSupportTicket, replyToTicket, closeTicket } from "../services/support";
 import { downloadCsv } from "../utils/csv";
 import "./Dashboard.css";
@@ -285,11 +287,12 @@ function AdminConsole() {
               </div>
             )}
             {loading ? (
-              <div className="portal-empty">Loading accounts…</div>
+              <SkeletonRows rows={5} cols={7} />
             ) : users.length === 0 ? (
-              <div className="portal-empty">
-                {tab === "pending" ? "No organisation accounts are waiting for approval." : "No accounts found."}
-              </div>
+              <EmptyState
+                icon={Users}
+                title={tab === "pending" ? "No organisation accounts are waiting for approval." : "No accounts found."}
+              />
             ) : visibleUsers.length === 0 ? (
               <div className="portal-empty">No accounts match that search.</div>
             ) : (
@@ -467,7 +470,7 @@ function AdminConsole() {
               </div>
             )}
             {loading ? (
-              <div className="portal-empty">Loading audit log…</div>
+              <SkeletonRows rows={5} cols={4} />
             ) : auditEntries.length === 0 ? (
               <div className="portal-empty">No hospital has accessed any patient's records yet.</div>
             ) : (
@@ -502,7 +505,7 @@ function AdminConsole() {
               </div>
             )}
             {loading ? (
-              <div className="portal-empty">Loading admin activity…</div>
+              <SkeletonRows rows={5} cols={5} />
             ) : actionLogEntries.length === 0 ? (
               <div className="portal-empty">No moderation actions have been taken yet.</div>
             ) : (
@@ -555,7 +558,7 @@ function AdminConsole() {
 
             <div className="portal-panel">
               {loading ? (
-                <div className="portal-empty">Loading announcements…</div>
+                <SkeletonRows rows={4} cols={3} />
               ) : announcements.length === 0 ? (
                 <div className="portal-empty">No announcements yet.</div>
               ) : (
@@ -601,9 +604,9 @@ function AdminConsole() {
         {tab === "support" && (
           <div className="portal-panel">
             {loading ? (
-              <div className="portal-empty">Loading support tickets…</div>
+              <SkeletonRows rows={4} cols={5} />
             ) : tickets.length === 0 ? (
-              <div className="portal-empty">No support tickets have been raised yet.</div>
+              <EmptyState title="No support tickets have been raised yet." />
             ) : (
               <div className="portal-table-wrap">
                 <table className="portal-table">

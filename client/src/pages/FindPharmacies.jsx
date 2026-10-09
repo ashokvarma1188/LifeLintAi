@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Phone, Send } from "lucide-react";
+import { ArrowLeft, Phone, Send, Pill, Search } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import MapsLink from "../components/MapsLink";
+import { SkeletonRows } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 import { listPharmacies, requestMedicine, myMedicineRequests } from "../services/pharmacyDirectory";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
@@ -134,11 +136,11 @@ function FindPharmacies() {
               />
             </div>
             {loading ? (
-              <div className="portal-empty">Loading pharmacies…</div>
+              <SkeletonRows rows={4} cols={5} />
             ) : pharmacies.length === 0 ? (
-              <div className="portal-empty">No pharmacies are registered yet.</div>
+              <EmptyState icon={Pill} title="No pharmacies are registered yet." />
             ) : visiblePharmacies.length === 0 ? (
-              <div className="portal-empty">No nearby pharmacy has that medicine in stock right now.</div>
+              <EmptyState icon={Search} title="No nearby pharmacy has that medicine in stock right now." hint="Try a different spelling, or check back later." />
             ) : (
               <div className="portal-table-wrap">
                 <table className="portal-table">

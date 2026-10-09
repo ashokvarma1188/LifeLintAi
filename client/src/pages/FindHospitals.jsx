@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import api from "../services/api";
 import AppNavbar from "./AppNavbar";
 import MapsLink from "../components/MapsLink";
+import { SkeletonCards } from "../components/Skeleton";
 import { IconMapPin, IconPhone, IconHospital } from "./icons";
 import "./Dashboard.css";
 import "./FindHospitals.css";
@@ -78,6 +79,8 @@ function FindHospitals() {
             {loading ? "Searching..." : "Refresh"}
           </button>
         </div>
+
+        {loading && hospitals.length === 0 && <SkeletonCards count={3} />}
 
         {!loading && hospitals.length === 0 && !error && (
           <div className="fh-empty">

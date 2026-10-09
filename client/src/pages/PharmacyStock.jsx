@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Plus, Trash2, Save, Download } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, Download, Package, Inbox } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import { getStock, updateStock, updateAvailability, listRequests, fulfilRequest, declineRequest } from "../services/pharmacy";
 import { getErrorMessage } from "../services/api";
 import { downloadCsv } from "../utils/csv";
+import { SkeletonRows } from "../components/Skeleton";
+import EmptyState from "../components/EmptyState";
 import "./Dashboard.css";
 import "./portal.css";
 
@@ -188,9 +190,9 @@ function PharmacyStock() {
               </div>
 
               {loading ? (
-                <div className="portal-empty">Loading stock…</div>
+                <SkeletonRows rows={4} cols={3} />
               ) : stock.length === 0 ? (
-                <div className="portal-empty">No medicines added yet. Add one above.</div>
+                <EmptyState icon={Package} title="No medicines added yet." hint="Add one above to let nearby civilians see it." />
               ) : (
                 <div className="portal-table-wrap">
                   <table className="portal-table">
@@ -260,7 +262,7 @@ function PharmacyStock() {
               )}
             </div>
             {requests.length === 0 ? (
-              <div className="portal-empty">No medicine requests yet.</div>
+              <EmptyState icon={Inbox} title="No medicine requests yet." hint="Requests from nearby civilians will show up here." />
             ) : visibleRequests.length === 0 ? (
               <div className="portal-empty">No requests with that status.</div>
             ) : (
