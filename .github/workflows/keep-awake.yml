@@ -1,6 +1,8 @@
 # Render's free plan puts the API to sleep after ~15 idle minutes, and the first
 # request after that takes ~30 s to wake it — too slow for an SOS, and medicine
 # reminders can't be sent while it sleeps. This pings it every 10 minutes.
+# GitHub often runs scheduled jobs late, so the server also pings itself
+# (server/utils/keepAwake.js). This job is the backup that wakes it after a restart.
 name: Keep API awake
 
 on:

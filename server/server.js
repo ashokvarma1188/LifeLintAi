@@ -8,6 +8,7 @@ const mongoose = require("mongoose");
 const app = require("./app");
 const { startSafeWalkScheduler } = require("./utils/safeWalkScheduler");
 const { startMedicineScheduler } = require("./utils/medicineScheduler");
+const { startKeepAwake } = require("./utils/keepAwake");
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -19,4 +20,5 @@ app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   startMedicineScheduler();
   startSafeWalkScheduler();
+  startKeepAwake();
 });

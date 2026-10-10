@@ -122,4 +122,4 @@ They also run on every push via GitHub Actions.
 
 - **Client (Vercel):** root directory `client`. Set `VITE_API_URL` (the API URL ending in `/api`) and `VITE_GOOGLE_CLIENT_ID`.
 - **Server (Render):** root directory `server`, start command `npm start`. Set the variables from `.env.example`, with `CLIENT_URL` set to the Vercel URL.
-- **Keep-awake:** `.github/workflows/keep-awake.yml` pings the API every 10 minutes. Render's free plan doesn't sleep, so the first SOS is never slow and medicine reminders go out on time.
+- **Keep-awake:** Render's free plan sleeps after 15 idle minutes. To stop that, the server pings its own public URL every 10 minutes (`server/utils/keepAwake.js`, which uses the `RENDER_EXTERNAL_URL` that Render sets). `.github/workflows/keep-awake.yml` is a backup ping. The first SOS is never slow, and medicine reminders go out on time.
