@@ -1,4 +1,4 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const gemini = require("../utils/gemini");
 
 const SYSTEM_PROMPT = `You are the LifeLink AI First-Aid Assistant, a calm, concise helper embedded in an
 emergency-response app. You give brief, practical first-aid and over-the-counter
@@ -23,20 +23,14 @@ Rules:
   bleeding, or that won't stop, tell them to seek in-person medical care or call
   emergency services right away.`;
 
-const isConfigured = () => Boolean(process.env.GEMINI_API_KEY);
+const { isConfigured } = gemini;
 
 // The language the person picked in the app — replies follow it unless they write in another one.
-const LANGUAGE_NAMES = { hi: "Hindi (Devanagari script)", te: "Telugu (Telugu script)" };
-
-let genAI = null;
-const getModel = (language) => {
-  if (!genAI) genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const languageRule = LANGUAGE_NAMES[language]
-    ? `
-- The user has chosen ${LANGUAGE_NAMES[language]} in the app. Reply in that language unless they write to you in a different one.`
-    : "";
-  return genAI.getGenerativeModel({ model: "gemini-3.6-flash", systemInstruction: SYSTEM_PROMPT + languageRule });
-};
+const systemPromptFor = (language) =>
+  ["hi", "te"].includes(language)
+    ? `${SYSTEM_PROMPT}
+- The user has chosen ${gemini.languageName(language)} in the app. Reply in that language unless they write to you in a different one.`
+    : SYSTEM_PROMPT;
 
 /**
  * `history` is the last few turns from the widget, kept short since this is a
@@ -80,7 +74,7 @@ const chat = async (req, res) => {
       { role: "user", parts: userParts },
     ];
 
-    const result = await getModel(req.body.language).generateContent({ contents });
+    const result = await gemini.generateContent(systemPromptFor(req.body.language), { contents });
     const reply = result.response.text();
 
     res.json({ reply });

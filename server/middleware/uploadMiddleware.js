@@ -83,4 +83,28 @@ const uploadSosMedia = (req, res, next) =>
     return res.status(400).json({ message: err.message || "Upload failed" });
   });
 
-module.exports = { uploadPdf, MAX_PDF_BYTES, uploadPhoto, MAX_IMAGE_BYTES, uploadSosMedia, SOS_MEDIA_TYPES };
+const MAX_REPORT_BYTES = 8 * 1024 * 1024;
+const REPORT_TYPES = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+
+/* A lab report for the AI report reader (field `file`): forwarded to Gemini, never stored. */
+const reportUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_REPORT_BYTES },
+  fileFilter: (req, file, cb) => {
+    if (!REPORT_TYPES.includes(file.mimetype)) return cb(new Error("Only photos (JPG, PNG, WEBP) or PDF reports are allowed"));
+    cb(null, true);
+  },
+});
+
+const uploadReport = (req, res, next) =>
+  reportUpload.single("file")(req, res, (err) => {
+    if (!err) return next();
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({ message: "The report must be smaller than 8 MB" });
+    }
+    return res.status(400).json({ message: err.message || "Upload failed" });
+  });
+
+module.exports = {
+  uploadPdf, MAX_PDF_BYTES, uploadPhoto, MAX_IMAGE_BYTES, uploadSosMedia, SOS_MEDIA_TYPES, uploadReport, MAX_REPORT_BYTES,
+};

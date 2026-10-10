@@ -1,0 +1,270 @@
+/* AI Report Reader and AI Symptom Checker */
+
+.ai-page { max-width: 960px; }
+
+.ai-hero {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.ai-hero h1 { margin: 0 0 6px; font-size: 26px; letter-spacing: -0.02em; }
+.ai-hero p { margin: 0; color: var(--text-secondary); font-size: 14px; max-width: 620px; line-height: 1.5; }
+
+.ai-hero-icon {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), #2a9df4);
+  box-shadow: 0 10px 24px rgba(15, 157, 99, 0.25);
+}
+
+.ai-eyebrow {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.ai-eyebrow.danger { color: var(--error-text); }
+.ai-muted { color: var(--text-secondary); font-size: 14px; margin: 4px 0; }
+
+/* ------------------------------------------------------------- upload zone */
+
+.ai-drop {
+  border: 2px dashed var(--border-color);
+  border-radius: 16px;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--bg-page);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.ai-drop:hover,
+.ai-drop.dragging { border-color: var(--accent); background: var(--accent-soft-bg); }
+.ai-drop.has-file { cursor: default; padding: 18px; align-items: stretch; border-style: solid; }
+.ai-drop strong { font-size: 15px; color: var(--text-primary); }
+.ai-drop span { font-size: 13px; color: var(--text-secondary); }
+.ai-drop-icon { color: var(--accent); }
+
+.ai-file { display: flex; align-items: center; gap: 14px; text-align: left; }
+.ai-file-thumb { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; border: 1px solid var(--border-color); flex: none; }
+.ai-file-thumb.pdf { display: grid; place-items: center; background: var(--error-bg); color: var(--error-text); }
+.ai-file-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ai-file-info strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ai-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.ai-note { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-secondary); }
+.ai-lang-note { margin: 10px 0 0; font-size: 12px; color: var(--text-secondary); }
+
+.ai-thinking { margin-top: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--text-secondary); }
+.ai-thinking-bar {
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent) var(--border-color-soft);
+  background-size: 40% 100%;
+  background-repeat: no-repeat;
+  animation: ai-scan 1.3s ease-in-out infinite;
+}
+
+@keyframes ai-scan {
+  from { background-position: -40% 0; }
+  to { background-position: 140% 0; }
+}
+
+/* ----------------------------------------------------------------- results */
+
+.ai-result { display: flex; flex-direction: column; gap: 16px; }
+
+.ai-urgent {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+  color: var(--error-text);
+}
+.ai-urgent > div { flex: 1; }
+.ai-urgent p { margin: 4px 0 0; font-size: 14px; }
+
+.ai-summary-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.ai-summary h2 { margin: 0; font-size: 20px; }
+.ai-summary-text { font-size: 15px; line-height: 1.65; margin: 12px 0 0; }
+.ai-counts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+.ai-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ai-chip.high { background: var(--error-bg); color: var(--error-text); }
+.ai-chip.low { background: var(--warning-bg); color: var(--warning-text); }
+.ai-chip.abnormal { background: #efe7fd; color: #6b3fc4; }
+.ai-chip.normal { background: var(--success-bg); color: var(--success-text); }
+.ai-chip.unknown { background: var(--border-color-soft); color: var(--text-secondary); }
+:root[data-theme="dark"] .ai-chip.abnormal { background: #261a3d; color: #c4a6ff; }
+
+.ai-tests { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+
+.ai-test {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.ai-test.high { border-left-color: var(--danger); }
+.ai-test.low { border-left-color: #e5a72a; }
+.ai-test.abnormal { border-left-color: #8b5cf6; }
+.ai-test.normal { border-left-color: var(--accent); }
+.ai-test-top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.ai-test-top strong { font-size: 14px; }
+.ai-test-value { font-size: 22px; font-weight: 700; margin-top: 6px; }
+.ai-test-value span { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+.ai-test-range { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.ai-test p { font-size: 13px; line-height: 1.5; color: var(--text-secondary); margin: 8px 0 0; }
+
+.ai-list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.55; }
+.ai-list.warn li::marker { color: var(--danger); }
+.ai-disclaimer { font-size: 12px; color: var(--text-secondary); margin: 0; }
+
+/* --------------------------------------------------------- symptom checker */
+
+.ai-textarea-wrap { position: relative; }
+.ai-textarea-wrap textarea { padding-right: 52px; min-height: 110px; }
+
+.ai-mic {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+.ai-mic.on { background: var(--danger); border-color: var(--danger); color: #fff; animation: ai-pulse 1.2s infinite; }
+
+@keyframes ai-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+  100% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
+}
+
+.ai-quick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.ai-quick-chip {
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+.ai-quick-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+.ai-segment { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--border-color); border-radius: 10px; overflow: hidden; width: fit-content; }
+.ai-segment button {
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 16px;
+  border: none;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  border-right: 1px solid var(--border-color);
+}
+.ai-segment button:last-child { border-right: none; }
+.ai-segment button.on { background: var(--accent); color: #fff; }
+
+.triage-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 20px;
+  align-items: center;
+  padding: 24px;
+  border-radius: 18px;
+  border: 1px solid;
+}
+.triage-card.emergency { background: var(--error-bg); border-color: var(--error-border); }
+.triage-card.doctor { background: var(--warning-bg); border-color: #f0d9a8; }
+.triage-card.home { background: var(--success-bg); border-color: var(--success-border); }
+:root[data-theme="dark"] .triage-card.doctor { border-color: #4a3a12; }
+
+.triage-badge {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  padding: 8px;
+}
+.triage-card.emergency .triage-badge { background: var(--danger); animation: ai-pulse 1.6s infinite; }
+.triage-card.doctor .triage-badge { background: #e5a72a; }
+.triage-card.home .triage-badge { background: var(--accent); }
+
+.triage-tag { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+.triage-card.emergency .triage-tag { color: var(--error-text); }
+.triage-card.doctor .triage-tag { color: var(--warning-text); }
+.triage-card.home .triage-tag { color: var(--success-text); }
+.triage-body h2 { margin: 6px 0; font-size: 22px; line-height: 1.3; }
+.triage-body p { margin: 0; font-size: 15px; line-height: 1.55; }
+.triage-care { display: inline-block; margin-top: 10px; font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 8px; background: var(--bg-surface); }
+.triage-cta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; }
+
+.ai-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.ai-warning-panel { border-color: var(--error-border); }
+
+.ai-hospitals { display: flex; flex-direction: column; gap: 10px; }
+.ai-hospital { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border-color); border-radius: 12px; flex-wrap: wrap; }
+.ai-hospital-icon { width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center; background: var(--accent-soft-bg); color: var(--accent); flex: none; }
+.ai-hospital-info { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 3px; }
+.ai-hospital-info span { font-size: 13px; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.ai-hospital-actions { display: flex; gap: 8px; }
+
+@media (max-width: 700px) {
+  .ai-two-col { grid-template-columns: 1fr; }
+  .triage-card { grid-template-columns: 1fr; justify-items: start; }
+  .triage-badge { width: 88px; height: 88px; }
+  .ai-hero { align-items: flex-start; }
+}
+
+.ai-result > .portal-btn { align-self: flex-start; }
