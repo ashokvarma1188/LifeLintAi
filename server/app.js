@@ -28,6 +28,11 @@ const publicRoutes = require("./routes/publicRoutes");
 const pushRoutes = require("./routes/pushRoutes");
 const medicineRoutes = require("./routes/medicineRoutes");
 const safeWalkRoutes = require("./routes/safeWalkRoutes");
+const controlRoomRoutes = require("./routes/controlRoomRoutes");
+const safetyCheckRoutes = require("./routes/safetyCheckRoutes");
+const campRoutes = require("./routes/campRoutes");
+const courseRoutes = require("./routes/courseRoutes");
+const certificateRoutes = require("./routes/certificateRoutes");
 
 // Automated tests fire many requests from one address — rate limits would only get in their way.
 const isTest = process.env.NODE_ENV === "test";
@@ -106,5 +111,10 @@ app.use("/api/public", publicRoutes);
 app.use("/api/push", pushRoutes);
 app.use("/api/medicines", medicineRoutes);
 app.use("/api/walks", safeWalkRoutes);
+app.use("/api/control-room", controlRoomRoutes);
+app.use("/api/safety-checks", safetyCheckRoutes);
+app.use("/api/camps", campRoutes);
+app.use("/api/course", courseRoutes);
+app.use("/api/certificates", certificateRoutes);
 
 module.exports = app;

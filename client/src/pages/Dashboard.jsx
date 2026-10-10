@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   User, Hospital, Droplet, Bot, FileHeart, BookHeart, Siren, ShieldCheck, Map, ClipboardList,
   BedDouble, Ambulance, Truck, Package, Clock, Pill, Footprints, Inbox, Users, History, HeartPulse, Building2, Phone, BarChart3, Megaphone,
+  ScanText, Stethoscope, GraduationCap, Radar, Tent, CloudLightning,
 } from "lucide-react";
 import api, { getErrorMessage } from "../services/api";
 import { getUser, resendVerification } from "../services/auth";
@@ -15,6 +16,7 @@ import ShakeSos from "../components/ShakeSos";
 import SosFollowUp from "../components/SosFollowUp";
 import { DonateAgainBanner } from "../components/DonationCard";
 import NotificationToggle from "../components/NotificationToggle";
+import SafetyCheckBanner from "../components/SafetyCheckBanner";
 import { syncPushSubscription } from "../services/push";
 import "./Dashboard.css";
 import "./portal.css";
@@ -27,6 +29,8 @@ import { useLang } from "../i18n/context";
 const FEATURES = {
   civilian: [
     { icon: History, title: "SOS History", desc: "Every alert you've sent, with live status and the option to cancel.", path: "/sos-history" },
+    { icon: Stethoscope, title: "AI Symptom Checker", desc: "Describe how you feel — the AI says how urgent it is and shows the nearest hospital.", path: "/symptom-checker", note: "New" },
+    { icon: ScanText, title: "AI Report Reader", desc: "Upload a lab report — the AI explains it in simple words and flags high or low values.", path: "/report-reader", note: "New" },
     { icon: FileHeart, title: "Health Records", desc: "Your medical reports, vitals and documents in one place.", path: "/health-records" },
     { icon: HeartPulse, title: "Medical ID", desc: "Emergency-ready summary, vitals trends, and who's viewed your records.", path: "/medical-id" },
     { icon: User, title: "My Profile", desc: "Blood group, medical history, allergies, and emergency contacts.", path: "/profile" },
@@ -39,11 +43,13 @@ const FEATURES = {
     { icon: Footprints, title: "Walk with me", desc: "Share your live location for a trip — if you don't check in on time, police can be alerted.", path: "/walk" },
     { icon: Pill, title: "Medicine Reminders", desc: "Add your medicines and times — get a reminder at every dose and tick it off.", path: "/medicines" },
     { icon: BookHeart, title: "First-Aid Guide", desc: "Step-by-step help for CPR, choking, bleeding, burns and more — works offline.", path: "/first-aid" },
+    { icon: GraduationCap, title: "First-Aid Course", desc: "8 short lessons and a quiz — pass to get your First-Aid Aware certificate.", path: "/first-aid-course", note: "New" },
     { icon: Inbox, title: "Support", desc: "Raise a ticket and get help from the admin team.", path: "/support" },
     { icon: Bot, title: "AI First-Aid Assistant", desc: "Get quick first-aid guidance while help is on the way. Open it from the chat button in the bottom-right corner.", note: "Live now" },
   ],
   police: [
     { icon: Siren, title: "Incoming Alerts", desc: "Live SOS alerts raised in your coverage area.", path: "/police/alerts", tab: "alerts" },
+    { icon: Radar, title: "Control Room", desc: "Live city map of open SOS alerts, hospital beds and Safety Checks.", path: "/control-room" },
     { icon: Map, title: "Coverage Map", desc: "See active incidents plotted across your jurisdiction.", path: "/police/alerts", tab: "map" },
     { icon: ClipboardList, title: "Incident Reports", desc: "File and review reports for responded incidents.", path: "/police/alerts", tab: "reports" },
     { icon: BarChart3, title: "Analytics", desc: "Response times, acceptance rate and false-alarm rate.", path: "/police/alerts", tab: "analytics" },
@@ -54,10 +60,13 @@ const FEATURES = {
     { icon: Ambulance, title: "Incoming Patients", desc: "Patients heading your way from SOS alerts.", path: "/hospital/incoming" },
     { icon: BedDouble, title: "Bed Availability", desc: "Keep your bed, ICU and ambulance counts up to date.", path: "/hospital/beds" },
     { icon: Droplet, title: "Blood Requests", desc: "Request blood for a patient — matched to compatible donors nearby.", path: "/blood-donation" },
+    { icon: Tent, title: "Donation Camps", desc: "Post blood donation camps, see who registered and mark who donated.", path: "/hospital/camps" },
+    { icon: Radar, title: "Control Room", desc: "Live city map of open SOS alerts, hospital beds and Safety Checks.", path: "/control-room" },
     { icon: Building2, title: "Organisation Profile", desc: "Logo, hours, service radius, and staff accounts.", path: "/org-profile" },
   ],
   firestation: [
     { icon: Siren, title: "Active Calls", desc: "Fire and rescue calls assigned to your station.", path: "/firestation/alerts", tab: "alerts" },
+    { icon: Radar, title: "Control Room", desc: "Live city map of open SOS alerts, hospital beds and Safety Checks.", path: "/control-room" },
     { icon: Truck, title: "Fleet Status", desc: "Track which engines and crews are available.", path: "/firestation/alerts", tab: "fleet" },
     { icon: Map, title: "Coverage Map", desc: "Live view of incidents across your coverage area.", path: "/firestation/alerts", tab: "map" },
     { icon: ClipboardList, title: "Incident Reports", desc: "File and review reports for responded calls.", path: "/firestation/alerts", tab: "reports" },
@@ -72,6 +81,8 @@ const FEATURES = {
   ],
   admin: [
     { icon: ShieldCheck, title: "Pending Approvals", desc: "Approve or reject organisation account requests.", path: "/admin", tab: "pending" },
+    { icon: Radar, title: "Control Room", desc: "Live city map of open SOS alerts, hospital beds and Safety Checks.", path: "/control-room" },
+    { icon: CloudLightning, title: "Safety Check", desc: "Declare a flood or cyclone area and see who is safe and who needs help.", path: "/admin", tab: "safety" },
     { icon: Users, title: "All Accounts", desc: "Browse, search and manage every account on LifeLink.", path: "/admin", tab: "all" },
     { icon: BarChart3, title: "Analytics", desc: "Platform-wide SOS, response time and user stats.", path: "/admin", tab: "analytics" },
     { icon: ClipboardList, title: "Audit Log", desc: "Hospital access to patient records.", path: "/admin", tab: "audit" },
@@ -277,6 +288,8 @@ function Dashboard() {
             {verifyNotice && <div style={{ marginTop: 8, wordBreak: "break-all" }}>{verifyNotice}</div>}
           </div>
         )}
+
+        {role === "civilian" && status === "approved" && <SafetyCheckBanner contacts={contacts} userName={user.name} />}
 
         {role === "civilian" && <DonateAgainBanner />}
 

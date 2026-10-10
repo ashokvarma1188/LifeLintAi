@@ -54,9 +54,15 @@ const TrackSos = lazy(() => import("./pages/TrackSos"));
 const PublicMedicalId = lazy(() => import("./pages/PublicMedicalId"));
 const AiAssistantWidget = lazy(() => import("./components/AiAssistantWidget"));
 const FaqAssistantWidget = lazy(() => import("./components/FaqAssistantWidget"));
+const ReportReader = lazy(() => import("./pages/ReportReader"));
+const SymptomChecker = lazy(() => import("./pages/SymptomChecker"));
+const ControlRoom = lazy(() => import("./pages/ControlRoom"));
+const HospitalCamps = lazy(() => import("./pages/HospitalCamps"));
+const FirstAidCourse = lazy(() => import("./pages/FirstAidCourse"));
+const VerifyCertificate = lazy(() => import("./pages/VerifyCertificate"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-const AUTH_PAGE_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-email", "/track/", "/id/", "/walk-track/"];
+const AUTH_PAGE_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-email", "/track/", "/id/", "/walk-track/", "/verify/", "/control-room"];
 
 /**
  * Available to every signed-in role — first-aid guidance is useful for staff
@@ -118,6 +124,7 @@ function App() {
                 <Route path="/track/:token" element={<TrackSos />} />
                 <Route path="/id/:token" element={<PublicMedicalId />} />
                 <Route path="/walk-track/:token" element={<WalkTrack />} />
+                <Route path="/verify/:code" element={<VerifyCertificate />} />
 
                 {/* Public and offline-capable — bundled content, no API calls */}
                 <Route path="/first-aid" element={<FirstAidGuide />} />
@@ -230,6 +237,30 @@ function App() {
                   }
                 />
                 <Route
+                  path="/report-reader"
+                  element={
+                    <ProtectedRoute>
+                      <ReportReader />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/symptom-checker"
+                  element={
+                    <ProtectedRoute>
+                      <SymptomChecker />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/first-aid-course"
+                  element={
+                    <ProtectedRoute>
+                      <FirstAidCourse />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
                   path="/medical-id"
                   element={
                     <ProtectedRoute>
@@ -260,6 +291,22 @@ function App() {
                   element={
                     <ProtectedRoute roles={["hospital"]}>
                       <HospitalBeds />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/hospital/camps"
+                  element={
+                    <ProtectedRoute roles={["hospital"]}>
+                      <HospitalCamps />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/control-room"
+                  element={
+                    <ProtectedRoute roles={["admin", "hospital", "police", "firestation"]}>
+                      <ControlRoom />
                     </ProtectedRoute>
                   }
                 />
