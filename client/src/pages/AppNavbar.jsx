@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../context/ThemeContext";
+import { useTheme } from "../context/theme";
 import { IconPulse, IconSun, IconMoon } from "./icons";
 import { unlinkPushOnLogout } from "../services/push";
 import { useLang } from "../i18n/context";

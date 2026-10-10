@@ -24,20 +24,14 @@ const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 function FindHospitals() {
   const { t } = useLang();
   const [hospitals, setHospitals] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(() => Boolean(navigator.geolocation));
+  const [error, setError] = useState(() => (navigator.geolocation ? "" : "Location is not supported on this device/browser."));
   const [coords, setCoords] = useState(null);
   const [bloodGroup, setBloodGroup] = useState("");
 
-  const search = useCallback(() => {
-    setError("");
-    setLoading(true);
-
-    if (!navigator.geolocation) {
-      setError("Location is not supported on this device/browser.");
-      setLoading(false);
-      return;
-    }
+  // State updates only happen in the geolocation/API callbacks, so this is safe to run on mount.
+  const locate = useCallback(() => {
+    if (!navigator.geolocation) return;
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
@@ -49,6 +43,7 @@ function FindHospitals() {
             params: { longitude, latitude },
           });
           setHospitals(res.data);
+          setError("");
         } catch (err) {
           setError(err.response?.data?.message || "Failed to load hospitals.");
         } finally {
@@ -62,9 +57,16 @@ function FindHospitals() {
     );
   }, []);
 
+  const search = () => {
+    if (!navigator.geolocation) return;
+    setError("");
+    setLoading(true);
+    locate();
+  };
+
   useEffect(() => {
-    search();
-  }, [search]);
+    locate();
+  }, [locate]);
 
   // Blood groups this hospital has units of, in the usual order.
   const stockOf = (h) => BLOOD_GROUPS.map((g) => [g, Number(h.bloodStock?.[g]) || 0]).filter(([, units]) => units > 0);
