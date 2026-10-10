@@ -9,9 +9,11 @@ import { createTicket, myTickets, getTicket, replyToTicket, closeTicket } from "
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
+import { useLang } from "../i18n/context";
 
 function Support() {
   const navigate = useNavigate();
+  const { t } = useLang();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -40,7 +42,7 @@ function Support() {
 
   const submitTicket = async (e) => {
     e.preventDefault();
-    if (!form.subject.trim() || !form.message.trim()) return setError("Fill in both fields.");
+    if (!form.subject.trim() || !form.message.trim()) return setError(t("Fill in both fields."));
     setSubmitting(true);
     setError("");
     try {
@@ -49,7 +51,7 @@ function Support() {
       setForm({ subject: "", message: "" });
       setCreating(false);
     } catch (err) {
-      setError(getErrorMessage(err, "Could not submit your ticket."));
+      setError(getErrorMessage(err, t("Could not submit your ticket.")));
     } finally {
       setSubmitting(false);
     }
@@ -59,7 +61,7 @@ function Support() {
     try {
       setOpenTicket(await getTicket(id));
     } catch (err) {
-      setError(getErrorMessage(err, "Could not open this ticket."));
+      setError(getErrorMessage(err, t("Could not open this ticket.")));
     }
   };
 
@@ -81,44 +83,44 @@ function Support() {
 
       <div className="portal-content">
         <button className="portal-back" onClick={() => navigate("/dashboard")}>
-          <ArrowLeft size={14} /> Back to dashboard
+          <ArrowLeft size={14} /> {t("Back to dashboard")}
         </button>
 
         <div className="portal-head">
           <div>
-            <h1>Support</h1>
-            <p>Raise a ticket and the admin team will reply here.</p>
+            <h1>{t("Support")}</h1>
+            <p>{t("Raise a ticket and the admin team will reply here.")}</p>
           </div>
           <button className="portal-btn primary" onClick={() => setCreating(true)}>
-            <Plus size={16} /> New ticket
+            <Plus size={16} /> {t("New ticket")}
           </button>
         </div>
 
-        {error && <div className="portal-message error">{error}</div>}
+        {error && <div className="portal-message error">{t(error)}</div>}
 
         <div className="portal-panel">
           {loading ? (
             <SkeletonRows rows={3} cols={4} />
           ) : tickets.length === 0 ? (
-            <EmptyState icon={MessageCircle} title="You haven't raised any support tickets yet." hint="Tap “New ticket” above if you need help from the admin team." />
+            <EmptyState icon={MessageCircle} title={t("You haven't raised any support tickets yet.")} hint={t("Tap “New ticket” above if you need help from the admin team.")} />
           ) : (
             <div className="portal-table-wrap">
               <table className="portal-table">
                 <thead>
-                  <tr><th>Subject</th><th>Status</th><th>Last message</th><th>Updated</th><th /></tr>
+                  <tr><th>{t("Subject")}</th><th>{t("Status")}</th><th>{t("Last message")}</th><th>{t("Updated")}</th><th /></tr>
                 </thead>
                 <tbody>
-                  {tickets.map((t) => (
-                    <tr key={t._id}>
-                      <td>{t.subject}</td>
-                      <td><span className={`portal-badge ${t.status === "open" ? "pending" : "approved"}`}>{t.status}</span></td>
+                  {tickets.map((ticket) => (
+                    <tr key={ticket._id}>
+                      <td>{ticket.subject}</td>
+                      <td><span className={`portal-badge ${ticket.status === "open" ? "pending" : "approved"}`}>{t(ticket.status)}</span></td>
                       <td style={{ maxWidth: 260, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                        {t.lastMessage ? `${t.lastMessage.senderRole === "admin" ? "Support: " : ""}${t.lastMessage.text}` : "—"}
+                        {ticket.lastMessage ? `${ticket.lastMessage.senderRole === "admin" ? `${t("Support")}: ` : ""}${ticket.lastMessage.text}` : "—"}
                       </td>
-                      <td>{new Date(t.updatedAt).toLocaleString()}</td>
+                      <td>{new Date(ticket.updatedAt).toLocaleString()}</td>
                       <td>
-                        <button className="portal-btn ghost small" onClick={() => openThread(t._id)}>
-                          <MessageCircle size={14} /> Open
+                        <button className="portal-btn ghost small" onClick={() => openThread(ticket._id)}>
+                          <MessageCircle size={14} /> {t("Open")}
                         </button>
                       </td>
                     </tr>
@@ -133,32 +135,32 @@ function Support() {
       {creating && (
         <div className="portal-modal-backdrop" onClick={() => setCreating(false)}>
           <div className="portal-modal" onClick={(e) => e.stopPropagation()}>
-            <h2>New support ticket</h2>
+            <h2>{t("New support ticket")}</h2>
             <form className="portal-form" onSubmit={submitTicket}>
               <div className="portal-field">
-                <label htmlFor="subject">Subject</label>
+                <label htmlFor="subject">{t("Subject")}</label>
                 <input
                   id="subject"
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  placeholder="e.g. Can't verify my email"
+                  placeholder={t("e.g. Can't verify my email")}
                 />
               </div>
               <div className="portal-field">
-                <label htmlFor="message">Message</label>
+                <label htmlFor="message">{t("Message")}</label>
                 <textarea
                   id="message"
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
-                  placeholder="Describe the issue…"
+                  placeholder={t("Describe the issue…")}
                 />
               </div>
               <div className="portal-form-actions">
                 <button type="button" className="portal-btn ghost" onClick={() => setCreating(false)} disabled={submitting}>
-                  Cancel
+                  {t("Cancel")}
                 </button>
                 <button type="submit" className="portal-btn primary" disabled={submitting}>
-                  {submitting ? "Submitting…" : "Submit"}
+                  {submitting ? t("Submitting…") : t("Submit")}
                 </button>
               </div>
             </form>

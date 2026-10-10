@@ -6,11 +6,14 @@ import { getTrack } from "../services/publicLinks";
 import { distanceKm } from "../utils/maps";
 import "./Dashboard.css";
 import "./portal.css";
+import { useLang } from "../i18n/context";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 const POLL_MS = 8000;
 const FINAL_STATUSES = ["resolved", "cancelled"];
 const AVERAGE_SPEED_KMH = 30;
 const RESPONDER_LABEL = { hospital: "Ambulance", police: "Police", firestation: "Fire engine" };
+const STATUS_BADGE_TEXT = { pending: "pending", accepted: "accepted", en_route: "en route", resolved: "resolved", cancelled: "cancelled", declined: "declined" };
 const STATUS_TEXT = {
   pending: "Waiting for a response team to accept.",
   accepted: "A response team has accepted and is getting ready.",
@@ -23,6 +26,7 @@ const STATUS_TEXT = {
 /** Public page opened from the link a civilian sends to family — no login, nothing sensitive. */
 function TrackSos() {
   const { token } = useParams();
+  const { t } = useLang();
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
 
@@ -40,7 +44,7 @@ function TrackSos() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err.response?.status === 404 ? "This tracking link is not valid." : "Could not load the status. Retrying…");
+          setError(err.response?.status === 404 ? t("This tracking link is not valid.") : t("Could not load the status. Retrying…"));
         }
       }
     };
@@ -50,6 +54,8 @@ function TrackSos() {
       cancelled = true;
       clearInterval(interval);
     };
+    // `t` only changes with the language; refetching on a language switch isn't needed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const who = RESPONDER_LABEL[data?.responderRole] || "Help";
@@ -64,14 +70,21 @@ function TrackSos() {
   return (
     <div className="portal-page">
       <div className="portal-content" style={{ maxWidth: 760 }}>
+        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+          <LanguageSwitcher />
+        </div>
         <div className="portal-head">
           <div>
             <h1 style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Siren size={20} color="#d0021b" /> LifeLink live SOS
+              <Siren size={20} color="#d0021b" /> {t("LifeLink live SOS")}
             </h1>
-            <p>{data ? `${data.firstName} sent an SOS (${data.type}).` : "Loading the latest status…"}</p>
+            <p>
+              {data
+                ? t("{name} sent an SOS ({type}).", { name: data.firstName, type: t(data.type) })
+                : t("Loading the latest status…")}
+            </p>
           </div>
-          {data && <span className={`portal-badge ${badge}`}>{data.status.replace("_", " ")}</span>}
+          {data && <span className={`portal-badge ${badge}`}>{t(STATUS_BADGE_TEXT[data.status] || data.status)}</span>}
         </div>
 
         {error && <div className="portal-message error">{error}</div>}
@@ -79,10 +92,14 @@ function TrackSos() {
         {data && (
           <div className="portal-panel">
             <div className="portal-message success" style={{ margin: 0 }}>
-              <strong>{STATUS_TEXT[data.status]}</strong>
-              {data.responderName && ` ${who} from ${data.responderName}.`}
-              {eta && ` ${eta.km < 1 ? `${Math.round(eta.km * 1000)} m` : `${eta.km.toFixed(1)} km`} away · about ${eta.minutes} min.`}
-              {!eta && data.etaMinutes ? ` Estimated arrival: ${data.etaMinutes} min.` : ""}
+              <strong>{t(STATUS_TEXT[data.status])}</strong>
+              {data.responderName && ` ${t("{who} from {name}.", { who: t(who), name: data.responderName })}`}
+              {eta &&
+                ` ${t("{distance} away · about {minutes} min.", {
+                  distance: eta.km < 1 ? `${Math.round(eta.km * 1000)} m` : `${eta.km.toFixed(1)} km`,
+                  minutes: eta.minutes,
+                })}`}
+              {!eta && data.etaMinutes ? ` ${t("Estimated arrival: {minutes} min.", { minutes: data.etaMinutes })}` : ""}
             </div>
 
             {data.location ? (
@@ -91,21 +108,21 @@ function TrackSos() {
                 responder={data.responderLocation}
                 responderRole={data.responderRole}
                 responderName={data.responderName}
-                youLabel={`${data.firstName}'s location`}
+                youLabel={t("{name}'s location", { name: data.firstName })}
               />
             ) : (
-              <p style={{ color: "var(--text-secondary)", marginBottom: 0 }}>Live location is hidden once an alert is over.</p>
+              <p style={{ color: "var(--text-secondary)", marginBottom: 0 }}>{t("Live location is hidden once an alert is over.")}</p>
             )}
 
             <p style={{ fontSize: 12.5, color: "var(--text-secondary)", marginBottom: 0 }}>
-              Last update {new Date(data.updatedAt).toLocaleTimeString()} · refreshes automatically.{" "}
-              <a href="tel:112"><Phone size={11} /> Call 112</a> if you can reach them in person.
+              {t("Last update {time} · refreshes automatically.", { time: new Date(data.updatedAt).toLocaleTimeString() })}{" "}
+              <a href="tel:112"><Phone size={11} /> {t("Call 112")}</a>
             </p>
           </div>
         )}
 
         <p style={{ marginTop: 18, fontSize: 12.5 }}>
-          <Link to="/">LifeLink AI</Link> — smart emergency &amp; blood donation network.
+          <Link to="/">LifeLink AI</Link> — {t("smart emergency & blood donation network.")}
         </p>
       </div>
     </div>

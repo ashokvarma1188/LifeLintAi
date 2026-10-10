@@ -5,10 +5,12 @@ import { getErrorMessage } from "../services/api";
 import AuthShell from "./AuthShell";
 import PasswordField from "./PasswordField";
 import GoogleSignInButton from "../components/GoogleSignInButton";
+import { useLang } from "../i18n/context";
 
 function Login() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLang();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -57,7 +59,7 @@ function Login() {
         navigate(redirectTo, { replace: true });
       }
     } catch (err) {
-      setError(getErrorMessage(err, "Could not sign in with Google."));
+      setError(getErrorMessage(err, t("Could not sign in with Google.")));
     } finally {
       setLoading(false);
     }
@@ -72,7 +74,7 @@ function Login() {
       await verifyTwoFactor(pending2FA.userId, code);
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      setError(getErrorMessage(err, "That code is invalid or has expired."));
+      setError(getErrorMessage(err, t("That code is invalid or has expired.")));
     } finally {
       setLoading(false);
     }
@@ -81,18 +83,18 @@ function Login() {
   if (pending2FA) {
     return (
       <AuthShell
-        title="Enter your code"
-        subtitle="We sent a 6-digit code to your email."
+        title={t("Enter your code")}
+        subtitle={t("We sent a 6-digit code to your email.")}
         error={error}
         footer={
           <button type="button" onClick={() => setPending2FA(null)} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--ll-primary)", fontWeight: 500 }}>
-            Back to sign in
+            {t("Back to sign in")}
           </button>
         }
       >
         <form className="auth-form" onSubmit={handleVerifyCode} noValidate>
           <div className="auth-field">
-            <label htmlFor="code">6-digit code</label>
+            <label htmlFor="code">{t("6-digit code")}</label>
             <input
               id="code"
               inputMode="numeric"
@@ -108,12 +110,12 @@ function Login() {
 
           {pending2FA.devCode && (
             <div className="auth-message" style={{ fontSize: 13 }}>
-              Email isn&apos;t configured on this deployment yet — your code is <strong>{pending2FA.devCode}</strong>.
+              {t("Email isn't configured on this deployment yet — your code is")} <strong>{pending2FA.devCode}</strong>.
             </div>
           )}
 
           <button className="auth-submit" type="submit" disabled={loading || code.length !== 6}>
-            {loading ? "Verifying…" : "Verify and sign in"}
+            {loading ? t("Verifying…") : t("Verify and sign in")}
           </button>
         </form>
       </AuthShell>
@@ -122,18 +124,18 @@ function Login() {
 
   return (
     <AuthShell
-      title="Welcome back"
-      subtitle="Sign in to your LifeLink account"
+      title={t("Welcome back")}
+      subtitle={t("Sign in to your LifeLink account")}
       error={error}
       footer={
         <>
-          Don&apos;t have an account? <Link to="/signup">Create one</Link>
+          {t("Don't have an account?")} <Link to="/signup">{t("Create one")}</Link>
         </>
       }
     >
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <div className="auth-field">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{t("Email")}</label>
           <input
             id="email"
             type="email"
@@ -147,7 +149,7 @@ function Login() {
         </div>
 
         <PasswordField
-          label="Password"
+          label={t("Password")}
           name="password"
           placeholder="••••••••"
           value={form.password}
@@ -156,23 +158,23 @@ function Login() {
         />
 
         <Link to="/forgot-password" className="auth-forgot-link">
-          Forgot password?
+          {t("Forgot password?")}
         </Link>
 
         <button className="auth-submit" type="submit" disabled={loading}>
           {loading ? (
             <>
               <span className="auth-spinner" aria-hidden="true" />
-              Signing in…
+              {t("Signing in…")}
             </>
           ) : (
-            "Sign in"
+            t("Sign in")
           )}
         </button>
       </form>
 
       <div className="auth-divider">
-        <span>or</span>
+        <span>{t("or")}</span>
       </div>
       <GoogleSignInButton onCredential={handleGoogleCredential} disabled={loading} />
     </AuthShell>

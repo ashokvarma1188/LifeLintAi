@@ -12,6 +12,7 @@ import "./Dashboard.css";
 import "./portal.css";
 import { SkeletonRows } from "../components/Skeleton";
 import MedicalIdQr from "../components/MedicalIdQr";
+import { useLang } from "../i18n/context";
 
 const VITALS = [
   { key: "heartRate", label: "Heart rate (bpm)", color: "#e5484d" },
@@ -20,17 +21,18 @@ const VITALS = [
 ];
 
 function VitalChart({ label, color, points }) {
+  const { t } = useLang();
   if (points.length < 2) {
     return (
       <div className="portal-panel" style={{ marginBottom: 16 }}>
-        <h3 style={{ marginTop: 0, fontSize: 14.5 }}>{label}</h3>
-        <div className="portal-empty">Need at least 2 readings to draw a trend.</div>
+        <h3 style={{ marginTop: 0, fontSize: 14.5 }}>{t(label)}</h3>
+        <div className="portal-empty">{t("Need at least 2 readings to draw a trend.")}</div>
       </div>
     );
   }
   return (
     <div className="portal-panel" style={{ marginBottom: 16 }}>
-      <h3 style={{ marginTop: 0, fontSize: 14.5 }}>{label}</h3>
+      <h3 style={{ marginTop: 0, fontSize: 14.5 }}>{t(label)}</h3>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={points}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border-color-soft)" />
@@ -46,6 +48,7 @@ function VitalChart({ label, color, points }) {
 
 function MedicalId() {
   const navigate = useNavigate();
+  const { t } = useLang();
   const [tab, setTab] = useState("id");
   const [profile, setProfile] = useState(null);
   const [records, setRecords] = useState([]);
@@ -85,28 +88,28 @@ function MedicalId() {
 
       <div className="portal-content">
         <button className="portal-back" onClick={() => navigate("/dashboard")}>
-          <ArrowLeft size={14} /> Back to dashboard
+          <ArrowLeft size={14} /> {t("Back to dashboard")}
         </button>
 
         <div className="portal-head">
           <div>
-            <h1>Medical ID</h1>
-            <p>Your emergency-ready summary, vitals trends, and who's accessed your records.</p>
+            <h1>{t("Medical ID")}</h1>
+            <p>{t("Your emergency-ready summary, vitals trends, and who's accessed your records.")}</p>
           </div>
           <div className="portal-toolbar" style={{ margin: 0 }}>
             <button className={`portal-btn ${tab === "id" ? "primary" : "ghost"}`} onClick={() => setTab("id")}>
-              ID card
+              {t("ID card")}
             </button>
             <button className={`portal-btn ${tab === "vitals" ? "primary" : "ghost"}`} onClick={() => setTab("vitals")}>
-              Vitals trends
+              {t("Vitals trends")}
             </button>
             <button className={`portal-btn ${tab === "log" ? "primary" : "ghost"}`} onClick={() => setTab("log")}>
-              Access log
+              {t("Access log")}
             </button>
           </div>
         </div>
 
-        {error && <div className="portal-message error">{error}</div>}
+        {error && <div className="portal-message error">{t(error)}</div>}
 
         {loading ? (
           <div className="portal-panel"><SkeletonRows rows={4} cols={3} /></div>
@@ -117,42 +120,42 @@ function MedicalId() {
                 <div className="portal-head" style={{ marginBottom: 16 }}>
                   <div>
                     <h1 style={{ fontSize: 20 }}>{profile.name}</h1>
-                    <p>{profile.phone || "No phone on file"}{profile.age ? ` · ${profile.age} yrs` : ""}</p>
+                    <p>{profile.phone || t("No phone on file")}{profile.age ? ` · ${t("{age} yrs", { age: profile.age })}` : ""}</p>
                   </div>
                   <button className="portal-btn ghost small" onClick={() => window.print()}>
-                    <Printer size={14} /> Print
+                    <Printer size={14} /> {t("Print")}
                   </button>
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
                   <div>
-                    <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 4 }}>Blood group</div>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 4 }}>{t("Blood group")}</div>
                     <div style={{ fontSize: 22, fontWeight: 700, display: "flex", alignItems: "center", gap: 6 }}>
-                      <Droplet size={18} /> {profile.bloodGroup || "Not set"}
+                      <Droplet size={18} /> {profile.bloodGroup || t("Not set")}
                     </div>
                   </div>
 
                   <div>
-                    <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 4 }}>Allergies</div>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 4 }}>{t("Allergies")}</div>
                     {profile.allergies?.length ? (
                       <div>{profile.allergies.join(", ")}</div>
                     ) : (
-                      <div style={{ color: "var(--text-secondary)" }}>None on file</div>
+                      <div style={{ color: "var(--text-secondary)" }}>{t("None on file")}</div>
                     )}
                   </div>
 
                   <div>
-                    <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 4 }}>Medical history</div>
+                    <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 4 }}>{t("Medical history")}</div>
                     {profile.medicalHistory?.length ? (
                       <div>{profile.medicalHistory.join(", ")}</div>
                     ) : (
-                      <div style={{ color: "var(--text-secondary)" }}>None on file</div>
+                      <div style={{ color: "var(--text-secondary)" }}>{t("None on file")}</div>
                     )}
                   </div>
                 </div>
 
                 <div style={{ marginTop: 20 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 8 }}>Emergency contacts</div>
+                  <div style={{ fontSize: 12, color: "var(--text-secondary)", marginBottom: 8 }}>{t("Emergency contacts")}</div>
                   {profile.emergencyContacts?.length ? (
                     <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                       {profile.emergencyContacts.map((c, i) => (
@@ -164,7 +167,7 @@ function MedicalId() {
                     </div>
                   ) : (
                     <div className="portal-empty" style={{ display: "flex", alignItems: "center", gap: 8, justifyContent: "flex-start" }}>
-                      <AlertCircle size={14} /> No emergency contacts added yet — add some from My Profile.
+                      <AlertCircle size={14} /> {t("No emergency contacts added yet — add some from My Profile.")}
                     </div>
                   )}
                 </div>
@@ -184,24 +187,24 @@ function MedicalId() {
             {tab === "log" && (
               <div className="portal-panel">
                 {logEntries.length === 0 ? (
-                  <div className="portal-empty">No hospital has viewed or added to your records yet.</div>
+                  <div className="portal-empty">{t("No hospital has viewed or added to your records yet.")}</div>
                 ) : (
                   <div className="portal-table-wrap">
                     <table className="portal-table">
                       <thead>
                         <tr>
-                          <th>Hospital</th>
-                          <th>Action</th>
-                          <th>When</th>
+                          <th>{t("Hospital")}</th>
+                          <th>{t("Action")}</th>
+                          <th>{t("When")}</th>
                         </tr>
                       </thead>
                       <tbody>
                         {logEntries.map((e) => (
                           <tr key={e._id}>
-                            <td>{e.hospitalId?.orgName || e.hospitalId?.name || "Unknown"}</td>
+                            <td>{e.hospitalId?.orgName || e.hospitalId?.name || t("Unknown")}</td>
                             <td style={{ display: "flex", alignItems: "center", gap: 6 }}>
                               {e.action === "viewed" ? <Eye size={13} /> : <FilePlus2 size={13} />}
-                              {e.action === "viewed" ? "Viewed your file" : "Added a report"}
+                              {e.action === "viewed" ? t("Viewed your file") : t("Added a report")}
                             </td>
                             <td>{new Date(e.createdAt).toLocaleString()}</td>
                           </tr>

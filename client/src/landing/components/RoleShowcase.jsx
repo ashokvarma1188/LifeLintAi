@@ -3,14 +3,16 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { ROLES } from "../data";
 import { revealUp } from "../motion";
+import { useLang } from "../../i18n/context";
 
 function RoleShowcase() {
+  const { t } = useLang();
   return (
     <section id="roles" className="ll-section ll-section-how">
       <div className="ll-container ll-container-6xl">
         <div className="ll-section-head">
-          <p className="ll-eyebrow">Built for everyone in the chain</p>
-          <h2 className="ll-h2">Which one are you?</h2>
+          <p className="ll-eyebrow">{t("Built for everyone in the chain")}</p>
+          <h2 className="ll-h2">{t("Which one are you?")}</h2>
         </div>
 
         <div className="ll-roles">
@@ -21,10 +23,10 @@ function RoleShowcase() {
                 <div className="ll-role-icon">
                   <Icon size={22} />
                 </div>
-                <h3 className="ll-role-title">{title}</h3>
-                <p className="ll-role-desc">{desc}</p>
+                <h3 className="ll-role-title">{t(title)}</h3>
+                <p className="ll-role-desc">{t(desc)}</p>
                 <span className="ll-role-link">
-                  Join as {title} <ArrowRight size={14} />
+                  {t("Join as {role}", { role: t(title) })} <ArrowRight size={14} />
                 </span>
               </Link>
             </motion.div>

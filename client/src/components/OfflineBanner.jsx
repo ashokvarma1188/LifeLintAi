@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { WifiOff } from "lucide-react";
+import { useLang } from "../i18n/context";
 import "./OfflineBanner.css";
 
 /** Shown whenever the device loses its connection — points people at the guide that still works. */
 function OfflineBanner() {
+  const { t } = useLang();
   const [online, setOnline] = useState(() => navigator.onLine);
   const { pathname } = useLocation();
 
@@ -23,8 +25,8 @@ function OfflineBanner() {
   return (
     <div className="offline-banner" role="status">
       <WifiOff size={15} />
-      <span>You&apos;re offline. SOS and live data need a connection — call 112 in an emergency.</span>
-      {pathname !== "/first-aid" && <Link to="/first-aid">Open First-Aid Guide</Link>}
+      <span>{t("You're offline. SOS and live data need a connection — call 112 in an emergency.")}</span>
+      {pathname !== "/first-aid" && <Link to="/first-aid">{t("Open First-Aid Guide")}</Link>}
     </div>
   );
 }

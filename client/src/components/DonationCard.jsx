@@ -3,6 +3,8 @@ import { Link } from "react-router-dom";
 import { HeartHandshake, Award, CalendarClock, Droplet } from "lucide-react";
 import { getDonationStatus, recordDonation } from "../services/donors";
 import { getErrorMessage } from "../services/api";
+import { useLang } from "../i18n/context";
+import { speechLangFor } from "../i18n/languages";
 import "./DonationCard.css";
 
 const badgeFor = (count) => {
@@ -14,6 +16,7 @@ const badgeFor = (count) => {
 
 /** The donor's own record: donations given, lives helped, when they can give again, and a one-tap "I just donated". */
 export function DonationCard({ onChange }) {
+  const { t, lang } = useLang();
   const [status, setStatus] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -32,7 +35,7 @@ export function DonationCard({ onChange }) {
       setStatus(next);
       onChange?.();
     } catch (err) {
-      setError(getErrorMessage(err, "Could not record your donation."));
+      setError(getErrorMessage(err, t("Could not record your donation.")));
     } finally {
       setBusy(false);
     }
@@ -48,22 +51,22 @@ export function DonationCard({ onChange }) {
           <HeartHandshake size={18} />
           <div>
             <strong>{status.donationCount}</strong>
-            <span>donation{status.donationCount === 1 ? "" : "s"}</span>
+            <span>{status.donationCount === 1 ? t("donation") : t("donations")}</span>
           </div>
         </div>
         <div className="donation-stat">
           <Droplet size={18} />
           <div>
             <strong>{status.livesSaved}</strong>
-            <span>lives you may have saved</span>
+            <span>{t("lives you may have saved")}</span>
           </div>
         </div>
         {badge && (
           <div className="donation-stat badge">
             <Award size={18} />
             <div>
-              <strong>{badge}</strong>
-              <span>thank you!</span>
+              <strong>{t(badge)}</strong>
+              <span>{t("thank you!")}</span>
             </div>
           </div>
         )}
@@ -72,17 +75,18 @@ export function DonationCard({ onChange }) {
       <div className="donation-next">
         <CalendarClock size={15} />
         {status.eligible ? (
-          <span>You&apos;re eligible to donate now. Whole-blood donors can give every 90 days.</span>
+          <span>{t("You're eligible to donate now. Whole-blood donors can give every 90 days.")}</span>
         ) : (
           <span>
-            Resting after your last donation — you can donate again on{" "}
-            <strong>{new Date(status.nextEligibleAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</strong>{" "}
-            ({status.daysUntilEligible} day{status.daysUntilEligible === 1 ? "" : "s"}).
+            {t(status.daysUntilEligible === 1 ? "Resting after your last donation — you can donate again on {date} (1 day)." : "Resting after your last donation — you can donate again on {date} ({days} days).", {
+              date: new Date(status.nextEligibleAt).toLocaleDateString(speechLangFor(lang), { day: "numeric", month: "short", year: "numeric" }),
+              days: status.daysUntilEligible,
+            })}
           </span>
         )}
         {status.eligible && (
           <button className="portal-btn ghost small" onClick={donated} disabled={busy}>
-            {busy ? "Saving…" : "I just donated"}
+            {busy ? t("Saving…") : t("I just donated")}
           </button>
         )}
       </div>
@@ -93,6 +97,7 @@ export function DonationCard({ onChange }) {
 
 /** Dashboard nudge: shown only once someone has donated before and their 90-day rest is over. */
 export function DonateAgainBanner() {
+  const { t } = useLang();
   const [status, setStatus] = useState(null);
 
   useEffect(() => {
@@ -107,9 +112,9 @@ export function DonateAgainBanner() {
     <div className="donate-again-banner">
       <HeartHandshake size={18} />
       <span>
-        <strong>You can donate blood again!</strong> It&apos;s been over 90 days since your last donation — someone nearby may need you.
+        <strong>{t("You can donate blood again!")}</strong> {t("It's been over 90 days since your last donation — someone nearby may need you.")}
       </span>
-      <Link to="/blood-donation" className="portal-btn primary small">View requests</Link>
+      <Link to="/blood-donation" className="portal-btn primary small">{t("View requests")}</Link>
     </div>
   );
 }

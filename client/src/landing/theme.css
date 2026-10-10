@@ -50,7 +50,7 @@
 
   background: var(--ll-background);
   color: var(--ll-foreground);
-  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, "Noto Sans Devanagari", "Noto Sans Telugu", "Nirmala UI", sans-serif;
   font-weight: 300;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

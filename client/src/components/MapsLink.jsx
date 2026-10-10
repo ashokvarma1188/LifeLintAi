@@ -1,8 +1,10 @@
 import { Navigation } from "lucide-react";
 import { googleMapsDirectionsUrl } from "../utils/maps";
+import { useLang } from "../i18n/context";
 
 /** `coordinates` is GeoJSON [lng, lat], as stored on EmergencyRequest.location. */
 function MapsLink({ coordinates, className = "portal-btn ghost small" }) {
+  const { t } = useLang();
   if (!Array.isArray(coordinates) || coordinates.length !== 2) return null;
   const [lng, lat] = coordinates;
 
@@ -12,9 +14,9 @@ function MapsLink({ coordinates, className = "portal-btn ghost small" }) {
       href={googleMapsDirectionsUrl(lat, lng)}
       target="_blank"
       rel="noopener noreferrer"
-      title="Open directions in Google Maps"
+      title={t("Open directions in Google Maps")}
     >
-      <Navigation size={13} /> Directions
+      <Navigation size={13} /> {t("Directions")}
     </a>
   );
 }

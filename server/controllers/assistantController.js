@@ -25,10 +25,17 @@ Rules:
 
 const isConfigured = () => Boolean(process.env.GEMINI_API_KEY);
 
+// The language the person picked in the app — replies follow it unless they write in another one.
+const LANGUAGE_NAMES = { hi: "Hindi (Devanagari script)", te: "Telugu (Telugu script)" };
+
 let genAI = null;
-const getModel = () => {
+const getModel = (language) => {
   if (!genAI) genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  return genAI.getGenerativeModel({ model: "gemini-3.6-flash", systemInstruction: SYSTEM_PROMPT });
+  const languageRule = LANGUAGE_NAMES[language]
+    ? `
+- The user has chosen ${LANGUAGE_NAMES[language]} in the app. Reply in that language unless they write to you in a different one.`
+    : "";
+  return genAI.getGenerativeModel({ model: "gemini-3.6-flash", systemInstruction: SYSTEM_PROMPT + languageRule });
 };
 
 /**
@@ -73,7 +80,7 @@ const chat = async (req, res) => {
       { role: "user", parts: userParts },
     ];
 
-    const result = await getModel().generateContent({ contents });
+    const result = await getModel(req.body.language).generateContent({ contents });
     const reply = result.response.text();
 
     res.json({ reply });

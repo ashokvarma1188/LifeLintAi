@@ -4,6 +4,8 @@ import { Menu, X } from "lucide-react";
 import BloodDrop from "./BloodDrop";
 import { NAV_LINKS } from "../data";
 import useActiveSection from "../hooks/useActiveSection";
+import { useLang } from "../../i18n/context";
+import LanguageSwitcher from "../../components/LanguageSwitcher";
 
 const SECTION_IDS = NAV_LINKS.map((l) => l.href.slice(1));
 
@@ -14,6 +16,7 @@ const SECTION_IDS = NAV_LINKS.map((l) => l.href.slice(1));
  *    whichever section is currently in view
  */
 function Navbar() {
+  const { t } = useLang();
   const [scrolled, setScrolled] = useState(false);
   const [progress, setProgress] = useState(0);
   const [hovered, setHovered] = useState(null);
@@ -107,23 +110,26 @@ function Navbar() {
                 className={`ll-nav-link${i === activeIndex ? " is-active" : ""}`}
                 aria-current={i === activeIndex ? "true" : undefined}
               >
-                {link.label}
+                {t(link.label)}
               </a>
             ))}
           </div>
 
           <div className="ll-nav-actions">
+            <span className="ll-nav-lang">
+              <LanguageSwitcher variant="landing" />
+            </span>
             <Link to="/login" className="ll-nav-signin">
-              Sign in
+              {t("Sign in")}
             </Link>
             <Link to="/signup" className="ll-nav-cta">
-              Get started
+              {t("Get started")}
             </Link>
             <button
               type="button"
               onClick={() => setMobileOpen((v) => !v)}
               className="ll-nav-burger"
-              aria-label="Menu"
+              aria-label={t("Menu")}
               aria-expanded={mobileOpen}
             >
               {mobileOpen ? <X size={16} /> : <Menu size={16} />}
@@ -140,11 +146,14 @@ function Navbar() {
                 onClick={(e) => handleNavClick(e, link.href)}
                 className="ll-nav-mobile-link"
               >
-                {link.label}
+                {t(link.label)}
               </a>
             ))}
+            <div className="ll-nav-mobile-lang">
+              <LanguageSwitcher variant="landing" />
+            </div>
             <Link to="/signup" onClick={() => setMobileOpen(false)} className="ll-nav-mobile-cta">
-              Sign in / Get started
+              {t("Sign in / Get started")}
             </Link>
           </div>
         )}

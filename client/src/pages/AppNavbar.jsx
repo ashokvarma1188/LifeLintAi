@@ -2,10 +2,13 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 import { IconPulse, IconSun, IconMoon } from "./icons";
 import { unlinkPushOnLogout } from "../services/push";
+import { useLang } from "../i18n/context";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 function AppNavbar({ showLogout }) {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { t } = useLang();
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   const handleLogout = async () => {
@@ -26,17 +29,18 @@ function AppNavbar({ showLogout }) {
       </div>
       <div className="user-area">
         {user.isDemo && (
-          <button className="logout-btn" onClick={() => navigate("/settings/role")} title="Switch to a different role">
-            Switch role
+          <button className="logout-btn" onClick={() => navigate("/settings/role")} title={t("Switch to a different role")}>
+            {t("Switch role")}
           </button>
         )}
-        <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
+        <LanguageSwitcher />
+        <button className="theme-toggle" onClick={toggleTheme} title={t("Toggle theme")}>
           {theme === "light" ? <IconMoon width={17} height={17} /> : <IconSun width={17} height={17} />}
         </button>
         <div className="avatar">{(user.name || "U")[0].toUpperCase()}</div>
         {showLogout && (
           <button className="logout-btn" onClick={handleLogout}>
-            Logout
+            {t("Logout")}
           </button>
         )}
       </div>

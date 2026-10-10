@@ -1,0 +1,45 @@
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.lang-switch select {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.lang-switch select option { color: #111; background: #fff; }
+.lang-switch:focus-within { border-color: var(--accent); }
+
+/* Landing / auth pages: dark glass look that matches the pill navbar. */
+.lang-switch-landing {
+  border: 1px solid var(--ll-glass-border, rgba(255, 255, 255, 0.14));
+  background: var(--ll-glass-bg, rgba(255, 255, 255, 0.06));
+  color: var(--ll-muted-foreground, rgba(255, 255, 255, 0.7));
+}
+.lang-switch-landing select { color: var(--ll-foreground, #fff); }
+
+/* Floating on the auth pages, next to the theme toggle. */
+.lang-switch-floating {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 50;
+  border: 1px solid var(--ll-glass-border, rgba(255, 255, 255, 0.14));
+  background: var(--ll-glass-bg, rgba(255, 255, 255, 0.06));
+  color: var(--ll-muted-foreground, rgba(255, 255, 255, 0.7));
+  backdrop-filter: blur(10px);
+}
+.lang-switch-floating select { color: var(--ll-foreground, #fff); }

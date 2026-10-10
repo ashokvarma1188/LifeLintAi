@@ -13,10 +13,12 @@ import { getUser, setTwoFactor, logoutEverywhere, logout, demoSwitchRole } from 
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
+import { useLang } from "../i18n/context";
 
 const DEMO_ROLES = ["civilian", "hospital", "police", "firestation", "pharmacy", "admin"];
 
 function RoleSettings() {
+  const { t } = useLang();
   const navigate = useNavigate();
   const [user, setUser] = useState(() => getUser() || {});
   const [role, setRole] = useState(user.role === "citizen" ? "civilian" : user.role || "civilian");
@@ -42,7 +44,7 @@ function RoleSettings() {
       setUser({ ...user, twoFactorEnabled: data.twoFactorEnabled });
       setSecurityNotice(data.message);
     } catch (err) {
-      setSecurityError(getErrorMessage(err, "Could not update two-factor authentication."));
+      setSecurityError(getErrorMessage(err, t("Could not update two-factor authentication.")));
     } finally {
       setTwoFAsaving(false);
     }
@@ -56,7 +58,7 @@ function RoleSettings() {
       logout();
       navigate("/login", { replace: true });
     } catch (err) {
-      setSecurityError(getErrorMessage(err, "Could not sign out of all devices."));
+      setSecurityError(getErrorMessage(err, t("Could not sign out of all devices.")));
       setSignOutSaving(false);
     }
   };
@@ -68,7 +70,7 @@ function RoleSettings() {
       await demoSwitchRole(targetRole);
       navigate("/dashboard");
     } catch (err) {
-      setDemoError(getErrorMessage(err, "Could not switch role."));
+      setDemoError(getErrorMessage(err, t("Could not switch role.")));
       setDemoSaving(null);
     }
   };
@@ -79,7 +81,7 @@ function RoleSettings() {
     setNotice("");
 
     if (needsOrg && !orgName.trim()) {
-      setError("Organization name is required for this role");
+      setError(t("Organization name is required for this role"));
       return;
     }
 
@@ -90,7 +92,7 @@ function RoleSettings() {
       // Pull the authoritative record back so the badge below is accurate.
       setUser(await refreshCurrentUser());
     } catch (err) {
-      setError(getErrorMessage(err, "Could not submit your request."));
+      setError(getErrorMessage(err, t("Could not submit your request.")));
     } finally {
       setSaving(false);
     }
@@ -102,13 +104,13 @@ function RoleSettings() {
 
       <div className="portal-content" style={{ maxWidth: 620 }}>
         <button className="portal-back" onClick={() => navigate("/dashboard")}>
-          <ArrowLeft size={14} /> Back to dashboard
+          <ArrowLeft size={14} /> {t("Back to dashboard")}
         </button>
 
         <div className="portal-head">
           <div>
-            <h1>Request a role change</h1>
-            <p>Organisation accounts are reviewed by an admin before they get access.</p>
+            <h1>{t("Request a role change")}</h1>
+            <p>{t("Organisation accounts are reviewed by an admin before they get access.")}</p>
           </div>
         </div>
 
@@ -117,9 +119,9 @@ function RoleSettings() {
 
         {user.isDemo && (
           <div className="portal-panel" style={{ marginBottom: 20, borderColor: "var(--ll-primary)" }}>
-            <h3 style={{ marginTop: 0, fontSize: 15 }}>Demo account — instant role switch</h3>
+            <h3 style={{ marginTop: 0, fontSize: 15 }}>{t("Demo account — instant role switch")}</h3>
             <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: -6 }}>
-              No admin approval needed on this account — pick a role to jump straight to that dashboard.
+              {t("No admin approval needed on this account — pick a role to jump straight to that dashboard.")}
             </p>
             {demoError && <div className="portal-message error">{demoError}</div>}
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -131,7 +133,7 @@ function RoleSettings() {
                   onClick={() => handleDemoSwitch(r)}
                   disabled={Boolean(demoSaving)}
                 >
-                  {demoSaving === r ? "Switching…" : roleLabel(r)}
+                  {demoSaving === r ? t("Switching…") : t(roleLabel(r))}
                 </button>
               ))}
             </div>
@@ -148,72 +150,72 @@ function RoleSettings() {
 
           <form className="portal-form" onSubmit={submit}>
             <div className="portal-field">
-              <label htmlFor="role">Role</label>
+              <label htmlFor="role">{t("Role")}</label>
               <select id="role" value={role} onChange={(e) => setRole(e.target.value)}>
                 {REQUESTABLE_ROLES.map((r) => (
-                  <option key={r.value} value={r.value}>{r.label}</option>
+                  <option key={r.value} value={r.value}>{t(r.label)}</option>
                 ))}
               </select>
               <span className="hint">
                 {needsOrg
-                  ? "This role needs admin approval before you can use it."
+                  ? t("This role needs admin approval before you can use it.")
                   : "Civilian accounts are active immediately."}
               </span>
             </div>
 
             {needsOrg && (
               <div className="portal-field">
-                <label htmlFor="orgName">Organisation name *</label>
+                <label htmlFor="orgName">{t("Organisation name *")}</label>
                 <input
                   id="orgName"
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
-                  placeholder="e.g. Apollo Hospital"
+                  placeholder={t("e.g. Apollo Hospital")}
                 />
               </div>
             )}
 
             <div className="portal-form-actions">
               <button className="portal-btn primary" type="submit" disabled={saving}>
-                {saving ? "Submitting…" : "Submit request"}
+                {saving ? t("Submitting…") : t("Submit request")}
               </button>
             </div>
           </form>
         </div>
 
         <div className="portal-panel" style={{ marginTop: 20 }}>
-          <h3 style={{ marginTop: 0, fontSize: 15 }}>Security</h3>
+          <h3 style={{ marginTop: 0, fontSize: 15 }}>{t("Security")}</h3>
 
           {securityError && <div className="portal-message error">{securityError}</div>}
           {securityNotice && <div className="portal-message success">{securityNotice}</div>}
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid var(--border-color-soft)" }}>
             <div>
-              <div style={{ fontWeight: 500, fontSize: 14 }}>Two-factor authentication</div>
+              <div style={{ fontWeight: 500, fontSize: 14 }}>{t("Two-factor authentication")}</div>
               <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>
                 {user.twoFactorMandatory
-                  ? "Required for this account type — a code is emailed to you at every login."
+                  ? t("Required for this account type — a code is emailed to you at every login.")
                   : user.twoFactorEnabled
-                    ? "Enabled — a code is emailed to you at every login."
+                    ? t("Enabled — a code is emailed to you at every login.")
                     : "Off — add a login code sent to your email."}
               </div>
             </div>
             {!user.twoFactorMandatory && (
               <button className={`portal-btn ${user.twoFactorEnabled ? "danger" : "primary"} small`} onClick={handleToggle2FA} disabled={twoFAsaving}>
-                <ShieldCheck size={14} /> {twoFAsaving ? "Saving…" : user.twoFactorEnabled ? "Disable" : "Enable"}
+                <ShieldCheck size={14} /> {twoFAsaving ? t("Saving…") : user.twoFactorEnabled ? t("Disable") : t("Enable")}
               </button>
             )}
           </div>
 
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
             <div>
-              <div style={{ fontWeight: 500, fontSize: 14 }}>Sign out of all devices</div>
+              <div style={{ fontWeight: 500, fontSize: 14 }}>{t("Sign out of all devices")}</div>
               <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>
-                Invalidates every session, including this one — you'll need to log in again.
+                {t("Invalidates every session, including this one — you'll need to log in again.")}
               </div>
             </div>
             <button className="portal-btn ghost small" onClick={handleLogoutEverywhere} disabled={signOutSaving}>
-              <LogOut size={14} /> {signOutSaving ? "Signing out…" : "Log out everywhere"}
+              <LogOut size={14} /> {signOutSaving ? t("Signing out…") : t("Log out everywhere")}
             </button>
           </div>
         </div>

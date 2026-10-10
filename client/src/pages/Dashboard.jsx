@@ -17,6 +17,7 @@ import NotificationToggle from "../components/NotificationToggle";
 import { syncPushSubscription } from "../services/push";
 import "./Dashboard.css";
 import "./portal.css";
+import { useLang } from "../i18n/context";
 
 /*
  * Cards per role. `path` marks a feature that is actually built; the rest render
@@ -77,10 +78,13 @@ const FEATURES = {
   ],
 };
 
+const TARGET_LABEL = { hospital: "Hospital", police: "Police", firestation: "Fire Station" };
+
 const normaliseRole = (role) => (role === "citizen" || !role ? "civilian" : role);
 
 function Dashboard() {
   const navigate = useNavigate();
+  const { t } = useLang();
   const [user, setUser] = useState(() => getUser() || {});
   const role = normaliseRole(user.role);
   const status = user.roleStatus || "approved";
@@ -134,9 +138,9 @@ function Dashboard() {
     setVerifyNotice("");
     try {
       const data = await resendVerification();
-      setVerifyNotice(data.verifyUrl ? `Verification link: ${data.verifyUrl}` : "Verification email sent — check your inbox.");
+      setVerifyNotice(data.verifyUrl ? `${t("Verification link:")} ${data.verifyUrl}` : t("Verification email sent — check your inbox."));
     } catch (err) {
-      setVerifyNotice(getErrorMessage(err, "Could not send verification email."));
+      setVerifyNotice(getErrorMessage(err, t("Could not send verification email.")));
     } finally {
       setVerifySending(false);
     }
@@ -144,7 +148,7 @@ function Dashboard() {
 
   const toggleTarget = (target) => {
     setSosTargets((prev) =>
-      prev.includes(target) ? prev.filter((t) => t !== target) : [...prev, target]
+      prev.includes(target) ? prev.filter((item) => item !== target) : [...prev, target]
     );
   };
 
@@ -153,12 +157,12 @@ function Dashboard() {
     setSosResult(null);
 
     if (sosTargets.length === 0) {
-      setSosError("Choose at least one service to alert.");
+      setSosError(t("Choose at least one service to alert."));
       return;
     }
 
     if (!navigator.geolocation) {
-      setSosError("Location is not supported on this device/browser.");
+      setSosError(t("Location is not supported on this device/browser."));
       return;
     }
 
@@ -172,13 +176,13 @@ function Dashboard() {
           setSosResult(res.data);
           startLiveLocationSharing(res.data.emergencyRequest._id);
         } catch (err) {
-          setSosError(err.response?.data?.message || "Failed to send SOS. Please try again.");
+          setSosError(err.response?.data?.message || t("Failed to send SOS. Please try again."));
         } finally {
           setSosLoading(false);
         }
       },
       () => {
-        setSosError("Location access denied. Please allow location to use SOS.");
+        setSosError(t("Location access denied. Please allow location to use SOS."));
         setSosLoading(false);
       }
     );
@@ -219,10 +223,10 @@ function Dashboard() {
 
       <div className="dash-content">
         <div className="dash-welcome">
-          <h1>Welcome back, {user.name || "there"}</h1>
+          <h1>{user.name ? t("Welcome back, {name}", { name: user.name }) : t("Welcome back")}</h1>
           <p>
             {user.orgName ? `${user.orgName} · ` : ""}
-            {roleLabel(user.role)} account
+            {t("{role} account", { role: t(roleLabel(user.role)) })}
           </p>
         </div>
 
@@ -234,16 +238,16 @@ function Dashboard() {
 
         {reminders.length > 0 && (
           <div className="portal-message error" style={{ marginBottom: 16 }}>
-            <strong>Follow-up reminder:</strong>{" "}
+            <strong>{t("Follow-up reminder:")}</strong>{" "}
             {reminders.map((r, i) => (
               <span key={r.id}>
                 {i > 0 && ", "}
-                &quot;{r.title}&quot; {r.overdue ? "was due" : "is due"} {r.followUpDate}
+                &quot;{r.title}&quot; {r.overdue ? t("was due") : t("is due")} {r.followUpDate}
               </span>
             ))}
             {" — "}
             <button className="portal-back" style={{ margin: 0 }} onClick={() => navigate("/health-records")}>
-              View Health Records
+              {t("View Health Records")}
             </button>
           </div>
         )}
@@ -252,20 +256,20 @@ function Dashboard() {
           <div className="portal-panel" style={{ marginBottom: 24 }}>
             <div className="portal-message error" style={{ marginBottom: 16 }}>
               {isPending
-                ? `Your ${roleLabel(user.role).toLowerCase()} account is waiting for admin approval. You'll get access to these features once it's approved — check back here any time.`
-                : "Your organisation request was rejected."}
+                ? t("Your {role} account is waiting for admin approval. You'll get access to these features once it's approved — check back here any time.", { role: t(roleLabel(user.role)) })
+                : t("Your organisation request was rejected.")}
             </div>
             <button className="portal-btn primary" onClick={() => navigate("/settings/role")}>
-              {isPending ? "View request / switch to a different role" : "Request a different role"}
+              {isPending ? t("View request / switch to a different role") : t("Request a different role")}
             </button>
           </div>
         )}
 
         {!user.emailVerified && (
           <div className="portal-message error" style={{ marginBottom: 24 }}>
-            Please verify your email address.{" "}
+            {t("Please verify your email address.")}{" "}
             <button className="portal-back" style={{ margin: 0 }} onClick={handleResendVerification} disabled={verifySending}>
-              {verifySending ? "Sending…" : "Resend verification email"}
+              {verifySending ? t("Sending…") : t("Resend verification email")}
             </button>
             {verifyNotice && <div style={{ marginTop: 8, wordBreak: "break-all" }}>{verifyNotice}</div>}
           </div>
@@ -278,34 +282,30 @@ function Dashboard() {
         {role === "civilian" && (
           <div className="sos-card">
             <div className="sos-text">
-              <h2>In an emergency?</h2>
-              <p>Choose who to alert, then press the button to send your live location instantly.</p>
+              <h2>{t("In an emergency?")}</h2>
+              <p>{t("Choose who to alert, then press the button to send your live location instantly.")}</p>
 
               <div className="sos-targets">
-                {[
-                  { value: "hospital", label: "Hospital" },
-                  { value: "police", label: "Police" },
-                  { value: "firestation", label: "Fire Station" },
-                ].map((t) => (
-                  <label key={t.value} className="sos-target-option">
+                {Object.entries(TARGET_LABEL).map(([value, label]) => (
+                  <label key={value} className="sos-target-option">
                     <input
                       type="checkbox"
-                      checked={sosTargets.includes(t.value)}
-                      onChange={() => toggleTarget(t.value)}
+                      checked={sosTargets.includes(value)}
+                      onChange={() => toggleTarget(value)}
                     />
-                    {t.label}
+                    {t(label)}
                   </label>
                 ))}
               </div>
 
               <label className="sos-target-option" style={{ marginTop: 10, display: "flex", gap: 8, alignItems: "center" }}>
-                What's happening?
+                {t("What's happening?")}
                 <select value={sosType} onChange={(e) => setSosType(e.target.value)}>
-                  <option value="medical">Medical emergency</option>
-                  <option value="fire">Fire</option>
-                  <option value="accident">Accident</option>
-                  <option value="safety">Safety / crime</option>
-                  <option value="other">Other</option>
+                  <option value="medical">{t("Medical emergency")}</option>
+                  <option value="fire">{t("Fire")}</option>
+                  <option value="accident">{t("Accident")}</option>
+                  <option value="safety">{t("Safety / crime")}</option>
+                  <option value="other">{t("Other")}</option>
                 </select>
               </label>
 
@@ -315,7 +315,7 @@ function Dashboard() {
                   checked={shareMedicalId}
                   onChange={(e) => setShareMedicalId(e.target.checked)}
                 />
-                Share my Medical ID (blood group, allergies, conditions) with responders
+                {t("Share my Medical ID (blood group, allergies, conditions) with responders")}
               </label>
 
               <VoiceSos
@@ -328,11 +328,11 @@ function Dashboard() {
 
               {sosResult && (
                 <div className="sos-status success">
-                  SOS sent to {sosTargets.join(", ")}
+                  {t("SOS sent to {services}", { services: sosTargets.map((s) => t(TARGET_LABEL[s])).join(", ") })}
                   {sosTargets.includes("hospital") &&
-                    ` — nearest hospital: ${
-                      sosResult.nearestHospital?.name || "none found within 10km, but your alert was recorded"
-                    }`}
+                    ` — ${t("nearest hospital: {name}", {
+                      name: sosResult.nearestHospital?.name || t("none registered yet, but your alert was recorded"),
+                    })}`}
                 </div>
               )}
               {sosResult && (
@@ -342,7 +342,7 @@ function Dashboard() {
             </div>
             <button className="sos-button" onClick={() => handleSOS()} disabled={sosLoading}>
               <Siren size={22} />
-              {sosLoading ? "Sending" : "SOS"}
+              {sosLoading ? t("Sending") : "SOS"}
             </button>
           </div>
         )}
@@ -359,10 +359,10 @@ function Dashboard() {
                 <div className="icon-circle">
                   <Icon size={19} />
                 </div>
-                <h3>{title}</h3>
-                <p>{desc}</p>
-                {!path && !note && <span className="badge-soon">Coming soon</span>}
-                {note && <span className="badge-live">{note}</span>}
+                <h3>{t(title)}</h3>
+                <p>{t(desc)}</p>
+                {!path && !note && <span className="badge-soon">{t("Coming soon")}</span>}
+                {note && <span className="badge-live">{t(note)}</span>}
               </div>
             ))}
           </div>

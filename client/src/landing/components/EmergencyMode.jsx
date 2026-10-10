@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Siren, Droplet, Clock, MapPin, Check, X } from "lucide-react";
 import { DONORS, EMERGENCY_POINTS } from "../data";
 import { revealFromLeft, revealUp } from "../motion";
+import { useLang } from "../../i18n/context";
 
 /**
  * One donor in the request queue. The reference renders the accept/decline
@@ -10,6 +11,7 @@ import { revealFromLeft, revealUp } from "../motion";
  * accepted transition is actually demonstrable.
  */
 function DonorRow({ donor, index, status, onRespond }) {
+  const { t } = useLang();
   return (
     <motion.div {...revealFromLeft(0.2 + index * 0.1)} className="ll-donor-row" data-status={status}>
       <div className="ll-donor-identity">
@@ -17,7 +19,7 @@ function DonorRow({ donor, index, status, onRespond }) {
         <div>
           <div className="ll-donor-name">{donor.name}</div>
           <div className="ll-donor-meta">
-            <MapPin size={12} /> {donor.distance} · ETA {donor.eta}
+            <MapPin size={12} /> {donor.distance} · {t("ETA {eta}", { eta: donor.eta })}
           </div>
         </div>
       </div>
@@ -32,7 +34,7 @@ function DonorRow({ donor, index, status, onRespond }) {
             transition={{ duration: 0.25 }}
             className="ll-donor-badge ll-donor-badge-accepted"
           >
-            <Check size={12} /> Accepted
+            <Check size={12} /> {t("Accepted")}
           </motion.span>
         ) : status === "declined" ? (
           <motion.span
@@ -43,7 +45,7 @@ function DonorRow({ donor, index, status, onRespond }) {
             transition={{ duration: 0.25 }}
             className="ll-donor-badge ll-donor-badge-declined"
           >
-            <X size={12} /> Declined
+            <X size={12} /> {t("Declined")}
           </motion.span>
         ) : (
           <motion.div
@@ -58,7 +60,7 @@ function DonorRow({ donor, index, status, onRespond }) {
               type="button"
               className="ll-donor-btn ll-donor-btn-accept"
               onClick={() => onRespond("accepted")}
-              aria-label={`Accept ${donor.name}`}
+              aria-label={t("Accept {name}", { name: donor.name })}
             >
               <Check size={14} />
             </button>
@@ -66,7 +68,7 @@ function DonorRow({ donor, index, status, onRespond }) {
               type="button"
               className="ll-donor-btn ll-donor-btn-decline"
               onClick={() => onRespond("declined")}
-              aria-label={`Decline ${donor.name}`}
+              aria-label={t("Decline {name}", { name: donor.name })}
             >
               <X size={14} />
             </button>
@@ -78,6 +80,7 @@ function DonorRow({ donor, index, status, onRespond }) {
 }
 
 function EmergencyMode() {
+  const { t } = useLang();
   const [statuses, setStatuses] = useState(() => DONORS.map((d) => d.status));
 
   const respond = (index, next) =>
@@ -88,14 +91,12 @@ function EmergencyMode() {
       <div className="ll-container ll-container-6xl">
         <div className="ll-emergency">
           <div>
-            <p className="ll-eyebrow ll-eyebrow-emergency">Emergency mode</p>
+            <p className="ll-eyebrow ll-eyebrow-emergency">{t("Emergency mode")}</p>
             <h2 className="ll-h2">
-              When seconds <span className="ll-text-gradient-emergency">matter most.</span>
+              {t("When seconds")} <span className="ll-text-gradient-emergency">{t("matter most.")}</span>
             </h2>
             <p className="ll-emergency-lead">
-              Hospitals raise a single request. Our matching engine ranks the closest available
-              donors by blood group, distance, and donation gap — pushing live alerts in under two
-              seconds.
+              {t("Hospitals raise a single request. Our matching engine ranks the closest available donors by blood group, distance, and donation gap — pushing live alerts in under two seconds.")}
             </p>
             <ul className="ll-emergency-list">
               {EMERGENCY_POINTS.map((point) => (
@@ -103,7 +104,7 @@ function EmergencyMode() {
                   <span className="ll-tick">
                     <Check size={12} />
                   </span>
-                  <span>{point}</span>
+                  <span>{t(point)}</span>
                 </li>
               ))}
             </ul>
@@ -124,27 +125,27 @@ function EmergencyMode() {
                     <Siren size={20} />
                   </div>
                   <div>
-                    <div className="ll-emergency-name">Emergency request</div>
-                    <div className="ll-emergency-place">Apollo Hospital · 1.2 km away</div>
+                    <div className="ll-emergency-name">{t("Emergency request")}</div>
+                    <div className="ll-emergency-place">Apollo Hospital · {t("{km} km away", { km: "1.2" })}</div>
                   </div>
                 </div>
-                <span className="ll-critical-badge">Critical</span>
+                <span className="ll-critical-badge">{t("Critical")}</span>
               </div>
 
               <div className="ll-emergency-facts">
                 <div>
-                  <div className="ll-fact-label">Group</div>
+                  <div className="ll-fact-label">{t("Group")}</div>
                   <div className="ll-fact-value ll-fact-value-emergency">
                     <Droplet size={16} fill="currentColor" />
                     O−
                   </div>
                 </div>
                 <div>
-                  <div className="ll-fact-label">Units</div>
+                  <div className="ll-fact-label">{t("Units")}</div>
                   <div className="ll-fact-value">3</div>
                 </div>
                 <div>
-                  <div className="ll-fact-label">Window</div>
+                  <div className="ll-fact-label">{t("Window")}</div>
                   <div className="ll-fact-value">
                     <Clock size={16} className="ll-fact-clock" />
                     45m

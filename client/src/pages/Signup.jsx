@@ -6,11 +6,13 @@ import AuthShell from "./AuthShell";
 import PasswordField from "./PasswordField";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import { REQUESTABLE_ROLES, roleNeedsOrg } from "../services/admin";
+import { useLang } from "../i18n/context";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
 
 function Signup() {
   const navigate = useNavigate();
+  const { t } = useLang();
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -39,14 +41,14 @@ function Signup() {
     try {
       const result = await googleSignIn(credential);
       if (result?.requires2FA) {
-        setError("This account has 2-factor authentication on — please sign in from the Login page instead.");
+        setError(t("This account has 2-factor authentication on — please sign in from the Login page instead."));
         setLoading(false);
         return;
       }
-      setSuccess("Signed in with Google. Taking you to your dashboard…");
+      setSuccess(t("Signed in with Google. Taking you to your dashboard…"));
       setTimeout(() => navigate("/dashboard", { replace: true }), 600);
     } catch (err) {
-      setError(getErrorMessage(err, "Could not sign in with Google."));
+      setError(getErrorMessage(err, t("Could not sign in with Google.")));
       setLoading(false);
     }
   };
@@ -57,7 +59,7 @@ function Signup() {
     setLoading(true);
 
     if (needsOrg && !form.orgName.trim()) {
-      setError("Organization name is required for this role");
+      setError(t("Organization name is required for this role"));
       setLoading(false);
       return;
     }
@@ -68,8 +70,8 @@ function Signup() {
       const user = await register(form, docFile);
       setSuccess(
         user?.roleStatus === "pending"
-          ? "Account created. An admin will review your organisation request."
-          : "Account created. Taking you to your dashboard…"
+          ? t("Account created. An admin will review your organisation request.")
+          : t("Account created. Taking you to your dashboard…")
       );
       setTimeout(() => navigate("/dashboard", { replace: true }), 900);
     } catch (err) {
@@ -80,24 +82,24 @@ function Signup() {
 
   return (
     <AuthShell
-      title="Create your account"
-      subtitle="Join LifeLink in a few seconds"
+      title={t("Create your account")}
+      subtitle={t("Join LifeLink in a few seconds")}
       error={error}
       success={success}
       footer={
         <>
-          Already have an account? <Link to="/login">Sign in</Link>
+          {t("Already have an account?")} <Link to="/login">{t("Sign in")}</Link>
         </>
       }
     >
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <div className="auth-field">
-          <label htmlFor="name">Full name</label>
+          <label htmlFor="name">{t("Full name")}</label>
           <input
             id="name"
             type="text"
             name="name"
-            placeholder="Your name"
+            placeholder={t("Your name")}
             value={form.name}
             onChange={handleChange}
             autoComplete="name"
@@ -106,7 +108,7 @@ function Signup() {
         </div>
 
         <div className="auth-field">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{t("Email")}</label>
           <input
             id="email"
             type="email"
@@ -120,9 +122,9 @@ function Signup() {
         </div>
 
         <PasswordField
-          label="Password"
+          label={t("Password")}
           name="password"
-          placeholder="At least 6 characters"
+          placeholder={t("At least 6 characters")}
           value={form.password}
           onChange={handleChange}
           minLength={6}
@@ -130,11 +132,11 @@ function Signup() {
         />
 
         <div className="auth-field">
-          <label htmlFor="role">I am signing up as</label>
+          <label htmlFor="role">{t("I am signing up as")}</label>
           <div className="auth-select-wrap">
             <select id="role" name="role" value={form.role} onChange={handleChange}>
               {REQUESTABLE_ROLES.map((r) => (
-                <option key={r.value} value={r.value}>{r.label}</option>
+                <option key={r.value} value={r.value}>{t(r.label)}</option>
               ))}
             </select>
           </div>
@@ -143,46 +145,46 @@ function Signup() {
         {needsOrg && (
           <>
             <div className="auth-field">
-              <label htmlFor="orgName">Organisation name *</label>
+              <label htmlFor="orgName">{t("Organisation name")} *</label>
               <input
                 id="orgName"
                 type="text"
                 name="orgName"
-                placeholder="e.g. Apollo Hospital"
+                placeholder={t("e.g. Apollo Hospital")}
                 value={form.orgName}
                 onChange={handleChange}
               />
             </div>
 
             <div className="auth-field">
-              <label htmlFor="licenseNumber">Licence / registration number</label>
+              <label htmlFor="licenseNumber">{t("Licence / registration number")}</label>
               <input
                 id="licenseNumber"
                 type="text"
                 name="licenseNumber"
-                placeholder="e.g. your hospital/pharmacy registration number"
+                placeholder={t("e.g. your hospital/pharmacy registration number")}
                 value={form.licenseNumber}
                 onChange={handleChange}
               />
-              <span className="hint">Optional, but helps admin verify your organisation faster.</span>
+              <span className="hint">{t("Optional, but helps admin verify your organisation faster.")}</span>
             </div>
 
             <div className="auth-field">
-              <label htmlFor="doc">Proof / registration document (optional)</label>
+              <label htmlFor="doc">{t("Proof / registration document (optional)")}</label>
               <input
                 id="doc"
                 type="file"
                 accept="application/pdf,.pdf"
                 onChange={(e) => setDocFile(e.target.files?.[0] || null)}
               />
-              <span className="hint">PDF only, up to 4 MB. Helps admin verify your organisation faster.</span>
+              <span className="hint">{t("PDF only, up to 4 MB. Helps admin verify your organisation faster.")}</span>
             </div>
           </>
         )}
 
         <div className="auth-row">
           <div className="auth-field">
-            <label htmlFor="bloodGroup">Blood group</label>
+            <label htmlFor="bloodGroup">{t("Blood group")}</label>
             <div className="auth-select-wrap">
               <select
                 id="bloodGroup"
@@ -191,7 +193,7 @@ function Signup() {
                 onChange={handleChange}
                 required={!needsOrg}
               >
-                <option value="">Select</option>
+                <option value="">{t("Select")}</option>
                 {BLOOD_GROUPS.map((group) => (
                   <option key={group} value={group}>
                     {group}
@@ -202,12 +204,12 @@ function Signup() {
           </div>
 
           <div className="auth-field">
-            <label htmlFor="phone">Phone</label>
+            <label htmlFor="phone">{t("Phone")}</label>
             <input
               id="phone"
               type="tel"
               name="phone"
-              placeholder="10-digit number"
+              placeholder={t("10-digit number")}
               value={form.phone}
               onChange={handleChange}
               autoComplete="tel"
@@ -220,10 +222,10 @@ function Signup() {
           {loading ? (
             <>
               <span className="auth-spinner" aria-hidden="true" />
-              Creating account…
+              {t("Creating account…")}
             </>
           ) : (
-            "Create account"
+            t("Create account")
           )}
         </button>
       </form>
@@ -231,7 +233,7 @@ function Signup() {
       {!needsOrg && (
         <>
           <div className="auth-divider">
-            <span>or</span>
+            <span>{t("or")}</span>
           </div>
           <GoogleSignInButton onCredential={handleGoogleCredential} disabled={loading} />
         </>

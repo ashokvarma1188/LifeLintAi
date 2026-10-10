@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { RECORD_TYPES } from "../services/healthRecords";
+import { useLang } from "../i18n/context";
 
 const EMPTY = {
   title: "",
@@ -21,6 +22,7 @@ const EMPTY = {
  * and the hospital's patient file, so both write identical data.
  */
 function RecordForm({ initial, onSubmit, onCancel, submitLabel = "Save report", showHospitalName = true }) {
+  const { t } = useLang();
   const [form, setForm] = useState(() => ({
     ...EMPTY,
     ...(initial
@@ -47,12 +49,12 @@ function RecordForm({ initial, onSubmit, onCancel, submitLabel = "Save report", 
     if (!file) return setPdfFile(null);
 
     if (!file.name.toLowerCase().endsWith(".pdf")) {
-      setError("Only PDF medical reports are allowed");
+      setError(t("Only PDF medical reports are allowed"));
       e.target.value = "";
       return;
     }
     if (file.size > 4 * 1024 * 1024) {
-      setError("PDF must be smaller than 4 MB");
+      setError(t("PDF must be smaller than 4 MB"));
       e.target.value = "";
       return;
     }
@@ -63,14 +65,14 @@ function RecordForm({ initial, onSubmit, onCancel, submitLabel = "Save report", 
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!form.title.trim()) return setError("Report title is required");
-    if (!form.recordDate) return setError("Report date is required");
+    if (!form.title.trim()) return setError(t("Report title is required"));
+    if (!form.recordDate) return setError(t("Report date is required"));
 
     setSaving(true);
     try {
       await onSubmit(form, pdfFile, removePdf);
     } catch (err) {
-      setError(err.response?.data?.message || "Could not save the report. Please try again.");
+      setError(err.response?.data?.message || t("Could not save the report. Please try again."));
       setSaving(false);
     }
   };
@@ -82,21 +84,21 @@ function RecordForm({ initial, onSubmit, onCancel, submitLabel = "Save report", 
       {error && <div className="portal-message error">{error}</div>}
 
       <div className="portal-field">
-        <label htmlFor="title">Report title *</label>
-        <input id="title" name="title" value={form.title} onChange={change} placeholder="e.g. Complete blood count" />
+        <label htmlFor="title">{t("Report title *")}</label>
+        <input id="title" name="title" value={form.title} onChange={change} placeholder={t("e.g. Complete blood count")} />
       </div>
 
       <div className="portal-row">
         <div className="portal-field">
-          <label htmlFor="recordType">Type</label>
+          <label htmlFor="recordType">{t("Type")}</label>
           <select id="recordType" name="recordType" value={form.recordType} onChange={change}>
-            {RECORD_TYPES.map((t) => (
-              <option key={t.value} value={t.value}>{t.label}</option>
+            {RECORD_TYPES.map((recordType) => (
+              <option key={recordType.value} value={recordType.value}>{t(recordType.label)}</option>
             ))}
           </select>
         </div>
         <div className="portal-field">
-          <label htmlFor="recordDate">Date *</label>
+          <label htmlFor="recordDate">{t("Date *")}</label>
           <input id="recordDate" type="date" name="recordDate" value={form.recordDate} onChange={change} />
         </div>
       </div>
@@ -104,53 +106,53 @@ function RecordForm({ initial, onSubmit, onCancel, submitLabel = "Save report", 
       <div className="portal-row">
         {showHospitalName && (
           <div className="portal-field">
-            <label htmlFor="hospitalName">Hospital / lab</label>
+            <label htmlFor="hospitalName">{t("Hospital / lab")}</label>
             <input id="hospitalName" name="hospitalName" value={form.hospitalName} onChange={change} placeholder="Apollo Hospital" />
           </div>
         )}
         <div className="portal-field">
-          <label htmlFor="doctorName">Doctor</label>
+          <label htmlFor="doctorName">{t("Doctor")}</label>
           <input id="doctorName" name="doctorName" value={form.doctorName} onChange={change} placeholder="Dr. Mehta" />
         </div>
       </div>
 
       <div className="portal-row">
         <div className="portal-field">
-          <label htmlFor="bloodPressure">Blood pressure</label>
+          <label htmlFor="bloodPressure">{t("Blood pressure")}</label>
           <input id="bloodPressure" name="bloodPressure" value={form.bloodPressure} onChange={change} placeholder="120/80" />
         </div>
         <div className="portal-field">
-          <label htmlFor="heartRate">Heart rate (bpm)</label>
+          <label htmlFor="heartRate">{t("Heart rate (bpm)")}</label>
           <input id="heartRate" type="number" name="heartRate" value={form.heartRate} onChange={change} placeholder="72" />
         </div>
         <div className="portal-field">
-          <label htmlFor="bloodSugar">Blood sugar (mg/dL)</label>
+          <label htmlFor="bloodSugar">{t("Blood sugar (mg/dL)")}</label>
           <input id="bloodSugar" type="number" name="bloodSugar" value={form.bloodSugar} onChange={change} placeholder="98" />
         </div>
         <div className="portal-field">
-          <label htmlFor="weight">Weight (kg)</label>
+          <label htmlFor="weight">{t("Weight (kg)")}</label>
           <input id="weight" type="number" step="0.1" name="weight" value={form.weight} onChange={change} placeholder="70" />
         </div>
       </div>
 
       <div className="portal-field">
-        <label htmlFor="notes">Notes</label>
-        <textarea id="notes" name="notes" value={form.notes} onChange={change} placeholder="Findings, symptoms, observations…" />
+        <label htmlFor="notes">{t("Notes")}</label>
+        <textarea id="notes" name="notes" value={form.notes} onChange={change} placeholder={t("Findings, symptoms, observations…")} />
       </div>
 
       <div className="portal-field">
-        <label htmlFor="recommendations">Recommendations</label>
-        <textarea id="recommendations" name="recommendations" value={form.recommendations} onChange={change} placeholder="Medication, follow-up, advice…" />
+        <label htmlFor="recommendations">{t("Recommendations")}</label>
+        <textarea id="recommendations" name="recommendations" value={form.recommendations} onChange={change} placeholder={t("Medication, follow-up, advice…")} />
       </div>
 
       <div className="portal-field">
-        <label htmlFor="followUpDate">Follow-up / reminder date</label>
+        <label htmlFor="followUpDate">{t("Follow-up / reminder date")}</label>
         <input id="followUpDate" type="date" name="followUpDate" value={form.followUpDate} onChange={change} />
-        <span className="hint">Optional — shows a reminder on your dashboard a few days before this date.</span>
+        <span className="hint">{t("Optional — shows a reminder on your dashboard a few days before this date.")}</span>
       </div>
 
       <div className="portal-field">
-        <label htmlFor="pdf">Attach PDF report</label>
+        <label htmlFor="pdf">{t("Attach PDF report")}</label>
         <input id="pdf" type="file" accept="application/pdf,.pdf" onChange={pickPdf} />
         <span className="hint">
           {pdfFile
@@ -161,18 +163,18 @@ function RecordForm({ initial, onSubmit, onCancel, submitLabel = "Save report", 
         </span>
         {existingPdf && !pdfFile && !removePdf && (
           <button type="button" className="portal-btn ghost small" onClick={() => setRemovePdf(true)}>
-            Remove attached PDF
+            {t("Remove attached PDF")}
           </button>
         )}
-        {removePdf && <span className="hint">PDF will be removed when you save.</span>}
+        {removePdf && <span className="hint">{t("PDF will be removed when you save.")}</span>}
       </div>
 
       <div className="portal-form-actions">
         <button type="button" className="portal-btn ghost" onClick={onCancel} disabled={saving}>
-          Cancel
+          {t("Cancel")}
         </button>
         <button type="submit" className="portal-btn primary" disabled={saving}>
-          {saving ? "Saving…" : submitLabel}
+          {saving ? t("Saving…") : t(submitLabel)}
         </button>
       </div>
     </form>

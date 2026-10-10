@@ -9,6 +9,7 @@ import { listPharmacies, requestMedicine, myMedicineRequests } from "../services
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
+import { useLang } from "../i18n/context";
 
 const REQUEST_BADGE = { pending: "pending", fulfilled: "approved", declined: "rejected" };
 
@@ -25,6 +26,7 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
 
 function FindPharmacies() {
   const navigate = useNavigate();
+  const { t } = useLang();
   const [tab, setTab] = useState("pharmacies");
   const [pharmacies, setPharmacies] = useState([]);
   const [myRequests, setMyRequests] = useState([]);
@@ -84,16 +86,16 @@ function FindPharmacies() {
 
   const submitRequest = async (e) => {
     e.preventDefault();
-    if (!form.medicineName.trim()) return setError("Enter the medicine name.");
+    if (!form.medicineName.trim()) return setError(t("Enter the medicine name."));
     setSending(true);
     setError("");
     try {
       await requestMedicine(requesting._id, form.medicineName.trim(), form.notes.trim());
-      setNotice(`Request sent to ${requesting.orgName || requesting.name}.`);
+      setNotice(t("Request sent to {name}.", { name: requesting.orgName || requesting.name }));
       setRequesting(null);
       await load(coords?.latitude, coords?.longitude);
     } catch (err) {
-      setError(getErrorMessage(err, "Could not send the request."));
+      setError(getErrorMessage(err, t("Could not send the request.")));
     } finally {
       setSending(false);
     }
@@ -105,32 +107,32 @@ function FindPharmacies() {
 
       <div className="portal-content">
         <button className="portal-back" onClick={() => navigate("/dashboard")}>
-          <ArrowLeft size={14} /> Back to dashboard
+          <ArrowLeft size={14} /> {t("Back to dashboard")}
         </button>
 
         <div className="portal-head">
           <div>
-            <h1>Find pharmacies</h1>
-            <p>See what's in stock and request a medicine.</p>
+            <h1>{t("Find pharmacies")}</h1>
+            <p>{t("See what's in stock and request a medicine.")}</p>
           </div>
           <div className="portal-toolbar" style={{ margin: 0 }}>
             <button className={`portal-btn ${tab === "pharmacies" ? "primary" : "ghost"}`} onClick={() => setTab("pharmacies")}>
-              Pharmacies
+              {t("Pharmacies")}
             </button>
             <button className={`portal-btn ${tab === "mine" ? "primary" : "ghost"}`} onClick={() => setTab("mine")}>
-              My requests
+              {t("My requests")}
             </button>
           </div>
         </div>
 
-        {error && <div className="portal-message error">{error}</div>}
+        {error && <div className="portal-message error">{t(error)}</div>}
         {notice && <div className="portal-message success">{notice}</div>}
 
         {tab === "pharmacies" && (
           <div className="portal-panel">
             <div className="portal-toolbar" style={{ marginBottom: 12 }}>
               <input
-                placeholder="Search by medicine, e.g. Paracetamol"
+                placeholder={t("Search by medicine, e.g. Paracetamol")}
                 value={medicineSearch}
                 onChange={(e) => setMedicineSearch(e.target.value)}
               />
@@ -138,19 +140,19 @@ function FindPharmacies() {
             {loading ? (
               <SkeletonRows rows={4} cols={5} />
             ) : pharmacies.length === 0 ? (
-              <EmptyState icon={Pill} title="No pharmacies are registered yet." />
+              <EmptyState icon={Pill} title={t("No pharmacies are registered yet.")} />
             ) : visiblePharmacies.length === 0 ? (
-              <EmptyState icon={Search} title="No nearby pharmacy has that medicine in stock right now." hint="Try a different spelling, or check back later." />
+              <EmptyState icon={Search} title={t("No nearby pharmacy has that medicine in stock right now.")} hint={t("Try a different spelling, or check back later.")} />
             ) : (
               <div className="portal-table-wrap">
                 <table className="portal-table">
                   <thead>
                     <tr>
-                      <th>Pharmacy</th>
-                      <th>Phone</th>
-                      <th>Hours</th>
-                      <th>Status</th>
-                      <th>Stock</th>
+                      <th>{t("Pharmacy")}</th>
+                      <th>{t("Phone")}</th>
+                      <th>{t("Hours")}</th>
+                      <th>{t("Status")}</th>
+                      <th>{t("Stock")}</th>
                       <th />
                     </tr>
                   </thead>
@@ -164,7 +166,7 @@ function FindPharmacies() {
                           <td>
                             {p.orgName || p.name}
                             {distance !== null && (
-                              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{distance.toFixed(1)} km away</div>
+                              <div style={{ fontSize: 12, color: "var(--text-secondary)" }}>{t("{km} km away", { km: distance.toFixed(1) })}</div>
                             )}
                           </td>
                           <td>
@@ -179,7 +181,7 @@ function FindPharmacies() {
                           <td>{p.openHours || "—"}</td>
                           <td>
                             <span className={`portal-badge ${p.isOpen !== false ? "approved" : "rejected"}`}>
-                              {p.isOpen !== false ? "Open" : "Closed"}
+                              {p.isOpen !== false ? t("Open") : t("Closed")}
                             </span>
                           </td>
                           <td>
@@ -188,13 +190,13 @@ function FindPharmacies() {
                               : p.stock
                                   .filter((s) => s.inStock)
                                   .map((s) => s.medicineName)
-                                  .join(", ") || "None in stock"}
+                                  .join(", ") || t("None in stock")}
                           </td>
                           <td style={{ whiteSpace: "nowrap" }}>
                             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                               <MapsLink coordinates={p.location?.coordinates} />
                               <button className="portal-btn primary small" onClick={() => openRequestForm(p)}>
-                                <Send size={14} /> Request
+                                <Send size={14} /> {t("Request")}
                               </button>
                             </div>
                           </td>
@@ -211,17 +213,17 @@ function FindPharmacies() {
         {tab === "mine" && (
           <div className="portal-panel">
             {myRequests.length === 0 ? (
-              <div className="portal-empty">You haven't sent any medicine requests yet.</div>
+              <div className="portal-empty">{t("You haven't sent any medicine requests yet.")}</div>
             ) : (
               <div className="portal-table-wrap">
                 <table className="portal-table">
                   <thead>
                     <tr>
-                      <th>Pharmacy</th>
-                      <th>Medicine</th>
-                      <th>Notes</th>
-                      <th>Status</th>
-                      <th>Sent</th>
+                      <th>{t("Pharmacy")}</th>
+                      <th>{t("Medicine")}</th>
+                      <th>{t("Notes")}</th>
+                      <th>{t("Status")}</th>
+                      <th>{t("Sent")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -245,33 +247,33 @@ function FindPharmacies() {
       {requesting && (
         <div className="portal-modal-backdrop" onClick={() => setRequesting(null)}>
           <div className="portal-modal" onClick={(e) => e.stopPropagation()}>
-            <h2>Request medicine from {requesting.orgName || requesting.name}</h2>
-            <p className="sub">They'll see this in their incoming requests.</p>
+            <h2>{t("Request medicine from {name}", { name: requesting.orgName || requesting.name })}</h2>
+            <p className="sub">{t("They'll see this in their incoming requests.")}</p>
             <form className="portal-form" onSubmit={submitRequest}>
               <div className="portal-field">
-                <label htmlFor="medicineName">Medicine name</label>
+                <label htmlFor="medicineName">{t("Medicine name")}</label>
                 <input
                   id="medicineName"
                   value={form.medicineName}
                   onChange={(e) => setForm({ ...form, medicineName: e.target.value })}
-                  placeholder="e.g. Paracetamol"
+                  placeholder={t("e.g. Paracetamol")}
                 />
               </div>
               <div className="portal-field">
-                <label htmlFor="notes">Notes (optional)</label>
+                <label htmlFor="notes">{t("Notes (optional)")}</label>
                 <textarea
                   id="notes"
                   value={form.notes}
                   onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                  placeholder="Quantity needed, urgency, etc."
+                  placeholder={t("Quantity needed, urgency, etc.")}
                 />
               </div>
               <div className="portal-form-actions">
                 <button type="button" className="portal-btn ghost" onClick={() => setRequesting(null)} disabled={sending}>
-                  Cancel
+                  {t("Cancel")}
                 </button>
                 <button type="submit" className="portal-btn primary" disabled={sending}>
-                  {sending ? "Sending…" : "Send request"}
+                  {sending ? t("Sending…") : t("Send request")}
                 </button>
               </div>
             </form>

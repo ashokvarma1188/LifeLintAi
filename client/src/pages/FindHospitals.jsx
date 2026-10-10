@@ -6,6 +6,7 @@ import { SkeletonCards } from "../components/Skeleton";
 import { IconMapPin, IconPhone, IconHospital } from "./icons";
 import "./Dashboard.css";
 import "./FindHospitals.css";
+import { useLang } from "../i18n/context";
 
 // Haversine formula: calculates straight-line distance (in km) between two lat/lng points
 function getDistanceKm(lat1, lon1, lat2, lon2) {
@@ -19,6 +20,7 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 function FindHospitals() {
+  const { t } = useLang();
   const [hospitals, setHospitals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -67,16 +69,16 @@ function FindHospitals() {
 
       <div className="fh-content">
         <div className="fh-header">
-          <h1>Nearby Hospitals</h1>
-          <p>Nearest hospitals to your current location.</p>
+          <h1>{t("Nearby Hospitals")}</h1>
+          <p>{t("Nearest hospitals to your current location.")}</p>
         </div>
 
         <div className="fh-search-bar">
           <span className="status-text">
-            {loading ? "Searching nearby hospitals..." : error || `${hospitals.length} hospital(s) found`}
+            {loading ? t("Searching nearby hospitals...") : error ? t(error) : t("{count} hospital(s) found", { count: hospitals.length })}
           </span>
           <button className="fh-refresh-btn" onClick={search} disabled={loading}>
-            {loading ? "Searching..." : "Refresh"}
+            {loading ? t("Searching...") : t("Refresh")}
           </button>
         </div>
 
@@ -87,7 +89,7 @@ function FindHospitals() {
             <div className="icon-wrap">
               <IconHospital width={24} height={24} />
             </div>
-            <p>No hospitals found nearby yet.</p>
+            <p>{t("No hospitals found nearby yet.")}</p>
           </div>
         )}
 
@@ -107,38 +109,38 @@ function FindHospitals() {
                     <h3>{h.name}</h3>
                     <div className="fh-card-row">
                       <IconMapPin width={14} height={14} />
-                      {h.address || "Address not available"}
-                      {distance !== null && <span className="fh-distance"> · {distance.toFixed(1)} km away</span>}
+                      {h.address || t("Address not available")}
+                      {distance !== null && <span className="fh-distance"> · {t("{km} km away", { km: distance.toFixed(1) })}</span>}
                     </div>
                     <div className="fh-card-row">
                       <IconPhone width={14} height={14} />
                       {h.phone ? (
                         <a href={`tel:${h.phone}`} style={{ color: "inherit" }}>{h.phone}</a>
                       ) : (
-                        "Not available"
+                        t("Not available")
                       )}
                     </div>
                   </div>
                 </div>
                 <div className="fh-card-side">
                   <div className="fh-beds">
-                    <strong>{h.availableBeds ?? "-"}</strong> / {h.totalBeds ?? "-"} beds free
+                    <strong>{h.availableBeds ?? "-"}</strong> / {h.totalBeds ?? "-"} {t("beds free")}
                   </div>
                   {h.icuBeds > 0 && (
                     <div className="fh-beds" style={{ marginTop: 2 }}>
-                      <strong>{h.icuAvailableBeds ?? 0}</strong> / {h.icuBeds} ICU beds free
+                      <strong>{h.icuAvailableBeds ?? 0}</strong> / {h.icuBeds} {t("ICU beds free")}
                     </div>
                   )}
                   <span className={`fh-ambulance ${h.ambulanceAvailable ? "available" : "unavailable"}`}>
                     {h.ambulanceAvailable
-                      ? `Ambulance available${h.ambulanceCount ? ` (${h.ambulanceCount})` : ""}`
-                      : "No ambulance"}
+                      ? `${t("Ambulance available")}${h.ambulanceCount ? ` (${h.ambulanceCount})` : ""}`
+                      : t("No ambulance")}
                   </span>
                   <span className={`fh-ambulance ${h.bloodBankAvailable ? "available" : "unavailable"}`} style={{ marginTop: 6 }}>
-                    {h.bloodBankAvailable ? "Blood bank available" : "No blood bank"}
+                    {h.bloodBankAvailable ? t("Blood bank available") : t("No blood bank")}
                   </span>
                   <span className={`fh-ambulance ${h.oxygenAvailable ? "available" : "unavailable"}`} style={{ marginTop: 6 }}>
-                    {h.oxygenAvailable ? "Oxygen available" : "No oxygen"}
+                    {h.oxygenAvailable ? t("Oxygen available") : t("No oxygen")}
                   </span>
                   <div style={{ marginTop: 10 }}>
                     <MapsLink coordinates={h.location?.coordinates} />

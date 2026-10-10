@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Bell, BellOff, BellRing, Send } from "lucide-react";
 import { pushSupported, getPushConfig, currentSubscription, enablePush, disablePush, sendTestPush } from "../services/push";
 import { getErrorMessage } from "../services/api";
+import { useLang } from "../i18n/context";
 import "./NotificationToggle.css";
 
 const COPY = {
@@ -17,6 +18,7 @@ const COPY = {
 
 /** Dashboard card to turn push notifications on/off for this browser, with a test button. */
 function NotificationToggle({ role }) {
+  const { t } = useLang();
   const [state, setState] = useState("loading"); // loading | hidden | off | on | denied
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -48,8 +50,8 @@ function NotificationToggle({ role }) {
       await action();
       after?.();
     } catch (err) {
-      const text = err.response ? getErrorMessage(err) : err.message;
-      setError(text || "Something went wrong.");
+      const text = err.response ? getErrorMessage(err) : t(err.message);
+      setError(text || t("Something went wrong."));
       if (Notification.permission === "denied") setState("denied");
     } finally {
       setBusy(false);
@@ -60,13 +62,13 @@ function NotificationToggle({ role }) {
     <div className={`notif-card ${state}`}>
       <div className="notif-icon">{state === "on" ? <BellRing size={18} /> : state === "denied" ? <BellOff size={18} /> : <Bell size={18} />}</div>
       <div className="notif-body">
-        <strong>{copy.title}</strong>
+        <strong>{t(copy.title)}</strong>
         <span>
           {state === "on"
-            ? "Notifications are on for this device."
+            ? t("Notifications are on for this device.")
             : state === "denied"
-              ? "Notifications are blocked for this site. Allow them from the lock icon in your browser's address bar, then reload."
-              : copy.text}
+              ? t("Notifications are blocked for this site. Allow them from the lock icon in your browser's address bar, then reload.")
+              : t(copy.text)}
         </span>
         {message && <span className="notif-ok">{message}</span>}
         {error && <span className="notif-error">{error}</span>}
@@ -74,7 +76,7 @@ function NotificationToggle({ role }) {
       <div className="notif-actions">
         {state === "off" && (
           <button className="portal-btn primary small" disabled={busy} onClick={() => run(enablePush, () => setState("on"))}>
-            <Bell size={14} /> {busy ? "Turning on…" : "Turn on"}
+            <Bell size={14} /> {busy ? t("Turning on…") : t("Turn on")}
           </button>
         )}
         {state === "on" && (
@@ -82,12 +84,12 @@ function NotificationToggle({ role }) {
             <button
               className="portal-btn ghost small"
               disabled={busy}
-              onClick={() => run(sendTestPush, () => setMessage("Test sent — it should appear in a few seconds."))}
+              onClick={() => run(sendTestPush, () => setMessage(t("Test sent — it should appear in a few seconds.")))}
             >
-              <Send size={13} /> Send test
+              <Send size={13} /> {t("Send test")}
             </button>
             <button className="portal-btn ghost small" disabled={busy} onClick={() => run(disablePush, () => setState("off"))}>
-              <BellOff size={13} /> Turn off
+              <BellOff size={13} /> {t("Turn off")}
             </button>
           </>
         )}

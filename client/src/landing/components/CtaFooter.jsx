@@ -3,8 +3,10 @@ import { motion } from "framer-motion";
 import { Heart } from "lucide-react";
 import BloodDrop from "./BloodDrop";
 import { revealUp } from "../motion";
+import { useLang } from "../../i18n/context";
 
 function CtaFooter() {
+  const { t } = useLang();
   return (
     <section className="ll-section">
       <div className="ll-container ll-container-5xl">
@@ -16,20 +18,19 @@ function CtaFooter() {
               <BloodDrop size={44} />
             </div>
             <h2 className="ll-h2">
-              Join the network. <br />
-              <span className="ll-text-gradient-success">Be someone&apos;s reason.</span>
+              {t("Join the network.")} <br />
+              <span className="ll-text-gradient-success">{t("Be someone's reason.")}</span>
             </h2>
             <p className="ll-cta-sub">
-              Free to join. Always anonymous until you say yes. Built for hospitals, powered by
-              donors like you.
+              {t("Free to join. Always anonymous until you say yes. Built for hospitals, powered by donors like you.")}
             </p>
             <div className="ll-cta-actions">
               <Link to="/signup" className="ll-btn ll-btn-primary ll-btn-wide">
                 <Heart size={16} fill="currentColor" />
-                Become a Donor
+                {t("Become a Donor")}
               </Link>
               <Link to="/signup" className="ll-btn ll-btn-ghost ll-btn-wide">
-                Hospital sign-up
+                {t("Hospital sign-up")}
               </Link>
             </div>
           </div>
@@ -39,22 +40,22 @@ function CtaFooter() {
           <div className="ll-footer-brand">
             <BloodDrop size={14} />
             <span>
-              Life<span className="ll-footer-accent">Link</span> · Smart Donation Network
+              Life<span className="ll-footer-accent">Link</span> · {t("Smart Donation Network")}
             </span>
           </div>
           <nav className="ll-footer-links">
-            <Link to="/features">Features</Link>
-            <Link to="/organizations">For Organizations</Link>
-            <Link to="/safety">Safety &amp; Privacy</Link>
-            <Link to="/faq">FAQ</Link>
-            <Link to="/download">Download App</Link>
-            <Link to="/contact">Contact</Link>
-            <Link to="/privacy">Privacy Policy</Link>
-            <Link to="/terms">Terms</Link>
-            <Link to="/cookies">Cookies</Link>
-            <Link to="/status">Status</Link>
+            <Link to="/features">{t("Features")}</Link>
+            <Link to="/organizations">{t("For Organizations")}</Link>
+            <Link to="/safety">{t("Safety & Privacy")}</Link>
+            <Link to="/faq">{t("FAQ")}</Link>
+            <Link to="/download">{t("Download App")}</Link>
+            <Link to="/contact">{t("Contact")}</Link>
+            <Link to="/privacy">{t("Privacy Policy")}</Link>
+            <Link to="/terms">{t("Terms")}</Link>
+            <Link to="/cookies">{t("Cookies")}</Link>
+            <Link to="/status">{t("Status")}</Link>
           </nav>
-          <div>© {new Date().getFullYear()} LifeLink. Privacy-first by design.</div>
+          <div>© {new Date().getFullYear()} LifeLink. {t("Privacy-first by design.")}</div>
         </footer>
       </div>
     </section>

@@ -6,6 +6,8 @@ import ThemeToggle from "../landing/components/ThemeToggle";
 import { useLightTheme } from "../landing/useLightTheme";
 import "../landing/theme.css";
 import "./auth.css";
+import LanguageSwitcher from "../components/LanguageSwitcher";
+import { useLang } from "../i18n/context";
 
 /**
  * Shared frame for sign-in and sign-up: landing-matched background, brand mark,
@@ -14,10 +16,12 @@ import "./auth.css";
 function AuthShell({ title, subtitle, error, success, children, footer }) {
   // Shared with the landing page so the choice carries over between them.
   const [light, setLight] = useLightTheme();
+  const { t } = useLang();
 
   return (
     <div className={`ll-root${light ? " ll-light" : ""}`}>
       <ThemeToggle light={light} onToggle={() => setLight((v) => !v)} />
+      <LanguageSwitcher variant="floating" />
       <div className="auth-page">
         <div className="ll-grid-bg auth-grid" aria-hidden="true" />
 
@@ -29,7 +33,7 @@ function AuthShell({ title, subtitle, error, success, children, footer }) {
         >
           <Link to="/" className="auth-back">
             <ArrowLeft size={14} />
-            Back to home
+            {t("Back to home")}
           </Link>
 
           <div className="ll-glass auth-card">

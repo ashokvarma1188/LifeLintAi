@@ -3,6 +3,7 @@ import { ArrowLeft, Phone } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import "./Dashboard.css";
 import "./portal.css";
+import { useLang } from "../i18n/context";
 
 const NUMBERS = [
   { label: "National Emergency Number", number: "112" },
@@ -17,6 +18,7 @@ const NUMBERS = [
 
 function EmergencyNumbers() {
   const navigate = useNavigate();
+  const { t } = useLang();
 
   return (
     <div className="portal-page">
@@ -24,13 +26,13 @@ function EmergencyNumbers() {
 
       <div className="portal-content">
         <button className="portal-back" onClick={() => navigate("/dashboard")}>
-          <ArrowLeft size={14} /> Back to dashboard
+          <ArrowLeft size={14} /> {t("Back to dashboard")}
         </button>
 
         <div className="portal-head">
           <div>
-            <h1>Emergency numbers</h1>
-            <p>Quick reference for India. Save these on your phone too — don't rely on internet access alone.</p>
+            <h1>{t("Emergency numbers")}</h1>
+            <p>{t("Quick reference for India. Save these on your phone too — don't rely on internet access alone.")}</p>
           </div>
         </div>
 
@@ -44,7 +46,7 @@ function EmergencyNumbers() {
                 style={{ margin: 0, display: "flex", alignItems: "center", justifyContent: "space-between", textDecoration: "none", color: "inherit" }}
               >
                 <div>
-                  <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>{n.label}</div>
+                  <div style={{ fontSize: 13, color: "var(--text-secondary)" }}>{t(n.label)}</div>
                   <div style={{ fontSize: 20, fontWeight: 700, marginTop: 2 }}>{n.number}</div>
                 </div>
                 <Phone size={18} />

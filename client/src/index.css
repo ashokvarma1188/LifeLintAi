@@ -9,7 +9,7 @@ html, body, #root {
 }
 
 body {
-  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, "Noto Sans Devanagari", "Noto Sans Telugu", "Nirmala UI", sans-serif;
 }
 
 :root {

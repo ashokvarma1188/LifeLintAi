@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Bot, X, Send, Image as ImageIcon, Mic, MicOff, Volume2, VolumeX } from "lucide-react";
 import { sendMessage } from "../services/assistant";
 import { getErrorMessage } from "../services/api";
+import { useLang } from "../i18n/context";
+import { speechLangFor as voiceLocaleFor } from "../i18n/languages";
 import "./AiAssistantWidget.css";
 
 const MAX_PHOTO_BYTES = 6 * 1024 * 1024;
@@ -34,6 +36,7 @@ const VOICE_ERRORS = {
 };
 
 function AiAssistantWidget({ open, onToggle }) {
+  const { t, lang } = useLang();
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [photo, setPhoto] = useState(null);
@@ -41,7 +44,9 @@ function AiAssistantWidget({ open, onToggle }) {
   const [photoError, setPhotoError] = useState("");
   const [sending, setSending] = useState(false);
   const [listening, setListening] = useState(false);
-  const [voiceLang, setVoiceLang] = useState("en-IN");
+  // Voice input follows the app language until the user picks another one here.
+  const [voiceLangChoice, setVoiceLang] = useState(null);
+  const voiceLang = voiceLangChoice || voiceLocaleFor(lang);
   const [voiceError, setVoiceError] = useState("");
   const [speakingIndex, setSpeakingIndex] = useState(null);
   const listRef = useRef(null);
@@ -103,7 +108,7 @@ function AiAssistantWidget({ open, onToggle }) {
       setInput(typedBefore ? `${typedBefore} ${spoken}` : spoken);
     };
     recognition.onerror = (event) => {
-      if (event.error !== "aborted") setVoiceError(VOICE_ERRORS[event.error] || "Voice input stopped unexpectedly.");
+      if (event.error !== "aborted") setVoiceError(t(VOICE_ERRORS[event.error] || "Voice input stopped unexpectedly."));
     };
     recognition.onend = () => {
       setListening(false);
@@ -115,7 +120,7 @@ function AiAssistantWidget({ open, onToggle }) {
       recognition.start();
       setListening(true);
     } catch {
-      setVoiceError("Voice input couldn't start. Please try again.");
+      setVoiceError(t("Voice input couldn't start. Please try again."));
     }
   };
 
@@ -126,11 +131,11 @@ function AiAssistantWidget({ open, onToggle }) {
 
     setPhotoError("");
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      setPhotoError("Only JPG, PNG or WEBP photos are allowed.");
+      setPhotoError(t("Only JPG, PNG or WEBP photos are allowed."));
       return;
     }
     if (file.size > MAX_PHOTO_BYTES) {
-      setPhotoError("Photo must be smaller than 6 MB.");
+      setPhotoError(t("Photo must be smaller than 6 MB."));
       return;
     }
     setPhoto(file);
@@ -158,12 +163,12 @@ function AiAssistantWidget({ open, onToggle }) {
     setSending(true);
 
     try {
-      const reply = await sendMessage(text, history, sentPhoto);
+      const reply = await sendMessage(text, history, sentPhoto, lang);
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { role: "error", content: getErrorMessage(err, "The assistant could not respond. Please try again.") },
+        { role: "error", content: getErrorMessage(err, t("The assistant could not respond. Please try again.")) },
       ]);
     } finally {
       setSending(false);
@@ -176,10 +181,10 @@ function AiAssistantWidget({ open, onToggle }) {
         <div className="ai-widget-panel">
           <div className="ai-widget-header">
             <div>
-              <h4>AI First-Aid Assistant</h4>
-              <p>Quick guidance while help is on the way</p>
+              <h4>{t("AI First-Aid Assistant")}</h4>
+              <p>{t("Quick guidance while help is on the way")}</p>
             </div>
-            <button className="ai-widget-close" onClick={onToggle} aria-label="Close">
+            <button className="ai-widget-close" onClick={onToggle} aria-label={t("Close")}>
               <X size={18} />
             </button>
           </div>
@@ -187,37 +192,36 @@ function AiAssistantWidget({ open, onToggle }) {
           <div className="ai-widget-messages" ref={listRef}>
             {messages.length === 0 && (
               <div className="ai-widget-empty">
-                Ask about first-aid steps, common over-the-counter medication, or attach a photo of an injury for
-                guidance. For emergencies, always use the SOS button.
+                {t("Ask about first-aid steps, common over-the-counter medication, or attach a photo of an injury for guidance. For emergencies, always use the SOS button.")}
               </div>
             )}
             {messages.map((m, i) => (
               <div key={i} className={`ai-widget-msg ${m.role}`}>
-                {m.image && <img src={m.image} alt="Attached injury" className="ai-widget-msg-img" />}
+                {m.image && <img src={m.image} alt={t("Attached injury")} className="ai-widget-msg-img" />}
                 {m.content}
                 {m.role === "assistant" && SpeechSynthesisApi && (
                   <button
                     type="button"
                     className={`ai-widget-speak${speakingIndex === i ? " speaking" : ""}`}
                     onClick={() => toggleSpeak(i, m.content)}
-                    aria-label={speakingIndex === i ? "Stop reading aloud" : "Read this reply aloud"}
-                    title={speakingIndex === i ? "Stop" : "Read aloud"}
+                    aria-label={speakingIndex === i ? t("Stop reading aloud") : t("Read this reply aloud")}
+                    title={speakingIndex === i ? t("Stop") : t("Read aloud")}
                   >
                     {speakingIndex === i ? <VolumeX size={14} /> : <Volume2 size={14} />}
-                    {speakingIndex === i ? "Stop" : "Listen"}
+                    {speakingIndex === i ? t("Stop") : t("Listen")}
                   </button>
                 )}
               </div>
             ))}
-            {sending && <div className="ai-widget-msg assistant">Thinking…</div>}
+            {sending && <div className="ai-widget-msg assistant">{t("Thinking…")}</div>}
           </div>
 
           {photoError && <div className="ai-widget-photo-error">{photoError}</div>}
           {photoPreview && (
             <div className="ai-widget-photo-preview">
-              <img src={photoPreview} alt="Selected" />
-              <span>Photo attached</span>
-              <button type="button" onClick={clearPhoto} aria-label="Remove photo">
+              <img src={photoPreview} alt={t("Selected")} />
+              <span>{t("Photo attached")}</span>
+              <button type="button" onClick={clearPhoto} aria-label={t("Remove photo")}>
                 <X size={14} />
               </button>
             </div>
@@ -231,14 +235,14 @@ function AiAssistantWidget({ open, onToggle }) {
                 value={voiceLang}
                 onChange={(e) => setVoiceLang(e.target.value)}
                 disabled={listening}
-                aria-label="Voice language"
+                aria-label={t("Voice language")}
               >
                 {VOICE_LANGUAGES.map((l) => (
                   <option key={l.code} value={l.code}>{l.label}</option>
                 ))}
               </select>
               <span className={`ai-widget-voice-status${listening ? " active" : ""}`}>
-                {listening ? "Listening… speak now" : "Tap the mic to speak instead of typing"}
+                {listening ? t("Listening… speak now") : t("Tap the mic to speak instead of typing")}
               </span>
             </div>
           )}
@@ -256,8 +260,8 @@ function AiAssistantWidget({ open, onToggle }) {
               className="ai-widget-attach"
               onClick={() => fileInputRef.current?.click()}
               disabled={sending}
-              aria-label="Attach a photo"
-              title="Attach a photo of an injury"
+              aria-label={t("Attach a photo")}
+              title={t("Attach a photo of an injury")}
             >
               <ImageIcon size={16} />
             </button>
@@ -267,27 +271,27 @@ function AiAssistantWidget({ open, onToggle }) {
                 className={`ai-widget-mic${listening ? " listening" : ""}`}
                 onClick={toggleVoice}
                 disabled={sending}
-                aria-label={listening ? "Stop voice input" : "Speak your question"}
-                title={listening ? "Stop listening" : "Speak instead of typing"}
+                aria-label={listening ? t("Stop voice input") : t("Speak your question")}
+                title={listening ? t("Stop listening") : t("Speak instead of typing")}
               >
                 {listening ? <MicOff size={16} /> : <Mic size={16} />}
               </button>
             )}
             <input
-              placeholder={listening ? "Listening…" : "Describe what's going on…"}
+              placeholder={listening ? t("Listening…") : t("Describe what's going on…")}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               disabled={sending}
             />
-            <button type="submit" disabled={sending || (!input.trim() && !photo)} aria-label="Send">
+            <button type="submit" disabled={sending || (!input.trim() && !photo)} aria-label={t("Send")}>
               <Send size={16} />
             </button>
           </form>
-          <div className="ai-widget-disclaimer">Not a substitute for professional medical advice.</div>
+          <div className="ai-widget-disclaimer">{t("Not a substitute for professional medical advice.")}</div>
         </div>
       )}
 
-      <button className="ai-widget-btn" onClick={onToggle} aria-label="Open AI assistant">
+      <button className="ai-widget-btn" onClick={onToggle} aria-label={t("Open AI assistant")}>
         {open ? <X size={24} /> : <Bot size={26} />}
       </button>
     </>

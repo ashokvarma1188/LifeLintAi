@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Siren, X, History, Phone, Share2 } from "lucide-react";
 import AppNavbar from "./AppNavbar";
@@ -13,10 +13,14 @@ import "./Dashboard.css";
 import "./portal.css";
 import { SkeletonRows } from "../components/Skeleton";
 import EmptyState from "../components/EmptyState";
+import { useLang } from "../i18n/context";
+import { speechLangFor } from "../i18n/languages";
 
 const STATUS_BADGE = { pending: "pending", accepted: "hospital", en_route: "hospital", resolved: "approved", cancelled: "rejected" };
 const TIMELINE_STEPS = ["pending", "accepted", "en_route", "resolved"];
 const STEP_LABEL = { pending: "Sent", accepted: "Accepted", en_route: "On the way", resolved: "Resolved" };
+const STATUS_TEXT = { pending: "pending", accepted: "accepted", en_route: "en route", resolved: "resolved", cancelled: "cancelled", declined: "declined" };
+const TYPE_LABEL = { medical: "Medical", fire: "Fire", accident: "Accident", safety: "Safety", other: "Other" };
 const RESPONDER_LABEL = { hospital: "Ambulance", police: "Police", firestation: "Fire engine" };
 const AVERAGE_SPEED_KMH = 30; // rough city-traffic speed for the arrival estimate
 const POLL_MS = 8000;
@@ -25,6 +29,7 @@ const isActive = (r) => r.status === "accepted" || r.status === "en_route";
 
 /** Live "help is coming" card: map with both positions, distance and a rough arrival time. */
 function LiveTracking({ request }) {
+  const { t } = useLang();
   const you = request.location?.coordinates;
   const responder = request.responderLocation?.coordinates;
   const who = RESPONDER_LABEL[request.respondedByRole] || "Help";
@@ -34,9 +39,9 @@ function LiveTracking({ request }) {
   if (!you || !responder) {
     return (
       <div className="portal-message success" style={{ marginTop: 12 }}>
-        {who}{name ? ` from ${name}` : ""} has accepted your alert
-        {request.etaMinutes ? ` — about ${request.etaMinutes} min away` : ""}. Their live position will appear here once
-        they start moving.
+        {name ? t("{who} from {name} has accepted your alert.", { who: t(who), name }) : t("{who} has accepted your alert.", { who: t(who) })}
+        {request.etaMinutes ? ` ${t("About {minutes} min away.", { minutes: request.etaMinutes })}` : ""}{" "}
+        {t("Their live position will appear here once they start moving.")}
         {phone && (
           <>
             {" "}
@@ -54,9 +59,9 @@ function LiveTracking({ request }) {
   return (
     <div style={{ marginTop: 12 }}>
       <div className="portal-message success" style={{ margin: 0 }}>
-        <strong>{arrived ? `${who} has arrived` : `${who} is on the way`}</strong>
+        <strong>{arrived ? t("{who} has arrived", { who: t(who) }) : t("{who} is on the way", { who: t(who) })}</strong>
         {name ? ` — ${name}` : ""}
-        {!arrived && ` · ${km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`} away · about ${minutes} min`}
+        {!arrived && ` · ${t("{distance} away · about {minutes} min", { distance: km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`, minutes })}`}
         {phone && (
           <>
             {" · "}
@@ -71,10 +76,11 @@ function LiveTracking({ request }) {
 const CANCEL_REASON_LABEL = { safe_now: "I'm safe now", sent_by_mistake: "Sent by mistake", other: "Other" };
 
 function Timeline({ status, cancelReason }) {
+  const { t } = useLang();
   if (status === "cancelled") {
     return (
       <div className="portal-badge rejected" style={{ display: "inline-block" }}>
-        Cancelled by you{cancelReason ? ` — ${CANCEL_REASON_LABEL[cancelReason]}` : ""}
+        {t("Cancelled by you")}{cancelReason ? ` — ${t(CANCEL_REASON_LABEL[cancelReason])}` : ""}
       </div>
     );
   }
@@ -93,7 +99,7 @@ function Timeline({ status, cancelReason }) {
               color: i <= currentIndex ? "var(--accent)" : "var(--text-secondary)",
             }}
           >
-            {STEP_LABEL[step]}
+            {t(STEP_LABEL[step])}
           </span>
           {i < TIMELINE_STEPS.length - 1 && (
             <span style={{ width: 14, height: 1, background: i < currentIndex ? "var(--accent)" : "var(--border-color)" }} />
@@ -106,6 +112,7 @@ function Timeline({ status, cancelReason }) {
 
 function SosHistory() {
   const navigate = useNavigate();
+  const { t, lang } = useLang();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -113,23 +120,23 @@ function SosHistory() {
   const [busyId, setBusyId] = useState(null);
   const [cancelingId, setCancelingId] = useState(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       const data = await myRequests();
       setRequests(data);
       setError("");
     } catch (err) {
-      setError(getErrorMessage(err, "Could not load your SOS history."));
+      setError(getErrorMessage(err, t("Could not load your SOS history.")));
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     (async () => {
       await load();
     })();
-  }, []);
+  }, [load]);
 
   // While help is on the way, refresh quietly so the responder's marker keeps moving.
   const tracking = requests.some(isActive);
@@ -137,17 +144,17 @@ function SosHistory() {
     if (!tracking) return undefined;
     const interval = setInterval(load, POLL_MS);
     return () => clearInterval(interval);
-  }, [tracking]);
+  }, [tracking, load]);
 
   /** Send family the public live-tracking link — the phone's share sheet where available, otherwise copy it. */
   const shareLink = async (r) => {
-    const text = sosMessage(getUser()?.name, r.type, r.shareToken);
+    const text = sosMessage(getUser()?.name, r.type, r.shareToken, t);
     try {
       if (navigator.share) {
         await navigator.share({ title: "LifeLink SOS", text, url: trackUrl(r.shareToken) });
       } else {
         await navigator.clipboard.writeText(text);
-        setNotice("Tracking link copied — paste it into WhatsApp or SMS for your family.");
+        setNotice(t("Tracking link copied — paste it into WhatsApp or SMS for your family."));
       }
     } catch {
       /* the user closed the share sheet, or the clipboard is blocked */
@@ -161,10 +168,10 @@ function SosHistory() {
     setError("");
     try {
       await cancelSOS(id, reason);
-      setNotice("SOS request cancelled.");
+      setNotice(t("SOS request cancelled."));
       await load();
     } catch (err) {
-      setError(getErrorMessage(err, "Could not cancel this request."));
+      setError(getErrorMessage(err, t("Could not cancel this request.")));
     } finally {
       setBusyId(null);
     }
@@ -176,13 +183,13 @@ function SosHistory() {
 
       <div className="portal-content">
         <button className="portal-back" onClick={() => navigate("/dashboard")}>
-          <ArrowLeft size={14} /> Back to dashboard
+          <ArrowLeft size={14} /> {t("Back to dashboard")}
         </button>
 
         <div className="portal-head">
           <div>
-            <h1>SOS history</h1>
-            <p>Every alert you've sent, with its live status.</p>
+            <h1>{t("SOS history")}</h1>
+            <p>{t("Every alert you've sent, with its live status.")}</p>
           </div>
         </div>
 
@@ -193,7 +200,7 @@ function SosHistory() {
           {loading ? (
             <SkeletonRows rows={3} cols={4} />
           ) : requests.length === 0 ? (
-            <EmptyState icon={History} title="You haven't sent any SOS alerts yet." hint="Alerts you send from the dashboard will show up here with live status." />
+            <EmptyState icon={History} title={t("You haven't sent any SOS alerts yet.")} hint={t("Alerts you send from the dashboard will show up here with live status.")} />
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {requests.map((r) => (
@@ -201,14 +208,14 @@ function SosHistory() {
                   <div className="portal-head" style={{ marginBottom: 10 }}>
                     <div>
                       <h1 style={{ fontSize: 16, display: "flex", alignItems: "center", gap: 8 }}>
-                        <Siren size={15} /> {r.type} SOS
+                        <Siren size={15} /> {t("{type} SOS", { type: t(TYPE_LABEL[r.type] || "Other") })}
                       </h1>
                       <p>
-                        {new Date(r.createdAt).toLocaleString()}
-                        {r.assignedHospitalId?.name ? ` · Nearest hospital: ${r.assignedHospitalId.name}` : ""}
+                        {new Date(r.createdAt).toLocaleString(speechLangFor(lang))}
+                        {r.assignedHospitalId?.name ? ` · ${t("Nearest hospital: {name}", { name: r.assignedHospitalId.name })}` : ""}
                       </p>
                     </div>
-                    <span className={`portal-badge ${STATUS_BADGE[r.status]}`}>{r.status.replace("_", " ")}</span>
+                    <span className={`portal-badge ${STATUS_BADGE[r.status]}`}>{t(STATUS_TEXT[r.status] || r.status)}</span>
                   </div>
 
                   <Timeline status={r.status} cancelReason={r.cancelReason} />
@@ -219,7 +226,7 @@ function SosHistory() {
                     <MapsLink coordinates={r.location?.coordinates} />
                     {r.shareToken && ["pending", "accepted", "en_route"].includes(r.status) && (
                       <button className="portal-btn ghost small" onClick={() => shareLink(r)}>
-                        <Share2 size={13} /> Share live link
+                        <Share2 size={13} /> {t("Share live link")}
                       </button>
                     )}
                     {r.status === "pending" && cancelingId !== r._id && (
@@ -228,23 +235,23 @@ function SosHistory() {
                         disabled={busyId === r._id}
                         onClick={() => setCancelingId(r._id)}
                       >
-                        <X size={13} /> Cancel this alert
+                        <X size={13} /> {t("Cancel this alert")}
                       </button>
                     )}
                     {r.status === "pending" && cancelingId === r._id && (
                       <>
-                        <span style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>Why?</span>
+                        <span style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>{t("Why?")}</span>
                         <button className="portal-btn ghost small" disabled={busyId === r._id} onClick={() => doCancel(r._id, "safe_now")}>
-                          I&apos;m safe now
+                          {t("I'm safe now")}
                         </button>
                         <button className="portal-btn ghost small" disabled={busyId === r._id} onClick={() => doCancel(r._id, "sent_by_mistake")}>
-                          Sent by mistake
+                          {t("Sent by mistake")}
                         </button>
                         <button className="portal-btn ghost small" disabled={busyId === r._id} onClick={() => doCancel(r._id, "other")}>
-                          Other
+                          {t("Other")}
                         </button>
                         <button className="portal-back" style={{ margin: 0 }} onClick={() => setCancelingId(null)}>
-                          Back
+                          {t("Back")}
                         </button>
                       </>
                     )}

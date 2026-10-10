@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { HelpCircle, X, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import FAQ_CATEGORIES from "../data/faqData";
+import { useLang } from "../i18n/context";
 import "./FaqAssistantWidget.css";
 
 /**
@@ -12,6 +13,7 @@ import "./FaqAssistantWidget.css";
  */
 function FaqAssistantWidget({ open, onToggle }) {
   const navigate = useNavigate();
+  const { t } = useLang();
   const [category, setCategory] = useState(null);
   const [question, setQuestion] = useState(null);
 
@@ -32,10 +34,10 @@ function FaqAssistantWidget({ open, onToggle }) {
         <div className="faq-widget-panel">
           <div className="faq-widget-header">
             <div>
-              <h4>Help &amp; Quick Answers</h4>
-              <p>Tap a question — no typing needed</p>
+              <h4>{t("Help & Quick Answers")}</h4>
+              <p>{t("Tap a question — no typing needed")}</p>
             </div>
-            <button className="faq-widget-close" onClick={toggle} aria-label="Close">
+            <button className="faq-widget-close" onClick={toggle} aria-label={t("Close")}>
               <X size={18} />
             </button>
           </div>
@@ -45,7 +47,7 @@ function FaqAssistantWidget({ open, onToggle }) {
               <div className="faq-widget-list">
                 {FAQ_CATEGORIES.map((c) => (
                   <button key={c.category} className="faq-widget-option" onClick={() => setCategory(c)}>
-                    {c.category}
+                    {t(c.category)}
                     <ChevronRight size={16} />
                   </button>
                 ))}
@@ -55,12 +57,12 @@ function FaqAssistantWidget({ open, onToggle }) {
             {category && !question && (
               <>
                 <button className="faq-widget-back" onClick={() => setCategory(null)}>
-                  <ChevronLeft size={14} /> All topics
+                  <ChevronLeft size={14} /> {t("All topics")}
                 </button>
                 <div className="faq-widget-list">
                   {category.questions.map((item) => (
                     <button key={item.q} className="faq-widget-option" onClick={() => setQuestion(item)}>
-                      {item.q}
+                      {t(item.q)}
                       <ChevronRight size={16} />
                     </button>
                   ))}
@@ -71,14 +73,14 @@ function FaqAssistantWidget({ open, onToggle }) {
             {question && (
               <>
                 <button className="faq-widget-back" onClick={() => setQuestion(null)}>
-                  <ChevronLeft size={14} /> {category.category}
+                  <ChevronLeft size={14} /> {t(category.category)}
                 </button>
                 <div className="faq-widget-answer">
-                  <div className="faq-widget-q">{question.q}</div>
-                  <div className="faq-widget-a">{question.a}</div>
+                  <div className="faq-widget-q">{t(question.q)}</div>
+                  <div className="faq-widget-a">{t(question.a)}</div>
                   {question.path && (
                     <button className="faq-widget-goto" onClick={goToPage}>
-                      {question.pathLabel || "Go there"} <ArrowRight size={14} />
+                      {t(question.pathLabel || "Go there")} <ArrowRight size={14} />
                     </button>
                   )}
                 </div>
@@ -87,12 +89,12 @@ function FaqAssistantWidget({ open, onToggle }) {
           </div>
 
           <div className="faq-widget-disclaimer">
-            First-aid answers are general guidance, not a medical diagnosis — for emergencies, use the SOS button.
+            {t("First-aid answers are general guidance, not a medical diagnosis — for emergencies, use the SOS button.")}
           </div>
         </div>
       )}
 
-      <button className="faq-widget-btn" onClick={toggle} aria-label="Open help">
+      <button className="faq-widget-btn" onClick={toggle} aria-label={t("Open help")}>
         {open ? <X size={22} /> : <HelpCircle size={24} />}
       </button>
     </>

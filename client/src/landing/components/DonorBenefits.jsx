@@ -1,14 +1,16 @@
 import { motion } from "framer-motion";
 import { BENEFITS } from "../data";
 import { revealUp } from "../motion";
+import { useLang } from "../../i18n/context";
 
 function DonorBenefits() {
+  const { t } = useLang();
   return (
     <section id="benefits" className="ll-section">
       <div className="ll-container ll-container-6xl">
         <div className="ll-section-head">
-          <p className="ll-eyebrow">Donor benefits</p>
-          <h2 className="ll-h2">Built to honor every donor.</h2>
+          <p className="ll-eyebrow">{t("Donor benefits")}</p>
+          <h2 className="ll-h2">{t("Built to honor every donor.")}</h2>
         </div>
 
         <div className="ll-benefits">
@@ -23,8 +25,8 @@ function DonorBenefits() {
               <div className="ll-benefit-icon">
                 <Icon size={20} />
               </div>
-              <h3 className="ll-benefit-title">{title}</h3>
-              <p className="ll-benefit-desc">{desc}</p>
+              <h3 className="ll-benefit-title">{t(title)}</h3>
+              <p className="ll-benefit-desc">{t(desc)}</p>
             </motion.div>
           ))}
         </div>

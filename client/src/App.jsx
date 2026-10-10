@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
+import LanguageProvider from "./i18n/LanguageProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Landing from "./landing/Landing";
 import Login from "./pages/Login";
@@ -80,203 +81,205 @@ function SignedInAssistant() {
 function App() {
   return (
     <ThemeProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/verify-email/:token" element={<VerifyEmail />} />
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/verify-email/:token" element={<VerifyEmail />} />
 
-          {/* Public marketing pages */}
-          <Route path="/features" element={<Features />} />
-          <Route path="/organizations" element={<Organizations />} />
-          <Route path="/safety" element={<Safety />} />
-          <Route path="/faq" element={<Faq />} />
-          <Route path="/download" element={<DownloadApp />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/cookies" element={<Cookies />} />
-          <Route path="/status" element={<Status />} />
+            {/* Public marketing pages */}
+            <Route path="/features" element={<Features />} />
+            <Route path="/organizations" element={<Organizations />} />
+            <Route path="/safety" element={<Safety />} />
+            <Route path="/faq" element={<Faq />} />
+            <Route path="/download" element={<DownloadApp />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/cookies" element={<Cookies />} />
+            <Route path="/status" element={<Status />} />
 
-          {/* Public, token-protected pages opened from a shared SOS link / a scanned Medical ID QR code */}
-          <Route path="/track/:token" element={<TrackSos />} />
-          <Route path="/id/:token" element={<PublicMedicalId />} />
+            {/* Public, token-protected pages opened from a shared SOS link / a scanned Medical ID QR code */}
+            <Route path="/track/:token" element={<TrackSos />} />
+            <Route path="/id/:token" element={<PublicMedicalId />} />
 
-          {/* Public and offline-capable — bundled content, no API calls */}
-          <Route path="/first-aid" element={<FirstAidGuide />} />
+            {/* Public and offline-capable — bundled content, no API calls */}
+            <Route path="/first-aid" element={<FirstAidGuide />} />
 
-          {/* Signed in, any role */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings/role"
-            element={
-              <ProtectedRoute>
-                <RoleSettings />
-              </ProtectedRoute>
-            }
-          />
+            {/* Signed in, any role */}
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/role"
+              element={
+                <ProtectedRoute>
+                  <RoleSettings />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Civilian features */}
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/support"
-            element={
-              <ProtectedRoute>
-                <Support />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/find-hospitals"
-            element={
-              <ProtectedRoute>
-                <FindHospitals />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/health-records"
-            element={
-              <ProtectedRoute>
-                <HealthRecords />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/blood-donation"
-            element={
-              <ProtectedRoute>
-                <BloodDonation />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/find-pharmacies"
-            element={
-              <ProtectedRoute>
-                <FindPharmacies />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/find-emergency-services"
-            element={
-              <ProtectedRoute>
-                <FindEmergencyServices />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/emergency-numbers"
-            element={
-              <ProtectedRoute>
-                <EmergencyNumbers />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/sos-history"
-            element={
-              <ProtectedRoute>
-                <SosHistory />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/medical-id"
-            element={
-              <ProtectedRoute>
-                <MedicalId />
-              </ProtectedRoute>
-            }
-          />
+            {/* Civilian features */}
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/support"
+              element={
+                <ProtectedRoute>
+                  <Support />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/find-hospitals"
+              element={
+                <ProtectedRoute>
+                  <FindHospitals />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/health-records"
+              element={
+                <ProtectedRoute>
+                  <HealthRecords />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/blood-donation"
+              element={
+                <ProtectedRoute>
+                  <BloodDonation />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/find-pharmacies"
+              element={
+                <ProtectedRoute>
+                  <FindPharmacies />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/find-emergency-services"
+              element={
+                <ProtectedRoute>
+                  <FindEmergencyServices />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/emergency-numbers"
+              element={
+                <ProtectedRoute>
+                  <EmergencyNumbers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sos-history"
+              element={
+                <ProtectedRoute>
+                  <SosHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medical-id"
+              element={
+                <ProtectedRoute>
+                  <MedicalId />
+                </ProtectedRoute>
+              }
+            />
 
-          {/* Role-restricted */}
-          <Route
-            path="/hospital/patients"
-            element={
-              <ProtectedRoute roles={["hospital"]}>
-                <HospitalPatients />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/hospital/incoming"
-            element={
-              <ProtectedRoute roles={["hospital"]}>
-                <IncomingPatients />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/hospital/beds"
-            element={
-              <ProtectedRoute roles={["hospital"]}>
-                <HospitalBeds />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/police/alerts"
-            element={
-              <ProtectedRoute roles={["police"]}>
-                <PoliceAlerts />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/firestation/alerts"
-            element={
-              <ProtectedRoute roles={["firestation"]}>
-                <FirestationAlerts />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/pharmacy/stock"
-            element={
-              <ProtectedRoute roles={["pharmacy"]}>
-                <PharmacyStock />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/org-profile"
-            element={
-              <ProtectedRoute roles={["hospital", "police", "firestation", "pharmacy"]}>
-                <OrgProfile />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute roles={["admin"]}>
-                <AdminConsole />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-        <SignedInAssistant />
-        <OfflineBanner />
-      </BrowserRouter>
+            {/* Role-restricted */}
+            <Route
+              path="/hospital/patients"
+              element={
+                <ProtectedRoute roles={["hospital"]}>
+                  <HospitalPatients />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hospital/incoming"
+              element={
+                <ProtectedRoute roles={["hospital"]}>
+                  <IncomingPatients />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hospital/beds"
+              element={
+                <ProtectedRoute roles={["hospital"]}>
+                  <HospitalBeds />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/police/alerts"
+              element={
+                <ProtectedRoute roles={["police"]}>
+                  <PoliceAlerts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/firestation/alerts"
+              element={
+                <ProtectedRoute roles={["firestation"]}>
+                  <FirestationAlerts />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pharmacy/stock"
+              element={
+                <ProtectedRoute roles={["pharmacy"]}>
+                  <PharmacyStock />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/org-profile"
+              element={
+                <ProtectedRoute roles={["hospital", "police", "firestation", "pharmacy"]}>
+                  <OrgProfile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute roles={["admin"]}>
+                  <AdminConsole />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+          <SignedInAssistant />
+          <OfflineBanner />
+        </BrowserRouter>
+      </LanguageProvider>
     </ThemeProvider>
   );
 }

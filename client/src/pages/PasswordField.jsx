@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
+import { useLang } from "../i18n/context";
 
 /** Password input with a show/hide toggle. */
 function PasswordField({ label, name, value, onChange, placeholder, minLength, autoComplete }) {
+  const { t } = useLang();
   const [visible, setVisible] = useState(false);
 
   return (
@@ -24,7 +26,7 @@ function PasswordField({ label, name, value, onChange, placeholder, minLength, a
           type="button"
           className="auth-eye"
           onClick={() => setVisible((v) => !v)}
-          aria-label={visible ? "Hide password" : "Show password"}
+          aria-label={visible ? t("Hide password") : t("Show password")}
         >
           {visible ? <EyeOff size={16} /> : <Eye size={16} />}
         </button>

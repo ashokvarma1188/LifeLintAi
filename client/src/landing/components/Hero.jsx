@@ -5,12 +5,14 @@ import { Heart, Siren, ArrowRight } from "lucide-react";
 import HeroDrops from "./HeroDrops";
 import EkgLine from "./EkgLine";
 import { heroEnter, revealScale } from "../motion";
+import { useLang } from "../../i18n/context";
 
 // The 3D stage pulls in three.js, so it is split out and only fetched once the
 // rest of the hero has rendered.
 const DonationBox3D = lazy(() => import("./DonationBox3D"));
 
 function Hero() {
+  const { t } = useLang();
   return (
     <section id="top" className="ll-hero" style={{ background: "var(--ll-gradient-hero)" }}>
       <div className="ll-grid-bg ll-hero-grid" aria-hidden="true" />
@@ -22,29 +24,28 @@ function Hero() {
             <span className="ll-ping-wave" />
             <span className="ll-ping-dot" />
           </span>
-          Real-time donor matching · 24/7 emergency network
+          {t("Real-time donor matching · 24/7 emergency network")}
         </motion.div>
 
         <motion.h1 {...heroEnter(0.1)} className="ll-hero-title">
-          Every drop.
+          {t("Every drop.")}
           <br />
-          <span className="ll-text-gradient-success">Saves a life.</span>
+          <span className="ll-text-gradient-success">{t("Saves a life.")}</span>
         </motion.h1>
 
         <motion.p {...heroEnter(0.2)} className="ll-hero-sub">
-          LifeLink is the smart blood &amp; organ donation network connecting hospitals with verified
-          donors in seconds — privacy-first, geo-matched, life-saving.
+          {t("LifeLink is the smart blood & organ donation network connecting hospitals with verified donors in seconds — privacy-first, geo-matched, life-saving.")}
         </motion.p>
 
         <motion.div {...heroEnter(0.3)} className="ll-hero-actions">
           <Link to="/signup" className="ll-btn ll-btn-primary">
             <Heart size={16} fill="currentColor" />
-            Become a Donor
+            {t("Become a Donor")}
             <ArrowRight size={16} className="ll-btn-arrow" />
           </Link>
           <Link to="/signup" className="ll-btn ll-btn-emergency">
             <Siren size={16} className="ll-heartbeat" />
-            Emergency Request
+            {t("Emergency Request")}
           </Link>
         </motion.div>
 
@@ -67,11 +68,11 @@ function Hero() {
         </motion.div>
 
         <motion.div {...revealScale()} className="ll-hero-stage">
-          <Suspense fallback={<div className="ll-stage-fallback">Loading 3D scene…</div>}>
+          <Suspense fallback={<div className="ll-stage-fallback">{t("Loading 3D scene…")}</div>}>
             <DonationBox3D />
           </Suspense>
           <p className="ll-stage-caption">
-            Move your cursor — every drop reaches the box, every box reaches a hospital.
+            {t("Move your cursor — every drop reaches the box, every box reaches a hospital.")}
           </p>
         </motion.div>
       </div>

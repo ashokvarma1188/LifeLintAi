@@ -7,6 +7,8 @@ import { isAuthenticated } from "../services/auth";
 import "./Dashboard.css";
 import "./portal.css";
 import "./FirstAidGuide.css";
+import { useLang } from "../i18n/context";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 
 /** Step-by-step first aid that works with no connection (the app shell is cached by the service worker). */
 function FirstAidGuide() {
@@ -14,6 +16,7 @@ function FirstAidGuide() {
   const [openId, setOpenId] = useState(null);
   const [offlineReady, setOfflineReady] = useState(false);
   const signedIn = isAuthenticated();
+  const { t } = useLang();
 
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
@@ -22,7 +25,7 @@ function FirstAidGuide() {
 
   const q = query.trim().toLowerCase();
   const guides = q
-    ? FIRST_AID_GUIDES.filter((g) => `${g.title} ${g.summary} ${g.keywords}`.toLowerCase().includes(q))
+    ? FIRST_AID_GUIDES.filter((g) => `${g.title} ${g.summary} ${g.keywords} ${t(g.title)} ${t(g.summary)}`.toLowerCase().includes(q))
     : FIRST_AID_GUIDES;
 
   return (
@@ -34,18 +37,19 @@ function FirstAidGuide() {
           <Link to="/" className="fa-brand">
             <BookHeart size={18} /> LifeLink AI
           </Link>
+          <LanguageSwitcher />
         </div>
       )}
 
       <div className="portal-content">
         <div className="portal-head">
           <div>
-            <h1>First-Aid Guide</h1>
-            <p>Clear steps for common emergencies — works even without internet.</p>
+            <h1>{t("First-Aid Guide")}</h1>
+            <p>{t("Clear steps for common emergencies — works even without internet.")}</p>
           </div>
           <span className={`fa-offline-badge ${offlineReady ? "ready" : ""}`}>
             {offlineReady ? <BadgeCheck size={14} /> : <CloudOff size={14} />}
-            {offlineReady ? "Saved for offline use" : "Opens offline after your first visit"}
+            {offlineReady ? t("Saved for offline use") : t("Opens offline after your first visit")}
           </span>
         </div>
 
@@ -55,7 +59,7 @@ function FirstAidGuide() {
               <Phone size={14} />
               <span>
                 <strong>{line.number}</strong>
-                {line.label}
+                {t(line.label)}
               </span>
             </a>
           ))}
@@ -64,14 +68,14 @@ function FirstAidGuide() {
         <div className="fa-search">
           <Search size={16} />
           <input
-            placeholder="Search — e.g. burn, choking, snake"
+            placeholder={t("Search — e.g. burn, choking, snake")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            aria-label="Search first-aid topics"
+            aria-label={t("Search first-aid topics")}
           />
         </div>
 
-        {guides.length === 0 && <div className="portal-empty">No topic matches “{query}”. Try another word, or call 112.</div>}
+        {guides.length === 0 && <div className="portal-empty">{t("No topic matches “{query}”. Try another word, or call 112.", { query })}</div>}
 
         <div className="fa-list">
           {guides.map((guide) => {
@@ -84,8 +88,8 @@ function FirstAidGuide() {
                     <Icon size={20} />
                   </span>
                   <span className="fa-item-text">
-                    <strong>{guide.title}</strong>
-                    <span>{guide.summary}</span>
+                    <strong>{t(guide.title)}</strong>
+                    <span>{t(guide.summary)}</span>
                   </span>
                   <ChevronDown size={18} className="fa-chevron" />
                 </button>
@@ -94,21 +98,21 @@ function FirstAidGuide() {
                   <div className="fa-item-body">
                     <ol className="fa-steps">
                       {guide.steps.map((step) => (
-                        <li key={step}>{step}</li>
+                        <li key={step}>{t(step)}</li>
                       ))}
                     </ol>
                     <div className="fa-dont">
                       <strong>
-                        <CircleAlert size={14} /> Don&apos;t
+                        <CircleAlert size={14} /> {t("Don't")}
                       </strong>
                       <ul>
                         {guide.dont.map((item) => (
-                          <li key={item}>{item}</li>
+                          <li key={item}>{t(item)}</li>
                         ))}
                       </ul>
                     </div>
                     <div className="fa-call-when">
-                      <Phone size={13} /> <span><strong>Call for help:</strong> {guide.callWhen}</span>
+                      <Phone size={13} /> <span><strong>{t("Call for help:")}</strong> {t(guide.callWhen)}</span>
                     </div>
                   </div>
                 )}
@@ -118,8 +122,7 @@ function FirstAidGuide() {
         </div>
 
         <p className="fa-disclaimer">
-          General first-aid guidance only — not a substitute for professional medical care or a first-aid course. In an
-          emergency, call 112 first.
+          {t("General first-aid guidance only — not a substitute for professional medical care or a first-aid course. In an emergency, call 112 first.")}
         </p>
       </div>
     </div>

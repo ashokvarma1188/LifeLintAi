@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Send, X } from "lucide-react";
 import { getUser } from "../services/auth";
+import { useLang } from "../i18n/context";
 
 /** Renders one support ticket's full thread, a reply box, and a close action. Shared by the civilian and admin views. */
 function SupportThread({ ticket, onReply, onClose, onDone }) {
+  const { t } = useLang();
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -19,7 +21,7 @@ function SupportThread({ ticket, onReply, onClose, onDone }) {
       await onReply(ticket._id, message.trim());
       setMessage("");
     } catch (err) {
-      setError(err.response?.data?.message || "Could not send your reply.");
+      setError(err.response?.data?.message || t("Could not send your reply."));
     } finally {
       setSending(false);
     }
@@ -31,7 +33,7 @@ function SupportThread({ ticket, onReply, onClose, onDone }) {
     try {
       await onClose(ticket._id);
     } catch (err) {
-      setError(err.response?.data?.message || "Could not close this ticket.");
+      setError(err.response?.data?.message || t("Could not close this ticket."));
     } finally {
       setClosing(false);
     }
@@ -48,7 +50,7 @@ function SupportThread({ ticket, onReply, onClose, onDone }) {
           </p>
         </div>
         <button className="portal-back" style={{ margin: 0 }} onClick={onDone}>
-          <X size={14} /> Close
+          <X size={14} /> {t("Close")}
         </button>
       </div>
 
@@ -70,7 +72,7 @@ function SupportThread({ ticket, onReply, onClose, onDone }) {
               }}
             >
               <div style={{ fontSize: 11, opacity: 0.75, marginBottom: 2 }}>
-                {m.senderRole === "admin" ? "Support" : m.senderId?.name || "You"}
+                {m.senderRole === "admin" ? t("Support") : m.senderId?.name || t("You")}
               </div>
               <div style={{ fontSize: 13.5, whiteSpace: "pre-wrap" }}>{m.text}</div>
             </div>
@@ -79,25 +81,25 @@ function SupportThread({ ticket, onReply, onClose, onDone }) {
       </div>
 
       {ticket.status === "closed" && (
-        <div className="portal-message success">This ticket is closed. Sending a reply will reopen it.</div>
+        <div className="portal-message success">{t("This ticket is closed. Sending a reply will reopen it.")}</div>
       )}
       <form className="portal-form" onSubmit={send}>
         <div className="portal-field">
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="Write a reply…"
+            placeholder={t("Write a reply…")}
             rows={2}
           />
         </div>
         <div className="portal-form-actions">
           {ticket.status === "open" && (
             <button type="button" className="portal-btn ghost" onClick={doClose} disabled={closing}>
-              {closing ? "Closing…" : "Close ticket"}
+              {closing ? t("Closing…") : t("Close ticket")}
             </button>
           )}
           <button type="submit" className="portal-btn primary" disabled={sending}>
-            <Send size={14} /> {sending ? "Sending…" : "Send"}
+            <Send size={14} /> {sending ? t("Sending…") : t("Send")}
           </button>
         </div>
       </form>

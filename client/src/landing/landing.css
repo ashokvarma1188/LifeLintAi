@@ -104,7 +104,7 @@
 
 .ll-nav-wrap {
   position: fixed;
-  top: 0;
+  top: var(--ll-banner-offset, 0px);
   left: 0;
   right: 0;
   z-index: 50;
@@ -1491,4 +1491,11 @@
     box-shadow: none;
     border-color: var(--ll-glass-border);
   }
+}
+
+/* Language picker: inline in the pill nav from 640px up, inside the mobile menu below that. */
+.ll-nav-lang { display: none; }
+.ll-nav-mobile-lang { padding: 0.5rem 1rem; }
+@media (min-width: 640px) {
+  .ll-nav-lang { display: inline-flex; }
 }

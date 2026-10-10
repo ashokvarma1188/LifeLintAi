@@ -4,6 +4,7 @@ import dashboardShot from "../assets/showcase-dashboard.png";
 import findHospitalsShot from "../assets/showcase-find-hospitals.png";
 import bloodDonationShot from "../assets/showcase-blood-donation.png";
 import { revealUp } from "../motion";
+import { useLang } from "../../i18n/context";
 
 /* Real screenshots of the actual running app, not mockups. */
 const SCREENS = [
@@ -13,14 +14,15 @@ const SCREENS = [
 ];
 
 function AppShowcase() {
+  const { t } = useLang();
   const [active, setActive] = useState(0);
 
   return (
     <section id="showcase" className="ll-section ll-section-how">
       <div className="ll-container ll-container-6xl">
         <div className="ll-section-head">
-          <p className="ll-eyebrow">See it for real</p>
-          <h2 className="ll-h2">Not a mockup. The actual app.</h2>
+          <p className="ll-eyebrow">{t("See it for real")}</p>
+          <h2 className="ll-h2">{t("Not a mockup. The actual app.")}</h2>
         </div>
 
         <div className="ll-showcase-tabs">
@@ -31,7 +33,7 @@ function AppShowcase() {
               className={`ll-showcase-tab${i === active ? " is-active" : ""}`}
               onClick={() => setActive(i)}
             >
-              {s.label}
+              {t(s.label)}
             </button>
           ))}
         </div>
@@ -48,7 +50,7 @@ function AppShowcase() {
               <motion.img
                 key={SCREENS[active].key}
                 src={SCREENS[active].src}
-                alt={`LifeLink AI — ${SCREENS[active].label} screen`}
+                alt={t("LifeLink AI — {screen} screen", { screen: t(SCREENS[active].label) })}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

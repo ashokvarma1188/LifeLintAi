@@ -3,11 +3,13 @@ import { motion } from "framer-motion";
 import { Siren, Check, Loader2 } from "lucide-react";
 import { SOS_DEMO_STEPS } from "../data";
 import { revealUp } from "../motion";
+import { useLang } from "../../i18n/context";
 
 const STEP_DELAY_MS = 900;
 
 /** A harmless, client-only simulation — no request is actually sent. Just shows what pressing SOS looks like. */
 function SosDemo() {
+  const { t } = useLang();
   const [activeStep, setActiveStep] = useState(-1);
   const [running, setRunning] = useState(false);
   const timeoutsRef = useRef([]);
@@ -34,8 +36,8 @@ function SosDemo() {
     <section id="sos-demo" className="ll-section ll-section-how">
       <div className="ll-container ll-container-5xl">
         <div className="ll-section-head">
-          <p className="ll-eyebrow">See it in action</p>
-          <h2 className="ll-h2">Press it. Watch what happens.</h2>
+          <p className="ll-eyebrow">{t("See it in action")}</p>
+          <h2 className="ll-h2">{t("Press it. Watch what happens.")}</h2>
         </div>
 
         <motion.div {...revealUp(0, { y: 20, duration: 0.5 })} className="ll-card ll-sos-demo-card">
@@ -43,7 +45,7 @@ function SosDemo() {
 
           <button type="button" className="ll-sos-demo-btn" onClick={run} disabled={running}>
             {running ? <Loader2 size={20} className="ll-sos-demo-spin" /> : <Siren size={20} />}
-            {running ? "Sending…" : "Simulate pressing SOS"}
+            {running ? t("Sending…") : t("Simulate pressing SOS")}
           </button>
 
           <div className="ll-sos-demo-steps">
@@ -55,15 +57,15 @@ function SosDemo() {
                     {state === "done" ? <Check size={12} /> : i + 1}
                   </span>
                   <div>
-                    <div className="ll-sos-demo-step-label">{step.label}</div>
-                    <div className="ll-sos-demo-step-detail">{step.detail}</div>
+                    <div className="ll-sos-demo-step-label">{t(step.label)}</div>
+                    <div className="ll-sos-demo-step-detail">{t(step.detail)}</div>
                   </div>
                 </div>
               );
             })}
           </div>
 
-          <p className="ll-sos-demo-note">This is a simulation — no real alert is sent.</p>
+          <p className="ll-sos-demo-note">{t("This is a simulation — no real alert is sent.")}</p>
         </motion.div>
       </div>
     </section>

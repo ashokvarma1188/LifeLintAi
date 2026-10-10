@@ -7,8 +7,10 @@ import AppNavbar from "./AppNavbar";
 import "./Dashboard.css";
 import "./Profile.css";
 import "./portal.css";
+import { useLang } from "../i18n/context";
 
 function Profile() {
+  const { t } = useLang();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -47,6 +49,7 @@ function Profile() {
             : [{ name: "", phone: "", relation: "" }],
         });
       } catch {
+        // Translated where it is shown, so a language switch never re-fetches (and resets) the form.
         setError("Failed to load profile. Please try again.");
       } finally {
         setLoading(false);
@@ -104,9 +107,9 @@ function Profile() {
 
       const res = await api.put("/profile/me", payload);
       localStorage.setItem("user", JSON.stringify(res.data.user));
-      setSuccess("Profile updated successfully.");
+      setSuccess(t("Profile updated successfully."));
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to update profile.");
+      setError(err.response?.data?.message || t("Failed to update profile."));
     } finally {
       setSaving(false);
     }
@@ -124,7 +127,7 @@ function Profile() {
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err.response?.data?.message || "Could not export your data.");
+      setError(err.response?.data?.message || t("Could not export your data."));
     } finally {
       setExporting(false);
     }
@@ -139,7 +142,7 @@ function Profile() {
       logout();
       navigate("/login", { replace: true });
     } catch (err) {
-      setDeleteError(err.response?.data?.message || "Could not delete your account.");
+      setDeleteError(err.response?.data?.message || t("Could not delete your account."));
     } finally {
       setDeleting(false);
     }
@@ -150,7 +153,7 @@ function Profile() {
       <div className="dash-wrapper">
         <AppNavbar />
         <div className="profile-content">
-          <p>Loading profile...</p>
+          <p>{t("Loading profile...")}</p>
         </div>
       </div>
     );
@@ -166,36 +169,36 @@ function Profile() {
         </a>
 
         <div className="profile-header">
-          <h1>My Profile</h1>
-          <p>Keep this updated — it's what responders see during an emergency.</p>
+          <h1>{t("My Profile")}</h1>
+          <p>{t("Keep this updated — it's what responders see during an emergency.")}</p>
         </div>
 
-        {error && <div className="auth-message error">{error}</div>}
+        {error && <div className="auth-message error">{t(error)}</div>}
         {success && <div className="auth-message success">{success}</div>}
 
         <form onSubmit={handleSubmit}>
           <div className="profile-card">
             <div className="profile-section">
-              <div className="profile-section-title">Basic Info</div>
+              <div className="profile-section-title">{t("Basic Info")}</div>
               <div className="profile-row">
                 <div className="auth-field">
-                  <label>Full Name</label>
+                  <label>{t("Full Name")}</label>
                   <input type="text" name="name" value={form.name} onChange={handleChange} required />
                 </div>
                 <div className="auth-field">
-                  <label>Phone</label>
+                  <label>{t("Phone")}</label>
                   <input type="tel" name="phone" value={form.phone} onChange={handleChange} />
                 </div>
               </div>
               <div className="profile-row">
                 <div className="auth-field">
-                  <label>Age</label>
+                  <label>{t("Age")}</label>
                   <input type="number" name="age" value={form.age} onChange={handleChange} min="0" />
                 </div>
                 <div className="auth-field">
-                  <label>Blood Group</label>
+                  <label>{t("Blood Group")}</label>
                   <select name="bloodGroup" value={form.bloodGroup} onChange={handleChange}>
-                    <option value="">Select</option>
+                    <option value="">{t("Select")}</option>
                     <option value="A+">A+</option>
                     <option value="A-">A-</option>
                     <option value="B+">B+</option>
@@ -210,33 +213,33 @@ function Profile() {
             </div>
 
             <div className="profile-section">
-              <div className="profile-section-title">Medical Info</div>
+              <div className="profile-section-title">{t("Medical Info")}</div>
               <div className="auth-field">
-                <label>Medical History</label>
+                <label>{t("Medical History")}</label>
                 <input
                   type="text"
                   name="medicalHistory"
-                  placeholder="e.g. Asthma, Diabetes"
+                  placeholder={t("e.g. Asthma, Diabetes")}
                   value={form.medicalHistory}
                   onChange={handleChange}
                 />
-                <div className="tag-input-hint">Separate multiple items with commas</div>
+                <div className="tag-input-hint">{t("Separate multiple items with commas")}</div>
               </div>
               <div className="auth-field">
-                <label>Allergies</label>
+                <label>{t("Allergies")}</label>
                 <input
                   type="text"
                   name="allergies"
-                  placeholder="e.g. Penicillin, Peanuts"
+                  placeholder={t("e.g. Penicillin, Peanuts")}
                   value={form.allergies}
                   onChange={handleChange}
                 />
-                <div className="tag-input-hint">Separate multiple items with commas</div>
+                <div className="tag-input-hint">{t("Separate multiple items with commas")}</div>
               </div>
             </div>
 
             <div className="profile-section">
-              <div className="profile-section-title">Emergency Contacts</div>
+              <div className="profile-section-title">{t("Emergency Contacts")}</div>
               {form.emergencyContacts.map((contact, index) => (
                 <div className="contact-card" key={index}>
                   {form.emergencyContacts.length > 1 && (
@@ -245,12 +248,12 @@ function Profile() {
                       className="contact-remove"
                       onClick={() => removeContact(index)}
                     >
-                      Remove
+                      {t("Remove")}
                     </button>
                   )}
                   <div className="profile-row">
                     <div className="auth-field">
-                      <label>Name</label>
+                      <label>{t("Name")}</label>
                       <input
                         type="text"
                         value={contact.name}
@@ -258,7 +261,7 @@ function Profile() {
                       />
                     </div>
                     <div className="auth-field">
-                      <label>Phone</label>
+                      <label>{t("Phone")}</label>
                       <input
                         type="tel"
                         value={contact.phone}
@@ -266,10 +269,10 @@ function Profile() {
                       />
                     </div>
                     <div className="auth-field">
-                      <label>Relation</label>
+                      <label>{t("Relation")}</label>
                       <input
                         type="text"
-                        placeholder="e.g. Father"
+                        placeholder={t("e.g. Father")}
                         value={contact.relation}
                         onChange={(e) => handleContactChange(index, "relation", e.target.value)}
                       />
@@ -284,7 +287,7 @@ function Profile() {
 
             <div className="profile-save-row">
               <button className="auth-submit" type="submit" disabled={saving}>
-                {saving ? "Saving..." : "Save Changes"}
+                {saving ? t("Saving...") : t("Save Changes")}
               </button>
             </div>
           </div>
@@ -292,42 +295,42 @@ function Profile() {
 
         <div className="profile-card" style={{ marginTop: 20 }}>
           <div className="profile-section">
-            <div className="profile-section-title">Privacy &amp; Data</div>
+            <div className="profile-section-title">{t("Privacy & Data")}</div>
 
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: "1px solid var(--border-color-soft)" }}>
               <div>
-                <div style={{ fontWeight: 500, fontSize: 14 }}>Download my data</div>
+                <div style={{ fontWeight: 500, fontSize: 14 }}>{t("Download my data")}</div>
                 <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>
-                  Your profile, health records, and SOS history as a JSON file.
+                  {t("Your profile, health records, and SOS history as a JSON file.")}
                 </div>
               </div>
               <button className="portal-btn ghost small" type="button" onClick={handleExportData} disabled={exporting}>
-                <Download size={14} /> {exporting ? "Preparing…" : "Download"}
+                <Download size={14} /> {exporting ? t("Preparing…") : t("Download")}
               </button>
             </div>
 
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0" }}>
               <div>
-                <div style={{ fontWeight: 500, fontSize: 14 }}>Delete my account</div>
+                <div style={{ fontWeight: 500, fontSize: 14 }}>{t("Delete my account")}</div>
                 <div style={{ fontSize: 12.5, color: "var(--text-secondary)" }}>
-                  Permanently removes your account, health records, and SOS history. This can't be undone.
+                  {t("Permanently removes your account, health records, and SOS history. This can't be undone.")}
                 </div>
               </div>
               <button className="portal-btn danger small" type="button" onClick={() => setShowDeleteConfirm(true)}>
-                <Trash2 size={14} /> Delete account
+                <Trash2 size={14} /> {t("Delete account")}
               </button>
             </div>
 
             {showDeleteConfirm && (
               <form onSubmit={handleDeleteAccount} style={{ marginTop: 12, padding: 12, border: "1px solid var(--danger)", borderRadius: 10 }}>
                 <p style={{ fontSize: 13, marginTop: 0 }}>
-                  Enter your password to permanently delete your account. This cannot be undone.
+                  {t("Enter your password to permanently delete your account. This cannot be undone.")}
                 </p>
                 {deleteError && <div className="auth-message error">{deleteError}</div>}
                 <div className="auth-field">
                   <input
                     type="password"
-                    placeholder="Your password"
+                    placeholder={t("Your password")}
                     value={deletePassword}
                     onChange={(e) => setDeletePassword(e.target.value)}
                     required
@@ -335,7 +338,7 @@ function Profile() {
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   <button className="portal-btn danger small" type="submit" disabled={deleting}>
-                    {deleting ? "Deleting…" : "Confirm delete"}
+                    {deleting ? t("Deleting…") : t("Confirm delete")}
                   </button>
                   <button
                     className="portal-btn ghost small"
@@ -346,7 +349,7 @@ function Profile() {
                       setDeletePassword("");
                     }}
                   >
-                    Cancel
+                    {t("Cancel")}
                   </button>
                 </div>
               </form>

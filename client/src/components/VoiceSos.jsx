@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Mic, MicOff, Siren } from "lucide-react";
+import { useLang } from "../i18n/context";
+import { speechLangFor } from "../i18n/languages";
 import "./VoiceSos.css";
 
 const SpeechRecognitionApi =
@@ -47,7 +49,10 @@ function interpret(transcript) {
  * "accident" if the user said so, otherwise "").
  */
 function VoiceSos({ onTrigger, disabled }) {
-  const [lang, setLang] = useState("en-IN");
+  const { t, lang: appLang } = useLang();
+  // Follows the app language until the user picks a different voice language here.
+  const [voiceLang, setVoiceLang] = useState(null);
+  const lang = voiceLang || speechLangFor(appLang);
   const [listening, setListening] = useState(false);
   const [heard, setHeard] = useState("");
   const [error, setError] = useState("");
@@ -107,12 +112,12 @@ function VoiceSos({ onTrigger, disabled }) {
       }
     };
     recognition.onerror = (event) => {
-      if (event.error !== "aborted") setError(VOICE_ERRORS[event.error] || "Voice input stopped unexpectedly.");
+      if (event.error !== "aborted") setError(t(VOICE_ERRORS[event.error] || "Voice input stopped unexpectedly."));
     };
     recognition.onend = () => {
       setListening(false);
       recognitionRef.current = null;
-      if (!matchedRef.current) setError((prev) => prev || "Didn't hear “help”. Tap the mic and try again, or press the SOS button.");
+      if (!matchedRef.current) setError((prev) => prev || t("Didn't hear “help”. Tap the mic and try again, or press the SOS button."));
     };
 
     recognitionRef.current = recognition;
@@ -120,7 +125,7 @@ function VoiceSos({ onTrigger, disabled }) {
       recognition.start();
       setListening(true);
     } catch {
-      setError("Voice input couldn't start. Please try again.");
+      setError(t("Voice input couldn't start. Please try again."));
     }
   };
 
@@ -142,37 +147,37 @@ function VoiceSos({ onTrigger, disabled }) {
           className={`voice-sos-btn${listening ? " listening" : ""}`}
           onClick={startListening}
           disabled={disabled || count !== null}
-          aria-label={listening ? "Stop listening" : "Start Voice SOS"}
+          aria-label={listening ? t("Stop listening") : t("Start Voice SOS")}
         >
           {listening ? <MicOff size={16} /> : <Mic size={16} />}
-          {listening ? "Listening…" : "Voice SOS"}
+          {listening ? t("Listening…") : t("Voice SOS")}
         </button>
         <select
           className="voice-sos-lang"
           value={lang}
-          onChange={(e) => setLang(e.target.value)}
+          onChange={(e) => setVoiceLang(e.target.value)}
           disabled={listening || count !== null}
-          aria-label="Voice language"
+          aria-label={t("Voice language")}
         >
           {LANGUAGES.map((l) => (
             <option key={l.code} value={l.code}>{l.label}</option>
           ))}
         </select>
-        <span className="voice-sos-hint">{listening ? (heard ? `Heard: “${heard}”` : hint) : hint}</span>
+        <span className="voice-sos-hint">{listening && heard ? t("Heard: “{text}”", { text: heard }) : hint}</span>
       </div>
       {error && <div className="voice-sos-error">{error}</div>}
 
       {count !== null && (
-        <div className="voice-sos-backdrop" role="alertdialog" aria-live="assertive" aria-label="Sending SOS">
+        <div className="voice-sos-backdrop" role="alertdialog" aria-live="assertive" aria-label={t("Sending SOS")}>
           <div className="voice-sos-modal">
             <Siren size={28} />
-            <h3>Sending SOS in</h3>
+            <h3>{t("Sending SOS in")}</h3>
             <div className="voice-sos-count" key={count}>{count}</div>
-            {heard && <p className="voice-sos-heard">I heard: “{heard}”</p>}
-            <p>Your live location will be shared with the selected services.</p>
+            {heard && <p className="voice-sos-heard">{t("I heard: “{text}”", { text: heard })}</p>}
+            <p>{t("Your live location will be shared with the selected services.")}</p>
             <div className="voice-sos-actions">
-              <button type="button" className="voice-sos-cancel" onClick={cancel}>Cancel</button>
-              <button type="button" className="voice-sos-now" onClick={sendNow}>Send now</button>
+              <button type="button" className="voice-sos-cancel" onClick={cancel}>{t("Cancel")}</button>
+              <button type="button" className="voice-sos-now" onClick={sendNow}>{t("Send now")}</button>
             </div>
           </div>
         </div>

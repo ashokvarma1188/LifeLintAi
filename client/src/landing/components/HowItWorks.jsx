@@ -1,14 +1,16 @@
 import { motion } from "framer-motion";
 import { STEPS } from "../data";
 import { revealUp } from "../motion";
+import { useLang } from "../../i18n/context";
 
 function HowItWorks() {
+  const { t } = useLang();
   return (
     <section id="how" className="ll-section ll-section-how">
       <div className="ll-container ll-container-6xl">
         <div className="ll-section-head">
-          <p className="ll-eyebrow">How it works</p>
-          <h2 className="ll-h2">Three steps. Zero friction.</h2>
+          <p className="ll-eyebrow">{t("How it works")}</p>
+          <h2 className="ll-h2">{t("Three steps. Zero friction.")}</h2>
         </div>
 
         <div className="ll-steps">
@@ -18,9 +20,9 @@ function HowItWorks() {
               <div className="ll-step-icon">
                 <Icon size={20} />
               </div>
-              <div className="ll-step-num">STEP 0{i + 1}</div>
-              <h3 className="ll-step-title">{title}</h3>
-              <p className="ll-step-desc">{desc}</p>
+              <div className="ll-step-num">{t("STEP {n}", { n: `0${i + 1}` })}</div>
+              <h3 className="ll-step-title">{t(title)}</h3>
+              <p className="ll-step-desc">{t(desc)}</p>
             </motion.div>
           ))}
         </div>

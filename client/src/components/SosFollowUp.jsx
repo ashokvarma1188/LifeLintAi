@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { MessageCircle, Smartphone, Copy, Check, BedDouble, Phone, UserPlus } from "lucide-react";
 import MapsLink from "./MapsLink";
 import { sosMessage, trackUrl, whatsappLink, smsLink } from "../utils/share";
+import { useLang } from "../i18n/context";
 import "./SosFollowUp.css";
 
 /**
@@ -10,11 +11,12 @@ import "./SosFollowUp.css";
  * tracking link), and the nearest hospitals with how many beds are free right now.
  */
 function SosFollowUp({ result, contacts, userName, type }) {
+  const { t } = useLang();
   const [copied, setCopied] = useState(false);
   const token = result.emergencyRequest?.shareToken;
   const hospitals = result.nearbyHospitals || [];
   const reachable = (contacts || []).filter((c) => c.phone);
-  const message = token ? sosMessage(userName, type, token) : "";
+  const message = token ? sosMessage(userName, type, token, t) : "";
 
   const copyLink = async () => {
     try {
@@ -30,11 +32,11 @@ function SosFollowUp({ result, contacts, userName, type }) {
     <div className="sos-followup">
       {token && (
         <div className="sos-followup-block">
-          <h4>Tell your family</h4>
+          <h4>{t("Tell your family")}</h4>
           {reachable.length === 0 ? (
             <p>
-              You haven&apos;t saved any emergency contacts.{" "}
-              <Link to="/profile"><UserPlus size={12} /> Add family numbers</Link> to alert them in one tap next time.
+              {t("You haven't saved any emergency contacts.")}{" "}
+              <Link to="/profile"><UserPlus size={12} /> {t("Add family numbers")}</Link> {t("to alert them in one tap next time.")}
             </p>
           ) : (
             <div className="sos-contact-list">
@@ -52,26 +54,26 @@ function SosFollowUp({ result, contacts, userName, type }) {
             </div>
           )}
           <button type="button" className="sos-copy" onClick={copyLink}>
-            {copied ? <Check size={13} /> : <Copy size={13} />} {copied ? "Link copied" : "Copy live-tracking link"}
+            {copied ? <Check size={13} /> : <Copy size={13} />} {copied ? t("Link copied") : t("Copy live-tracking link")}
           </button>
         </div>
       )}
 
       {hospitals.length > 0 && (
         <div className="sos-followup-block">
-          <h4>Nearest hospitals — beds free now</h4>
+          <h4>{t("Nearest hospitals — beds free now")}</h4>
           {hospitals.map((h) => (
             <div key={h._id} className="sos-hospital">
               <div>
                 <strong>{h.name}</strong>
                 <span className={`sos-beds ${h.availableBeds > 0 ? "ok" : "none"}`}>
-                  <BedDouble size={12} /> {h.availableBeds ?? "—"} free
-                  {h.icuAvailableBeds > 0 ? ` · ${h.icuAvailableBeds} ICU` : ""}
+                  <BedDouble size={12} /> {t("{count} free", { count: h.availableBeds ?? "—" })}
+                  {h.icuAvailableBeds > 0 ? ` · ${t("{count} ICU", { count: h.icuAvailableBeds })}` : ""}
                 </span>
               </div>
               <div className="sos-hospital-actions">
                 {h.phone && (
-                  <a href={`tel:${h.phone}`}><Phone size={12} /> Call</a>
+                  <a href={`tel:${h.phone}`}><Phone size={12} /> {t("Call")}</a>
                 )}
                 <MapsLink coordinates={h.location?.coordinates} className="sos-map-link" />
               </div>

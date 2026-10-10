@@ -8,6 +8,7 @@ import { listNearbyServices } from "../services/emergencyServices";
 import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./FindHospitals.css";
+import { useLang } from "../i18n/context";
 
 // Haversine formula: calculates straight-line distance (in km) between two lat/lng points
 function getDistanceKm(lat1, lon1, lat2, lon2) {
@@ -27,6 +28,7 @@ const TYPES = [
 
 function FindEmergencyServices() {
   const navigate = useNavigate();
+  const { t } = useLang();
   const [type, setType] = useState("police");
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -77,32 +79,32 @@ function FindEmergencyServices() {
 
       <div className="fh-content">
         <button className="portal-back" onClick={() => navigate("/dashboard")}>
-          <ArrowLeft size={14} /> Back to dashboard
+          <ArrowLeft size={14} /> {t("Back to dashboard")}
         </button>
 
         <div className="fh-header">
-          <h1>Nearby Police &amp; Fire Stations</h1>
-          <p>Registered stations within 25 km of your current location, closest first.</p>
+          <h1>{t("Nearby Police & Fire Stations")}</h1>
+          <p>{t("Registered stations within 25 km of your current location, closest first.")}</p>
         </div>
 
         <div className="portal-toolbar" style={{ marginBottom: 16 }}>
-          {TYPES.map((t) => (
+          {TYPES.map((option) => (
             <button
-              key={t.value}
-              className={`portal-btn ${type === t.value ? "primary" : "ghost"}`}
-              onClick={() => setType(t.value)}
+              key={option.value}
+              className={`portal-btn ${type === option.value ? "primary" : "ghost"}`}
+              onClick={() => setType(option.value)}
             >
-              {t.label}
+              {t(option.label)}
             </button>
           ))}
         </div>
 
         <div className="fh-search-bar">
           <span className="status-text">
-            {loading ? "Searching nearby…" : error || `${services.length} found`}
+            {loading ? t("Searching nearby…") : error ? t(error) : t("{count} found", { count: services.length })}
           </span>
           <button className="fh-refresh-btn" onClick={() => search(type)} disabled={loading}>
-            {loading ? "Searching..." : "Refresh"}
+            {loading ? t("Searching...") : t("Refresh")}
           </button>
         </div>
 
@@ -111,7 +113,7 @@ function FindEmergencyServices() {
             <div className="icon-wrap">
               <IconHospital width={24} height={24} />
             </div>
-            <p>No {type === "police" ? "police stations" : "fire stations"} registered yet.</p>
+            <p>{type === "police" ? t("No police stations registered yet.") : t("No fire stations registered yet.")}</p>
           </div>
         )}
 
@@ -131,7 +133,7 @@ function FindEmergencyServices() {
                     <h3>{s.orgName || s.name}</h3>
                     <div className="fh-card-row">
                       <IconMapPin width={14} height={14} />
-                      {distance !== null ? `${distance.toFixed(1)} km away` : "Distance unavailable"}
+                      {distance !== null ? t("{km} km away", { km: distance.toFixed(1) }) : t("Distance unavailable")}
                     </div>
                     <div className="fh-card-row">
                       <IconPhone width={14} height={14} />
@@ -145,7 +147,7 @@ function FindEmergencyServices() {
                 </div>
                 <div className="fh-card-side">
                   <span className={`fh-ambulance ${s.isOpen !== false ? "available" : "unavailable"}`}>
-                    {s.isOpen !== false ? "Open" : "Closed"}
+                    {s.isOpen !== false ? t("Open") : t("Closed")}
                   </span>
                   <div style={{ marginTop: 10 }}>
                     <MapsLink coordinates={s.location?.coordinates} />
