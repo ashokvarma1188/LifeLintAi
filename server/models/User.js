@@ -22,6 +22,13 @@ const userSchema = new mongoose.Schema(
     donationCount: { type: Number, default: 0 },
     // Opt-in token behind the QR-code Medical ID page (see publicController.getMedicalIdByToken).
     medicalIdToken: { type: String, index: true, sparse: true },
+    // Personal organ-donor pledge, shown on the Medical ID and its QR page.
+    organPledge: {
+      pledged: { type: Boolean, default: false },
+      organs: { type: [String], default: [] },
+      familyInformed: { type: Boolean, default: false },
+      pledgedAt: { type: Date },
+    },
     phone: { type: String },
     age: { type: Number },
     medicalHistory: [{ type: String }],

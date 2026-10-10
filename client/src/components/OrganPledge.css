@@ -1,0 +1,29 @@
+.organ-pledge {
+  margin-top: 22px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(224, 18, 42, 0.25);
+  background: rgba(224, 18, 42, 0.04);
+}
+.organ-pledge-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; color: #d0021b; }
+.organ-pledge-head strong { color: var(--text-primary); }
+.organ-badge { margin-left: auto; padding: 2px 10px; border-radius: 999px; background: #e0122a; color: #fff; font-size: 12px; font-weight: 700; }
+.organ-pledge p { margin: 0 0 10px; font-size: 13.5px; color: var(--text-primary); }
+.organ-pledge .organ-note { font-size: 12.5px; color: var(--text-secondary); }
+.organ-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 10px; }
+.organ-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  font-size: 13px;
+  cursor: pointer;
+}
+.organ-option.on { border-color: #e0122a; background: rgba(224, 18, 42, 0.08); }
+.organ-option input, .organ-family input { width: auto; }
+.organ-family { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 10px; }
+.organ-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.organ-official { display: inline-flex; align-items: center; gap: 5px; margin-top: 12px; font-size: 12.5px; color: var(--text-secondary); }

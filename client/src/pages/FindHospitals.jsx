@@ -19,12 +19,15 @@ function getDistanceKm(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+
 function FindHospitals() {
   const { t } = useLang();
   const [hospitals, setHospitals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [coords, setCoords] = useState(null);
+  const [bloodGroup, setBloodGroup] = useState("");
 
   const search = useCallback(() => {
     setError("");
@@ -63,6 +66,10 @@ function FindHospitals() {
     search();
   }, [search]);
 
+  // Blood groups this hospital has units of, in the usual order.
+  const stockOf = (h) => BLOOD_GROUPS.map((g) => [g, Number(h.bloodStock?.[g]) || 0]).filter(([, units]) => units > 0);
+  const visible = bloodGroup ? hospitals.filter((h) => (Number(h.bloodStock?.[bloodGroup]) || 0) > 0) : hospitals;
+
   return (
     <div className="dash-wrapper">
       <AppNavbar showLogout />
@@ -82,6 +89,24 @@ function FindHospitals() {
           </button>
         </div>
 
+        <div className="fh-blood-filter">
+          <span>{t("Need blood?")}</span>
+          <button className={`fh-chip${bloodGroup === "" ? " active" : ""}`} onClick={() => setBloodGroup("")}>
+            {t("All hospitals")}
+          </button>
+          {BLOOD_GROUPS.map((g) => (
+            <button key={g} className={`fh-chip${bloodGroup === g ? " active" : ""}`} onClick={() => setBloodGroup(g)}>
+              {g}
+            </button>
+          ))}
+        </div>
+
+        {bloodGroup && !loading && visible.length === 0 && (
+          <div className="fh-empty">
+            <p>{t("No nearby hospital has {group} blood in stock right now. Try Blood Donation to reach donors.", { group: bloodGroup })}</p>
+          </div>
+        )}
+
         {loading && hospitals.length === 0 && <SkeletonCards count={3} />}
 
         {!loading && hospitals.length === 0 && !error && (
@@ -94,7 +119,7 @@ function FindHospitals() {
         )}
 
         <div className="fh-list">
-          {hospitals.map((h) => {
+          {visible.map((h) => {
             const [lng, lat] = h.location?.coordinates || [];
             const distance =
               coords && lat != null ? getDistanceKm(coords.latitude, coords.longitude, lat, lng) : null;
@@ -142,6 +167,15 @@ function FindHospitals() {
                   <span className={`fh-ambulance ${h.oxygenAvailable ? "available" : "unavailable"}`} style={{ marginTop: 6 }}>
                     {h.oxygenAvailable ? t("Oxygen available") : t("No oxygen")}
                   </span>
+                  {stockOf(h).length > 0 && (
+                    <div className="fh-stock">
+                      {stockOf(h).map(([g, units]) => (
+                        <span key={g} className={`fh-stock-chip${g === bloodGroup ? " match" : ""}`}>
+                          {g} · {units}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div style={{ marginTop: 10 }}>
                     <MapsLink coordinates={h.location?.coordinates} />
                   </div>

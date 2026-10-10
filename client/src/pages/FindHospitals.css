@@ -194,3 +194,20 @@
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+.fh-blood-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 16px; font-size: 13px; color: var(--text-secondary); }
+.fh-blood-filter > span { margin-right: 4px; font-weight: 600; }
+.fh-chip {
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fh-chip.active { background: #e0122a; border-color: #e0122a; color: #fff; }
+.fh-stock { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; justify-content: flex-end; }
+.fh-stock-chip { font-size: 11.5px; padding: 2px 7px; border-radius: 999px; background: rgba(224, 18, 42, 0.08); color: #c0001c; font-weight: 600; }
+.fh-stock-chip.match { background: #e0122a; color: #fff; }

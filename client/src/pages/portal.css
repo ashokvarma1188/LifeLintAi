@@ -461,3 +461,8 @@
   .portal-form-actions { flex-direction: column-reverse; }
   .portal-form-actions .portal-btn { width: 100%; }
 }
+
+/* Hospital blood bank stock editor */
+.blood-stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 8px; }
+.blood-stock-cell { display: flex; flex-direction: column; gap: 4px; font-weight: 700; font-size: 13px; color: var(--text-primary); }
+.blood-stock-cell input { width: 100%; }

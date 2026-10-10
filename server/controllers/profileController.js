@@ -7,6 +7,7 @@ const MedicineRequest = require("../models/MedicineRequest");
 const PushSubscription = require("../models/PushSubscription");
 const SosMessage = require("../models/SosMessage");
 const MedicineReminder = require("../models/MedicineReminder");
+const SafeWalk = require("../models/SafeWalk");
 
 const getProfile = async (req, res) => {
   try {
@@ -55,6 +56,32 @@ const disableMedicalIdLink = async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.userId, { $unset: { medicalIdToken: 1 } });
     res.json({ message: "Medical ID link turned off" });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+const PLEDGE_ORGANS = ["Kidneys", "Liver", "Heart", "Lungs", "Pancreas", "Eyes (corneas)", "Skin", "Bone & tissue"];
+
+/** Make (or withdraw) an organ-donor pledge. */
+const setOrganPledge = async (req, res) => {
+  try {
+    const pledged = Boolean(req.body?.pledged);
+    const organs = pledged ? [...new Set((req.body?.organs || []).filter((o) => PLEDGE_ORGANS.includes(o)))] : [];
+    if (pledged && organs.length === 0) return res.status(400).json({ message: "Choose at least one organ to pledge." });
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      {
+        organPledge: {
+          pledged,
+          organs,
+          familyInformed: pledged && Boolean(req.body?.familyInformed),
+          pledgedAt: pledged ? new Date() : undefined,
+        },
+      },
+      { new: true }
+    ).select("organPledge");
+    res.json({ organPledge: user.organPledge });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
   }
@@ -115,6 +142,7 @@ const deleteMyAccount = async (req, res) => {
     await Promise.all([
       SosMessage.deleteMany({ requestId: { $in: sosIds } }),
       MedicineReminder.deleteMany({ userId: req.userId }),
+      SafeWalk.deleteMany({ userId: req.userId }),
       HealthRecord.deleteMany({ userId: req.userId }),
       EmergencyRequest.deleteMany({ citizenId: req.userId }),
       MedicineRequest.deleteMany({ requestedBy: req.userId }),
@@ -128,4 +156,4 @@ const deleteMyAccount = async (req, res) => {
   }
 };
 
-module.exports = { getProfile, updateProfile, exportMyData, deleteMyAccount, enableMedicalIdLink, disableMedicalIdLink };
+module.exports = { getProfile, updateProfile, exportMyData, deleteMyAccount, enableMedicalIdLink, disableMedicalIdLink, setOrganPledge };

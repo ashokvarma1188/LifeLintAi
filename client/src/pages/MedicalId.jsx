@@ -12,6 +12,7 @@ import "./Dashboard.css";
 import "./portal.css";
 import { SkeletonRows } from "../components/Skeleton";
 import MedicalIdQr from "../components/MedicalIdQr";
+import OrganPledge from "../components/OrganPledge";
 import { useLang } from "../i18n/context";
 
 const VITALS = [
@@ -172,6 +173,7 @@ function MedicalId() {
                   )}
                 </div>
 
+                <OrganPledge initial={profile.organPledge} />
                 <MedicalIdQr initialToken={profile.medicalIdToken} />
               </div>
             )}

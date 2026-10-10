@@ -24,6 +24,8 @@ import FindEmergencyServices from "./pages/FindEmergencyServices";
 import EmergencyNumbers from "./pages/EmergencyNumbers";
 import SosHistory from "./pages/SosHistory";
 import Medicines from "./pages/Medicines";
+import SafeWalk from "./pages/SafeWalk";
+import WalkTrack from "./pages/WalkTrack";
 import MedicalId from "./pages/MedicalId";
 import Privacy from "./landing/pages/Privacy";
 import Terms from "./landing/pages/Terms";
@@ -48,7 +50,7 @@ import AiAssistantWidget from "./components/AiAssistantWidget";
 import FaqAssistantWidget from "./components/FaqAssistantWidget";
 import { isAuthenticated } from "./services/auth";
 
-const AUTH_PAGE_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-email", "/track/", "/id/"];
+const AUTH_PAGE_PREFIXES = ["/login", "/signup", "/forgot-password", "/reset-password", "/verify-email", "/track/", "/id/", "/walk-track/"];
 
 /**
  * Available to every signed-in role — first-aid guidance is useful for staff
@@ -107,6 +109,7 @@ function App() {
             {/* Public, token-protected pages opened from a shared SOS link / a scanned Medical ID QR code */}
             <Route path="/track/:token" element={<TrackSos />} />
             <Route path="/id/:token" element={<PublicMedicalId />} />
+            <Route path="/walk-track/:token" element={<WalkTrack />} />
 
             {/* Public and offline-capable — bundled content, no API calls */}
             <Route path="/first-aid" element={<FirstAidGuide />} />
@@ -199,6 +202,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SosHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/walk"
+              element={
+                <ProtectedRoute>
+                  <SafeWalk />
                 </ProtectedRoute>
               }
             />

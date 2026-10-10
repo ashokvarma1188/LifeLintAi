@@ -1,13 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Mic, MicOff, Siren } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
+import SosCountdown from "./SosCountdown";
 import { useLang } from "../i18n/context";
 import { speechLangFor } from "../i18n/languages";
 import "./VoiceSos.css";
 
 const SpeechRecognitionApi =
   typeof window !== "undefined" ? window.SpeechRecognition || window.webkitSpeechRecognition : undefined;
-
-const COUNTDOWN_SECONDS = 5;
 
 const LANGUAGES = [
   { code: "en-IN", label: "English", hint: "Say “Help” or “Emergency”" },
@@ -56,33 +55,14 @@ function VoiceSos({ onTrigger, disabled }) {
   const [listening, setListening] = useState(false);
   const [heard, setHeard] = useState("");
   const [error, setError] = useState("");
-  const [count, setCount] = useState(null);
+  const [confirming, setConfirming] = useState(false);
   const [detectedType, setDetectedType] = useState("");
   const recognitionRef = useRef(null);
   const matchedRef = useRef(false);
-  const onTriggerRef = useRef(onTrigger);
-  useEffect(() => {
-    onTriggerRef.current = onTrigger;
-  });
 
   const stopListening = useCallback(() => recognitionRef.current?.stop(), []);
 
   useEffect(() => () => recognitionRef.current?.abort(), []);
-
-  // Tick the countdown down once a second; fire the SOS when it reaches zero.
-  useEffect(() => {
-    if (count === null) return undefined;
-    navigator.vibrate?.(80);
-    const timer = setTimeout(() => {
-      if (count <= 1) {
-        setCount(null);
-        onTriggerRef.current(detectedType);
-      } else {
-        setCount(count - 1);
-      }
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [count, detectedType]);
 
   const startListening = () => {
     if (listening) {
@@ -107,7 +87,7 @@ function VoiceSos({ onTrigger, disabled }) {
       if (type !== null) {
         matchedRef.current = true;
         setDetectedType(type);
-        setCount(COUNTDOWN_SECONDS);
+        setConfirming(true);
         recognition.stop();
       }
     };
@@ -129,10 +109,9 @@ function VoiceSos({ onTrigger, disabled }) {
     }
   };
 
-  const cancel = () => setCount(null);
-  const sendNow = () => {
-    setCount(null);
-    onTriggerRef.current(detectedType);
+  const fire = () => {
+    setConfirming(false);
+    onTrigger(detectedType);
   };
 
   if (!SpeechRecognitionApi) return null;
@@ -146,7 +125,7 @@ function VoiceSos({ onTrigger, disabled }) {
           type="button"
           className={`voice-sos-btn${listening ? " listening" : ""}`}
           onClick={startListening}
-          disabled={disabled || count !== null}
+          disabled={disabled || confirming}
           aria-label={listening ? t("Stop listening") : t("Start Voice SOS")}
         >
           {listening ? <MicOff size={16} /> : <Mic size={16} />}
@@ -156,7 +135,7 @@ function VoiceSos({ onTrigger, disabled }) {
           className="voice-sos-lang"
           value={lang}
           onChange={(e) => setVoiceLang(e.target.value)}
-          disabled={listening || count !== null}
+          disabled={listening || confirming}
           aria-label={t("Voice language")}
         >
           {LANGUAGES.map((l) => (
@@ -167,20 +146,8 @@ function VoiceSos({ onTrigger, disabled }) {
       </div>
       {error && <div className="voice-sos-error">{error}</div>}
 
-      {count !== null && (
-        <div className="voice-sos-backdrop" role="alertdialog" aria-live="assertive" aria-label={t("Sending SOS")}>
-          <div className="voice-sos-modal">
-            <Siren size={28} />
-            <h3>{t("Sending SOS in")}</h3>
-            <div className="voice-sos-count" key={count}>{count}</div>
-            {heard && <p className="voice-sos-heard">{t("I heard: “{text}”", { text: heard })}</p>}
-            <p>{t("Your live location will be shared with the selected services.")}</p>
-            <div className="voice-sos-actions">
-              <button type="button" className="voice-sos-cancel" onClick={cancel}>{t("Cancel")}</button>
-              <button type="button" className="voice-sos-now" onClick={sendNow}>{t("Send now")}</button>
-            </div>
-          </div>
-        </div>
+      {confirming && (
+        <SosCountdown note={heard ? t("I heard: “{text}”", { text: heard }) : ""} onFire={fire} onCancel={() => setConfirming(false)} />
       )}
     </>
   );

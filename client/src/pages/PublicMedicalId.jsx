@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Droplet, Phone, AlertCircle, HeartPulse } from "lucide-react";
+import { Droplet, Phone, AlertCircle, HeartPulse, HeartHandshake } from "lucide-react";
 import { getPublicMedicalId } from "../services/publicLinks";
 import "./Dashboard.css";
 import "./portal.css";
@@ -77,6 +77,15 @@ function PublicMedicalId() {
                 {card.medicalHistory.length ? card.medicalHistory.join(", ") : t("None listed")}
               </div>
             </div>
+
+            {card.organDonor?.length > 0 && (
+              <div className="portal-message success" style={{ margin: "18px 0 0", display: "flex", gap: 8, alignItems: "center" }}>
+                <HeartHandshake size={16} />
+                <span>
+                  <strong>{t("Registered organ donor")}</strong> — {card.organDonor.map((o) => t(o)).join(", ")}
+                </span>
+              </div>
+            )}
 
             <h3 style={{ fontSize: 14.5, margin: "20px 0 8px" }}>{t("Call an emergency contact")}</h3>
             {card.emergencyContacts.length ? (

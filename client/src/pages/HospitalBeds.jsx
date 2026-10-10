@@ -9,6 +9,8 @@ import "./portal.css";
 import { SkeletonRows } from "../components/Skeleton";
 import EmptyState from "../components/EmptyState";
 
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+
 function HospitalBeds() {
   const navigate = useNavigate();
   const [hospitals, setHospitals] = useState([]);
@@ -16,6 +18,7 @@ function HospitalBeds() {
   const [form, setForm] = useState({
     phone: "", totalBeds: "", availableBeds: "", icuBeds: "", icuAvailableBeds: "",
     ambulanceAvailable: true, ambulanceCount: "", bloodBankAvailable: false, oxygenAvailable: true,
+    bloodStock: {},
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -50,6 +53,7 @@ function HospitalBeds() {
         ambulanceCount: h.ambulanceCount ?? "",
         bloodBankAvailable: h.bloodBankAvailable ?? false,
         oxygenAvailable: h.oxygenAvailable ?? true,
+        bloodStock: { ...(h.bloodStock || {}) },
       });
     }
   };
@@ -74,6 +78,7 @@ function HospitalBeds() {
         ambulanceCount: Number(form.ambulanceCount) || 0,
         bloodBankAvailable: form.bloodBankAvailable,
         oxygenAvailable: form.oxygenAvailable,
+        bloodStock: Object.fromEntries(BLOOD_GROUPS.map((g) => [g, Number(form.bloodStock[g]) || 0])),
       });
       setHospitals((prev) => prev.map((h) => (h._id === updated._id ? updated : h)));
       setNotice("Availability updated.");
@@ -217,6 +222,26 @@ function HospitalBeds() {
                       />
                       <label htmlFor="oxygenAvailable" style={{ margin: 0 }}>Oxygen available</label>
                     </div>
+                  </div>
+
+                  <div className="portal-field">
+                    <label>Blood bank stock (units per group)</label>
+                    <div className="blood-stock-grid">
+                      {BLOOD_GROUPS.map((group) => (
+                        <label key={group} className="blood-stock-cell">
+                          <span>{group}</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="9999"
+                            value={form.bloodStock[group] ?? ""}
+                            placeholder="0"
+                            onChange={(e) => setForm({ ...form, bloodStock: { ...form.bloodStock, [group]: e.target.value } })}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                    <span className="hint">Civilians searching for a blood group see hospitals with units in stock, nearest first.</span>
                   </div>
 
                   <div className="portal-form-actions">

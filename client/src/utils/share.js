@@ -28,3 +28,14 @@ export function sosMessage(name, type, token, t = format) {
 
 export const whatsappLink = (phone, text) => `https://wa.me/${toInternationalPhone(phone)}?text=${encodeURIComponent(text)}`;
 export const smsLink = (phone, text) => `sms:${String(phone || "").replace(/[^\d+]/g, "")}?body=${encodeURIComponent(text)}`;
+
+export const walkUrl = (token) => `${window.location.origin}/walk-track/${token}`;
+
+/** "Walk with me" message for family — they follow along on the public walk page. */
+export function walkMessage(name, destination, token, t = format) {
+  return t("🚶 {name} is walking{to} with LifeLink and shared their live location. Follow along here: {url}", {
+    name: name || t("Someone close to you"),
+    to: destination ? t(" to {place}", { place: destination }) : "",
+    url: walkUrl(token),
+  });
+}

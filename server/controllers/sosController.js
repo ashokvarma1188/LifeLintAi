@@ -10,7 +10,12 @@ const VALID_TARGETS = ["hospital", "police", "firestation"];
 
 const createSOS = async (req, res) => {
   try {
-    const { longitude, latitude, type, targets, shareMedicalId } = req.body;
+    const { type, targets, shareMedicalId } = req.body || {};
+    const longitude = Number(req.body?.longitude);
+    const latitude = Number(req.body?.latitude);
+    if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
+      return res.status(400).json({ message: "Your location is needed to send an SOS." });
+    }
 
     const cleanTargets = Array.isArray(targets)
       ? targets.filter((t) => VALID_TARGETS.includes(t))
@@ -127,8 +132,8 @@ const cancelSOS = async (req, res) => {
     }
 
     request.status = "cancelled";
-    if (CANCEL_REASONS.includes(req.body.reason)) {
-      request.cancelReason = req.body.reason;
+    if (CANCEL_REASONS.includes(req.body?.reason)) {
+      request.cancelReason = req.body?.reason;
     }
     await request.save();
 
@@ -146,8 +151,8 @@ const updateLocation = async (req, res) => {
       return res.status(404).json({ message: "Request not found" });
     }
 
-    const longitude = Number(req.body.longitude);
-    const latitude = Number(req.body.latitude);
+    const longitude = Number(req.body?.longitude);
+    const latitude = Number(req.body?.latitude);
     if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
       return res.status(400).json({ message: "A valid latitude and longitude are required" });
     }
@@ -207,12 +212,12 @@ const setStatus = (status) => async (req, res) => {
       respondedBy: req.user._id,
       respondedByRole: req.user.role,
     };
-    if (status === "accepted" && req.body.etaMinutes !== undefined) {
-      const eta = Number(req.body.etaMinutes);
+    if (status === "accepted" && req.body?.etaMinutes !== undefined) {
+      const eta = Number(req.body?.etaMinutes);
       if (Number.isFinite(eta) && eta >= 0) update.etaMinutes = eta;
     }
-    if (status === "resolved" && req.body.falseAlarm !== undefined) {
-      update.falseAlarm = Boolean(req.body.falseAlarm);
+    if (status === "resolved" && req.body?.falseAlarm !== undefined) {
+      update.falseAlarm = Boolean(req.body?.falseAlarm);
     }
 
     const request = await EmergencyRequest.findOneAndUpdate(
@@ -253,8 +258,8 @@ const updateResponderLocation = async (req, res) => {
       return res.status(403).json({ message: "Only response services can share a responder location" });
     }
 
-    const longitude = Number(req.body.longitude);
-    const latitude = Number(req.body.latitude);
+    const longitude = Number(req.body?.longitude);
+    const latitude = Number(req.body?.latitude);
     if (!Number.isFinite(longitude) || !Number.isFinite(latitude)) {
       return res.status(400).json({ message: "A valid latitude and longitude are required" });
     }

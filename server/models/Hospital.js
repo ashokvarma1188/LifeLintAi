@@ -21,6 +21,9 @@ const hospitalSchema = new mongoose.Schema(
     ambulanceCount: { type: Number, default: 0 },
     bloodBankAvailable: { type: Boolean, default: false },
     oxygenAvailable: { type: Boolean, default: true },
+    // Units in the blood bank per group, e.g. { "O-": 3, "A+": 12 } — powers "who has O− near me".
+    bloodStock: { type: Map, of: Number, default: {} },
+    bloodStockUpdatedAt: { type: Date },
   },
   { timestamps: true }
 );

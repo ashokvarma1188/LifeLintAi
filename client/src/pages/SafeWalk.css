@@ -1,0 +1,26 @@
+.walk-durations { display: flex; gap: 8px; flex-wrap: wrap; }
+.walk-check { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; color: var(--text-primary); margin: 6px 0 4px; line-height: 1.4; }
+.walk-check input { margin-top: 3px; }
+
+.walk-status {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 14px;
+  margin-bottom: 14px;
+  color: #fff;
+  background: linear-gradient(135deg, #0f9d63, #0b7a4c);
+}
+.walk-status div { display: flex; flex-direction: column; gap: 2px; font-size: 13.5px; }
+.walk-status strong { font-size: 15.5px; }
+.walk-left { font-size: 34px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.walk-status.overdue { background: linear-gradient(135deg, #e5a72a, #c47f00); }
+.walk-status.alerted { background: linear-gradient(135deg, #e0122a, #b8001f); }
+
+.walk-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+
+.walk-contacts { display: flex; flex-direction: column; gap: 8px; }
+.walk-contact { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13.5px; }
+.walk-contact span { flex: 1; min-width: 120px; }
+.walk-hint { font-size: 12.5px; color: var(--text-secondary); }

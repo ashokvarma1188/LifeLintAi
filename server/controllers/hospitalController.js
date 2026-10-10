@@ -82,6 +82,19 @@ const listHospitals = async (req, res) => {
  * This closes the IDOR gap (any hospital account could edit any hospital)
  * without needing a one-off migration for hospitals seeded before ownerId existed.
  */
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+
+/** Keeps only real blood groups with whole, sensible unit counts. */
+const cleanBloodStock = (input) => {
+  if (!input || typeof input !== "object") return null;
+  const stock = {};
+  for (const group of BLOOD_GROUPS) {
+    const units = Math.round(Number(input[group]));
+    stock[group] = Number.isFinite(units) ? Math.min(9999, Math.max(0, units)) : 0;
+  }
+  return stock;
+};
+
 const updateHospital = async (req, res) => {
   try {
     const { id } = req.params;
@@ -101,8 +114,8 @@ const updateHospital = async (req, res) => {
 
     const {
       phone, totalBeds, availableBeds, icuBeds, icuAvailableBeds,
-      ambulanceAvailable, ambulanceCount, bloodBankAvailable, oxygenAvailable,
-    } = req.body;
+      ambulanceAvailable, ambulanceCount, bloodBankAvailable, oxygenAvailable, bloodStock,
+    } = req.body || {};
     const update = {};
     if (phone !== undefined) update.phone = phone;
     if (totalBeds !== undefined) update.totalBeds = totalBeds;
@@ -113,6 +126,13 @@ const updateHospital = async (req, res) => {
     if (ambulanceCount !== undefined) update.ambulanceCount = ambulanceCount;
     if (bloodBankAvailable !== undefined) update.bloodBankAvailable = bloodBankAvailable;
     if (oxygenAvailable !== undefined) update.oxygenAvailable = oxygenAvailable;
+    if (bloodStock !== undefined) {
+      const stock = cleanBloodStock(bloodStock);
+      if (!stock) return res.status(400).json({ message: "Blood stock must list units per blood group" });
+      update.bloodStock = stock;
+      update.bloodStockUpdatedAt = new Date();
+      if (Object.values(stock).some((units) => units > 0)) update.bloodBankAvailable = true;
+    }
     if (isUnclaimed && req.user.role === "hospital") update.ownerId = req.user._id;
 
     const hospital = await Hospital.findByIdAndUpdate(id, update, { new: true });

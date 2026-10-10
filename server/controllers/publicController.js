@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const Hospital = require("../models/Hospital");
 const EmergencyRequest = require("../models/EmergencyRequest");
+const SafeWalk = require("../models/SafeWalk");
 
 /**
  * Real, live counts for the landing page's "network" section — no auth
@@ -75,7 +76,7 @@ const getMedicalIdByToken = async (req, res) => {
     if (!TOKEN_PATTERN.test(req.params.token)) return res.status(404).json({ message: "Medical ID not found" });
 
     const user = await User.findOne({ medicalIdToken: req.params.token }).select(
-      "name age bloodGroup allergies medicalHistory emergencyContacts"
+      "name age bloodGroup allergies medicalHistory emergencyContacts organPledge"
     );
     if (!user) return res.status(404).json({ message: "Medical ID not found" });
 
@@ -86,10 +87,36 @@ const getMedicalIdByToken = async (req, res) => {
       allergies: user.allergies || [],
       medicalHistory: user.medicalHistory || [],
       emergencyContacts: (user.emergencyContacts || []).map((c) => ({ name: c.name, phone: c.phone, relation: c.relation })),
+      organDonor: user.organPledge?.pledged ? user.organPledge.organs : null,
     });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
   }
 };
 
-module.exports = { getNetworkStats, getTrackByToken, getMedicalIdByToken };
+/**
+ * The page family members follow during a "Walk with me" trip: first name, destination,
+ * status and last position (hidden again once the walk is over).
+ */
+const getWalkByToken = async (req, res) => {
+  try {
+    if (!TOKEN_PATTERN.test(req.params.token)) return res.status(404).json({ message: "Link not found" });
+    const walk = await SafeWalk.findOne({ shareToken: req.params.token }).populate("userId", "name");
+    if (!walk) return res.status(404).json({ message: "Link not found" });
+    const live = ["active", "overdue", "alerted"].includes(walk.status);
+    res.json({
+      firstName: (walk.userId?.name || "Someone").split(" ")[0],
+      destination: walk.destination || null,
+      status: walk.status,
+      startedAt: walk.startedAt,
+      expectedArrival: walk.expectedArrival,
+      endedAt: walk.endedAt || null,
+      location: live ? walk.lastLocation?.coordinates || null : null,
+      locationUpdatedAt: live ? walk.lastLocation?.updatedAt || null : null,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Something went wrong", error: err.message });
+  }
+};
+
+module.exports = { getNetworkStats, getTrackByToken, getMedicalIdByToken, getWalkByToken };

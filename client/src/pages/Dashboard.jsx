@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   User, Hospital, Droplet, Bot, FileHeart, BookHeart, Siren, ShieldCheck, Map, ClipboardList,
-  BedDouble, Ambulance, Truck, Package, Clock, Pill, Inbox, Users, History, HeartPulse, Building2, Phone, BarChart3, Megaphone,
+  BedDouble, Ambulance, Truck, Package, Clock, Pill, Footprints, Inbox, Users, History, HeartPulse, Building2, Phone, BarChart3, Megaphone,
 } from "lucide-react";
 import api, { getErrorMessage } from "../services/api";
 import { getUser, resendVerification } from "../services/auth";
@@ -11,6 +11,7 @@ import { listActiveAnnouncements } from "../services/announcements";
 import { getReminders } from "../services/healthRecords";
 import AppNavbar from "./AppNavbar";
 import VoiceSos from "../components/VoiceSos";
+import ShakeSos from "../components/ShakeSos";
 import SosFollowUp from "../components/SosFollowUp";
 import { DonateAgainBanner } from "../components/DonationCard";
 import NotificationToggle from "../components/NotificationToggle";
@@ -35,6 +36,7 @@ const FEATURES = {
     { icon: Package, title: "Find Pharmacies", desc: "Check medicine stock nearby and request what you need.", path: "/find-pharmacies" },
     { icon: Map, title: "Nearby Police & Fire", desc: "Find registered police and fire stations near you.", path: "/find-emergency-services" },
     { icon: Phone, title: "Emergency Numbers", desc: "Quick-dial reference for Police, Ambulance, Fire and more.", path: "/emergency-numbers" },
+    { icon: Footprints, title: "Walk with me", desc: "Share your live location for a trip — if you don't check in on time, police can be alerted.", path: "/walk" },
     { icon: Pill, title: "Medicine Reminders", desc: "Add your medicines and times — get a reminder at every dose and tick it off.", path: "/medicines" },
     { icon: BookHeart, title: "First-Aid Guide", desc: "Step-by-step help for CPR, choking, bleeding, burns and more — works offline.", path: "/first-aid" },
     { icon: Inbox, title: "Support", desc: "Raise a ticket and get help from the admin team.", path: "/support" },
@@ -326,6 +328,7 @@ function Dashboard() {
                   handleSOS(spokenType);
                 }}
               />
+              <ShakeSos disabled={sosLoading} onTrigger={() => handleSOS()} />
 
               {sosResult && (
                 <div className="sos-status success">
