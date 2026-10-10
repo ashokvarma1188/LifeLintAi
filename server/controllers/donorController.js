@@ -92,7 +92,7 @@ const recordDonation = async (req, res) => {
     }
     const user = await User.findByIdAndUpdate(
       req.userId,
-      { lastDonatedAt: new Date(), $inc: { donationCount: 1 }, donorAvailable: false },
+      { lastDonatedAt: new Date(), $inc: { donationCount: 1 }, donorAvailable: false, $unset: { lastDonationPlace: 1 } },
       { new: true }
     ).select("-password");
     res.json({ message: "Thank you for donating!", ...donationSummary(user) });
@@ -101,4 +101,4 @@ const recordDonation = async (req, res) => {
   }
 };
 
-module.exports = { listDonors, setDonorStatus, getDonationStatus, recordDonation };
+module.exports = { listDonors, setDonorStatus, getDonationStatus, recordDonation, nextEligibleDate, REST_DAYS };

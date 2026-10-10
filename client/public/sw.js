@@ -11,8 +11,9 @@ const STATIC_FILES = ["/manifest.webmanifest", "/favicon.svg", "/icons/icon-192.
 
 const isHtml = (response) => response.ok && (response.headers.get("content-type") || "").includes("text/html");
 
-// The landing page's 3D scene (~925 kB) isn't needed offline. It's still cached if it gets loaded.
-const SKIP_PRECACHE = /\/assets\/DonationBox3D-|\.(png|jpe?g|webp|svg)$/;
+// Not saved in advance: the landing page's 3D scene (~925 kB) and the PDF library with its
+// helpers (~750 kB, only used online to download certificates). Both are still cached once used.
+const SKIP_PRECACHE = /\/assets\/(DonationBox3D|jspdf|html2canvas|purify|index\.es)[.-]|\.(png|jpe?g|webp|svg)$/;
 
 /**
  * Saves the code for every page in this deploy, then deletes files left over from older deploys.

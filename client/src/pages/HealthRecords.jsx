@@ -17,6 +17,7 @@ import "./Dashboard.css";
 import "./portal.css";
 import { SkeletonRows } from "../components/Skeleton";
 import EmptyState from "../components/EmptyState";
+import HealthSummaryButton from "../components/HealthSummaryButton";
 import { useLang } from "../i18n/context";
 
 function HealthRecords() {
@@ -91,9 +92,12 @@ function HealthRecords() {
             <h1>{t("Health records")}</h1>
             <p>{t("Your medical reports, vitals and documents in one place.")}</p>
           </div>
-          <button className="portal-btn primary" onClick={() => setEditing("new")}>
-            <Plus size={16} /> {t("Add report")}
-          </button>
+          <div className="portal-toolbar" style={{ margin: 0 }}>
+            <HealthSummaryButton />
+            <button className="portal-btn primary" onClick={() => setEditing("new")}>
+              <Plus size={16} /> {t("Add report")}
+            </button>
+          </div>
         </div>
 
         {error && <div className="portal-message error">{t(error)}</div>}

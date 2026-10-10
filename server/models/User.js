@@ -20,6 +20,14 @@ const userSchema = new mongoose.Schema(
     // Blood-donation tracking: drives the "you can donate again" reminder and the lives-saved badge.
     lastDonatedAt: { type: Date },
     donationCount: { type: Number, default: 0 },
+    // Where the last donation happened when a camp recorded it (shown on the certificate).
+    lastDonationPlace: { type: String },
+    // The first-aid course: best quiz score and when it was first passed.
+    firstAidCourse: {
+      passedAt: { type: Date },
+      bestScore: { type: Number },
+      total: { type: Number },
+    },
     // Opt-in token behind the QR-code Medical ID page (see publicController.getMedicalIdByToken).
     medicalIdToken: { type: String, index: true, sparse: true },
     // Personal organ-donor pledge, shown on the Medical ID and its QR page.

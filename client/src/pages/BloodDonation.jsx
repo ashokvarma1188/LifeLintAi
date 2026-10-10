@@ -19,6 +19,7 @@ import { getErrorMessage } from "../services/api";
 import "./Dashboard.css";
 import "./portal.css";
 import { DonationCard } from "../components/DonationCard";
+import DonationCamps from "../components/DonationCamps";
 import { useLang } from "../i18n/context";
 
 const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
@@ -195,6 +196,11 @@ function BloodDonation() {
                 {t("Requests for you")}
               </button>
             )}
+            {isCivilian && (
+              <button className={`portal-btn ${tab === "camps" ? "primary" : "ghost"}`} onClick={() => setTab("camps")}>
+                {t("Donation camps")}
+              </button>
+            )}
             <button className={`portal-btn ${tab === "post" ? "primary" : "ghost"}`} onClick={() => setTab("post")}>
               {t("Request blood")}
             </button>
@@ -227,6 +233,8 @@ function BloodDonation() {
         )}
 
         {isCivilian && <DonationCard onChange={() => loadAll(coords)} />}
+
+        {tab === "camps" && isCivilian && <DonationCamps coords={coords} />}
 
         {tab === "requests" && isCivilian && (
           <div className="portal-panel">

@@ -13,6 +13,7 @@ import "./portal.css";
 import { SkeletonRows } from "../components/Skeleton";
 import MedicalIdQr from "../components/MedicalIdQr";
 import OrganPledge from "../components/OrganPledge";
+import HealthSummaryButton from "../components/HealthSummaryButton";
 import { useLang } from "../i18n/context";
 
 const VITALS = [
@@ -98,6 +99,7 @@ function MedicalId() {
             <p>{t("Your emergency-ready summary, vitals trends, and who's accessed your records.")}</p>
           </div>
           <div className="portal-toolbar" style={{ margin: 0 }}>
+            <HealthSummaryButton />
             <button className={`portal-btn ${tab === "id" ? "primary" : "ghost"}`} onClick={() => setTab("id")}>
               {t("ID card")}
             </button>

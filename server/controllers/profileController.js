@@ -8,6 +8,9 @@ const PushSubscription = require("../models/PushSubscription");
 const SosMessage = require("../models/SosMessage");
 const MedicineReminder = require("../models/MedicineReminder");
 const SafeWalk = require("../models/SafeWalk");
+const SafetyResponse = require("../models/SafetyResponse");
+const Certificate = require("../models/Certificate");
+const DonationCamp = require("../models/DonationCamp");
 
 const getProfile = async (req, res) => {
   try {
@@ -147,6 +150,9 @@ const deleteMyAccount = async (req, res) => {
       EmergencyRequest.deleteMany({ citizenId: req.userId }),
       MedicineRequest.deleteMany({ requestedBy: req.userId }),
       PushSubscription.deleteMany({ userId: req.userId }),
+      SafetyResponse.deleteMany({ userId: req.userId }),
+      Certificate.deleteMany({ userId: req.userId }),
+      DonationCamp.updateMany({ "registrations.userId": req.userId }, { $pull: { registrations: { userId: req.userId } } }),
     ]);
     await user.deleteOne();
 

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { HeartHandshake, Award, CalendarClock, Droplet } from "lucide-react";
+import { HeartHandshake, Award, CalendarClock, Droplet, FileBadge } from "lucide-react";
 import { getDonationStatus, recordDonation } from "../services/donors";
+import { getDonationCertificate } from "../services/certificates";
 import { getErrorMessage } from "../services/api";
 import { useLang } from "../i18n/context";
 import { speechLangFor } from "../i18n/languages";
@@ -20,12 +21,27 @@ export function DonationCard({ onChange }) {
   const [status, setStatus] = useState(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [certBusy, setCertBusy] = useState(false);
 
   useEffect(() => {
     (async () => {
       setStatus(await getDonationStatus().catch(() => null));
     })();
   }, []);
+
+  const downloadCertificate = async () => {
+    setCertBusy(true);
+    setError("");
+    try {
+      const certificate = await getDonationCertificate();
+      const pdf = await import("../utils/pdf");
+      await pdf.downloadCertificate(certificate, t, lang);
+    } catch (err) {
+      setError(getErrorMessage(err, t("Could not make your certificate.")));
+    } finally {
+      setCertBusy(false);
+    }
+  };
 
   const donated = async () => {
     setBusy(true);
@@ -87,6 +103,11 @@ export function DonationCard({ onChange }) {
         {status.eligible && (
           <button className="portal-btn ghost small" onClick={donated} disabled={busy}>
             {busy ? t("Saving…") : t("I just donated")}
+          </button>
+        )}
+        {status.donationCount > 0 && (
+          <button className="portal-btn primary small" onClick={downloadCertificate} disabled={certBusy}>
+            <FileBadge size={14} /> {certBusy ? t("Preparing PDF…") : t("Download certificate")}
           </button>
         )}
       </div>
