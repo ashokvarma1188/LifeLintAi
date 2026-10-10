@@ -1,0 +1,65 @@
+.sc-stack { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+
+.sc-banner {
+  position: relative;
+  border-radius: 16px;
+  padding: 20px;
+  background: linear-gradient(135deg, #fff7e6, #fdecea);
+  border: 1px solid #f3c58b;
+  color: #3d2a06;
+  overflow: hidden;
+}
+:root[data-theme="dark"] .sc-banner { background: linear-gradient(135deg, #2a2010, #2b1416); border-color: #5a4216; color: #fbe7c0; }
+
+.sc-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 5px;
+  background: repeating-linear-gradient(45deg, #f59e0b 0 10px, #1f2937 10px 20px);
+}
+
+.sc-head { display: flex; gap: 14px; align-items: flex-start; }
+.sc-kind { font-size: 22px; line-height: 1; }
+.sc-kind.big { font-size: 40px; animation: sc-wobble 2.4s ease-in-out infinite; }
+
+@keyframes sc-wobble {
+  0%, 100% { transform: rotate(0); }
+  50% { transform: rotate(-12deg); }
+}
+
+.sc-eyebrow { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: #b45309; }
+:root[data-theme="dark"] .sc-eyebrow { color: #fbbf24; }
+.sc-banner h2 { margin: 4px 0 6px; font-size: 20px; }
+.sc-banner p { margin: 0 0 4px; font-size: 14px; line-height: 1.5; }
+.sc-area { opacity: 0.8; font-size: 13px !important; }
+.sc-question { font-size: 18px !important; font-weight: 800; margin: 14px 0 10px !important; }
+
+.sc-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.sc-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.sc-btn:disabled { opacity: 0.6; cursor: wait; }
+.sc-btn.safe { background: #0f9d63; color: #fff; }
+.sc-btn.help { background: #dc2626; color: #fff; }
+.sc-btn.away { background: transparent; border-color: currentColor; color: inherit; }
+.sc-hint { font-size: 12px !important; opacity: 0.75; margin-top: 10px !important; }
+
+.sc-banner.compact { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 16px 12px 20px; }
+.sc-banner.compact.safe,
+.sc-banner.compact.not_in_area { background: var(--success-bg); border-color: var(--success-border); color: var(--success-text); }
+.sc-banner.compact.need_help { background: var(--error-bg); border-color: var(--error-border); color: var(--error-text); }
+.sc-banner.compact::before { background: currentColor; opacity: 0.6; }
+.sc-text { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 2px; font-size: 14px; }
+.sc-text a { color: inherit; font-weight: 700; }
+.sc-family { display: flex; gap: 8px; flex-wrap: wrap; }
+.sc-change { margin: 0 !important; color: inherit !important; text-decoration: underline; }

@@ -15,6 +15,7 @@ import SupportThread from "../components/SupportThread";
 import { SkeletonRows } from "../components/Skeleton";
 import EmptyState from "../components/EmptyState";
 import AdminSosCharts from "../components/AdminSosCharts";
+import SafetyCheckAdmin from "../components/SafetyCheckAdmin";
 import { listAllTickets, getTicket as getSupportTicket, replyToTicket, closeTicket } from "../services/support";
 import { downloadCsv } from "../utils/csv";
 import "./Dashboard.css";
@@ -248,6 +249,7 @@ function AdminConsole() {
               { key: "actionlog", label: "Admin activity" },
               { key: "announcements", label: "Announcements" },
               { key: "support", label: "Support" },
+              { key: "safety", label: "Safety Check" },
             ].map((t) => (
               <button
                 key={t.key}
@@ -603,6 +605,8 @@ function AdminConsole() {
             </div>
           </>
         )}
+
+        {tab === "safety" && <SafetyCheckAdmin />}
 
         {tab === "support" && (
           <div className="portal-panel">

@@ -11,6 +11,7 @@ const webpush = require("web-push");
 const PushSubscription = require("../models/PushSubscription");
 const User = require("../models/User");
 const Hospital = require("../models/Hospital");
+const { distanceKm } = require("./geo");
 
 const DEFAULT_SERVICE_RADIUS_KM = 25; // same default the alert inboxes use
 const RESPONDER_PAGE = { hospital: "/hospital/incoming", police: "/police/alerts", firestation: "/firestation/alerts" };
@@ -36,7 +37,8 @@ const deriveKeys = () => {
   return null;
 };
 
-const keys = deriveKeys();
+// DISABLE_PUSH=true turns sending off, e.g. on a developer machine that shares the real database.
+const keys = process.env.DISABLE_PUSH === "true" ? null : deriveKeys();
 if (keys) {
   const subject = process.env.VAPID_SUBJECT || `${(process.env.CLIENT_URL || "https://lifelinkai-app.vercel.app").split(",")[0].trim()}`;
   webpush.setVapidDetails(subject, keys.publicKey, keys.privateKey);
@@ -69,13 +71,6 @@ const sendToUsers = async (userIds, payload) => {
   return sent;
 };
 
-const toRad = (deg) => (deg * Math.PI) / 180;
-const distanceKm = ([lng1, lat1], [lng2, lat2]) => {
-  const a =
-    Math.sin(toRad(lat2 - lat1) / 2) ** 2 +
-    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(toRad(lng2 - lng1) / 2) ** 2;
-  return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-};
 
 /**
  * New SOS → every subscribed responder who would see it in their own inbox. Mirrors the

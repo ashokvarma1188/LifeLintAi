@@ -1,0 +1,60 @@
+.sca-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr); gap: 20px; align-items: start; }
+.sca-muted { color: var(--text-secondary); font-size: 14px; }
+.sca-subhead { font-size: 16px; margin: 24px 0 12px; }
+
+.sca-map { height: 420px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); }
+.sca-map.small { height: 260px; cursor: crosshair; }
+
+.sca-counts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.sca-counts span,
+.sca-pill { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+.sca-counts .safe,
+.sca-pill.safe { background: var(--success-bg); color: var(--success-text); }
+.sca-counts .need_help,
+.sca-pill.need_help { background: var(--error-bg); color: var(--error-text); }
+.sca-counts .not_in_area,
+.sca-pill.not_in_area { background: var(--border-color-soft); color: var(--text-secondary); }
+
+.sca-list { display: flex; flex-direction: column; gap: 10px; }
+.sca-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sca-item:hover { border-color: var(--accent); }
+.sca-item-icon { font-size: 26px; }
+.sca-item-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sca-item-text small { color: var(--text-secondary); font-size: 12px; }
+
+.sca-detail-head { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.sca-detail-head h2 { margin: 0 0 4px; font-size: 22px; }
+.sca-detail-head p { margin: 0; color: var(--text-secondary); font-size: 14px; }
+.sca-detail-actions { display: flex; gap: 8px; align-items: flex-start; }
+
+.sca-help-list { display: flex; flex-direction: column; gap: 10px; }
+.sca-help {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px;
+  border-radius: 12px;
+  background: var(--error-bg);
+  border: 1px solid var(--error-border);
+}
+.sca-help > div:first-child { display: flex; flex-direction: column; gap: 3px; }
+.sca-help span { font-size: 13px; color: var(--text-secondary); }
+.sca-help em { font-size: 13px; }
+.sca-help-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+@media (max-width: 860px) {
+  .sca-grid { grid-template-columns: 1fr; }
+}
