@@ -1,21 +1,51 @@
 /*
  * LifeLink service worker.
- *  - Offline: keeps the app shell (index.html + the hashed JS/CSS bundles) cached, so the
- *    app — and its First-Aid Guide — still opens with no connection.
+ *  - Offline: keeps the app shell (index.html + its JS/CSS) cached. In the background it also
+ *    saves every page's code (listed in /precache.json), so the app and its First-Aid Guide
+ *    open with no connection, even pages that were never visited.
  *  - Push: shows SOS alerts / SOS status updates sent by the server, even when no tab is open.
  * API calls, map tiles and fonts are other origins and always go straight to the network.
  */
-const CACHE = "lifelink-shell-v1";
+const CACHE = "lifelink-shell-v2";
 const STATIC_FILES = ["/manifest.webmanifest", "/favicon.svg", "/icons/icon-192.png", "/icons/badge-96.png"];
 
 const isHtml = (response) => response.ok && (response.headers.get("content-type") || "").includes("text/html");
 
-/** Caches index.html as "/" plus every /assets/ file it references. */
-async function cacheShell(cache, response) {
+// The landing page's 3D scene (~925 kB) isn't needed offline. It's still cached if it gets loaded.
+const SKIP_PRECACHE = /\/assets\/DonationBox3D-|\.(png|jpe?g|webp|svg)$/;
+
+/**
+ * Saves the code for every page in this deploy, then deletes files left over from older deploys.
+ */
+async function precacheAll(cache) {
+  const response = await fetch("/precache.json", { cache: "no-store" });
+  if (!response.ok) return;
+  const files = await response.json();
+  const current = new Set(files);
+  await Promise.all(
+    files
+      .filter((url) => url.startsWith("/assets/") && !SKIP_PRECACHE.test(url))
+      .map(async (url) => {
+        if (!(await cache.match(url))) await cache.add(url).catch(() => {});
+      })
+  );
+  for (const request of await cache.keys()) {
+    const path = new URL(request.url).pathname;
+    if (path.startsWith("/assets/") && !current.has(path)) await cache.delete(request);
+  }
+}
+
+/**
+ * Caches index.html as "/" plus every /assets/ file it references. When the files are new
+ * (first install, or a new deploy), it also saves the rest of the app.
+ */
+async function cacheShell(cache, response, force = false) {
   const html = await response.clone().text();
+  const assets = [...new Set([...html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map((m) => m[1]))];
+  const newDeploy = force || (await Promise.all(assets.map((url) => cache.match(url)))).some((hit) => !hit);
   await cache.put("/", response);
-  const assets = [...html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map((m) => m[1]);
-  await Promise.all([...new Set(assets)].map((url) => cache.add(url).catch(() => {})));
+  await Promise.all(assets.map((url) => cache.add(url).catch(() => {})));
+  if (newDeploy) await precacheAll(cache).catch(() => {});
 }
 
 self.addEventListener("install", (event) => {
@@ -23,7 +53,7 @@ self.addEventListener("install", (event) => {
     (async () => {
       const cache = await caches.open(CACHE);
       const response = await fetch("/", { cache: "no-store" });
-      if (isHtml(response)) await cacheShell(cache, response);
+      if (isHtml(response)) await cacheShell(cache, response, true);
       await Promise.all(STATIC_FILES.map((url) => cache.add(url).catch(() => {})));
       await self.skipWaiting();
     })()
@@ -54,8 +84,8 @@ self.addEventListener("fetch", (event) => {
         try {
           const response = await fetch(request);
           if (isHtml(response)) {
-            const cache = await caches.open(CACHE);
-            cacheShell(cache, response.clone()).catch(() => {});
+            const copy = response.clone();
+            event.waitUntil(caches.open(CACHE).then((cache) => cacheShell(cache, copy)).catch(() => {}));
           }
           return response;
         } catch {
@@ -67,10 +97,12 @@ self.addEventListener("fetch", (event) => {
   }
 
   // Hashed bundles never change content, and the icons/manifest rarely do: cache first.
+  // ignoreVary: page code loaded on demand is requested with an Origin header, so a
+  // "Vary: Origin" response would otherwise never match the saved copy.
   if (url.pathname.startsWith("/assets/") || STATIC_FILES.includes(url.pathname)) {
     event.respondWith(
       (async () => {
-        const hit = await caches.match(request);
+        const hit = await caches.match(request, { ignoreVary: true });
         if (hit) return hit;
         const response = await fetch(request);
         if (response.ok) {
@@ -84,7 +116,7 @@ self.addEventListener("fetch", (event) => {
 });
 
 self.addEventListener("push", (event) => {
-  let data = {};
+  let data;
   try {
     data = event.data ? event.data.json() : {};
   } catch {

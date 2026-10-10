@@ -1058,6 +1058,16 @@ const te = {
   "Location access is needed to start a walk. Allow location and try again.": "నడక ప్రారంభించడానికి లొకేషన్ అనుమతి అవసరం. అనుమతి ఇచ్చి మళ్లీ ప్రయత్నించండి.",
   "This link is not valid.": "ఈ లింక్ చెల్లదు.",
   "Could not save your pledge.": "మీ ప్రతిజ్ఞను సేవ్ చేయలేకపోయాం.",
+  "Something went wrong": "ఏదో తప్పు జరిగింది",
+  "You seem to be offline. Reconnect and reload the page.": "మీరు ఆఫ్‌లైన్‌లో ఉన్నట్లున్నారు. ఇంటర్నెట్‌కు కనెక్ట్ అయి పేజీని మళ్లీ లోడ్ చేయండి.",
+  "This page hit an unexpected problem. Reloading usually fixes it.": "ఈ పేజీలో అనుకోని సమస్య వచ్చింది. మళ్లీ లోడ్ చేస్తే సాధారణంగా సరిపోతుంది.",
+  "Reload page": "పేజీని మళ్లీ లోడ్ చేయండి",
+  "Go to dashboard": "డాష్‌బోర్డ్‌కు వెళ్లండి",
+  "In an emergency, call 112": "అత్యవసర పరిస్థితిలో 112కు కాల్ చేయండి",
+  "Error 404": "లోపం 404",
+  "This page doesn't exist": "ఈ పేజీ లేదు",
+  "The link may be mistyped, or the page has moved. Everything important is one tap away.": "లింక్ తప్పుగా టైప్ అయి ఉండవచ్చు, లేదా పేజీ మారి ఉండవచ్చు. ముఖ్యమైనవన్నీ ఒక్క ట్యాప్ దూరంలో ఉన్నాయి.",
+  "Go to home page": "హోమ్ పేజీకి వెళ్లండి",
 };
 
 export default te;

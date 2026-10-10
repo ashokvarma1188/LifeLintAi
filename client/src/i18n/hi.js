@@ -1058,6 +1058,16 @@ const hi = {
   "Location access is needed to start a walk. Allow location and try again.": "वॉक शुरू करने के लिए लोकेशन की अनुमति चाहिए। अनुमति देकर फिर कोशिश करें।",
   "This link is not valid.": "यह लिंक मान्य नहीं है।",
   "Could not save your pledge.": "आपका संकल्प सेव नहीं हो सका।",
+  "Something went wrong": "कुछ गड़बड़ हो गई",
+  "You seem to be offline. Reconnect and reload the page.": "लगता है आप ऑफ़लाइन हैं। इंटरनेट से जुड़ें और पेज फिर से लोड करें।",
+  "This page hit an unexpected problem. Reloading usually fixes it.": "इस पेज में अचानक समस्या आ गई। पेज फिर से लोड करने से आमतौर पर ठीक हो जाता है।",
+  "Reload page": "पेज फिर से लोड करें",
+  "Go to dashboard": "डैशबोर्ड पर जाएँ",
+  "In an emergency, call 112": "आपातकाल में 112 पर कॉल करें",
+  "Error 404": "त्रुटि 404",
+  "This page doesn't exist": "यह पेज मौजूद नहीं है",
+  "The link may be mistyped, or the page has moved. Everything important is one tap away.": "लिंक गलत टाइप हुआ हो सकता है, या पेज हट गया है। सभी ज़रूरी चीज़ें बस एक टैप दूर हैं।",
+  "Go to home page": "होम पेज पर जाएँ",
 };
 
 export default hi;
