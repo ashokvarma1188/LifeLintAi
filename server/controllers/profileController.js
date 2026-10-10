@@ -5,6 +5,8 @@ const HealthRecord = require("../models/HealthRecord");
 const EmergencyRequest = require("../models/EmergencyRequest");
 const MedicineRequest = require("../models/MedicineRequest");
 const PushSubscription = require("../models/PushSubscription");
+const SosMessage = require("../models/SosMessage");
+const MedicineReminder = require("../models/MedicineReminder");
 
 const getProfile = async (req, res) => {
   try {
@@ -109,7 +111,10 @@ const deleteMyAccount = async (req, res) => {
       return res.status(400).json({ message: "Incorrect password" });
     }
 
+    const sosIds = await EmergencyRequest.find({ citizenId: req.userId }).distinct("_id");
     await Promise.all([
+      SosMessage.deleteMany({ requestId: { $in: sosIds } }),
+      MedicineReminder.deleteMany({ userId: req.userId }),
       HealthRecord.deleteMany({ userId: req.userId }),
       EmergencyRequest.deleteMany({ citizenId: req.userId }),
       MedicineRequest.deleteMany({ requestedBy: req.userId }),

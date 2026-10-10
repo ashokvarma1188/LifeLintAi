@@ -29,6 +29,8 @@ const bloodRequestRoutes = require("./routes/bloodRequestRoutes");
 const supportRoutes = require("./routes/supportRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 const pushRoutes = require("./routes/pushRoutes");
+const medicineRoutes = require("./routes/medicineRoutes");
+const { startMedicineScheduler } = require("./utils/medicineScheduler");
 
 const app = express();
 
@@ -101,6 +103,7 @@ app.use("/api/blood-requests", bloodRequestRoutes);
 app.use("/api/support", supportRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/push", pushRoutes);
+app.use("/api/medicines", medicineRoutes);
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -110,4 +113,5 @@ mongoose
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+  startMedicineScheduler();
 });

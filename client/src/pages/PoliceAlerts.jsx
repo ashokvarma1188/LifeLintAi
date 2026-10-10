@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Plus, CheckCheck, Check, X, Download, Siren } from "lucide-react";
+import { ArrowLeft, Plus, CheckCheck, Check, X, Download, Siren, MessageCircle } from "lucide-react";
+import SosChat from "../components/SosChat";
 import AppNavbar from "./AppNavbar";
 import CoverageMap from "../components/CoverageMap";
 import MapsLink from "../components/MapsLink";
@@ -34,6 +35,7 @@ function PoliceAlerts() {
   const [filing, setFiling] = useState(false);
   const [form, setForm] = useState({ title: "", description: "" });
   const [etaInputs, setEtaInputs] = useState({});
+  const [chatFor, setChatFor] = useState(null); // alert whose chat is open
   const knownPendingIds = useRef(new Set());
   const firstLoad = useRef(true);
 
@@ -134,6 +136,13 @@ function PoliceAlerts() {
   return (
     <div className="portal-page">
       <AppNavbar showLogout />
+      {chatFor && (
+        <SosChat
+          requestId={chatFor._id}
+          title={`SOS chat — ${chatFor.citizenId?.name || "Civilian"}`}
+          onClose={() => setChatFor(null)}
+        />
+      )}
 
       <div className="portal-content">
         <button className="portal-back" onClick={() => navigate("/dashboard")}>
@@ -231,6 +240,9 @@ function PoliceAlerts() {
                         <td style={{ whiteSpace: "nowrap" }}>
                           <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
                             <MapsLink coordinates={a.location?.coordinates} />
+                            <button className="portal-btn ghost small" onClick={() => setChatFor(a)} title="Messages, photos and voice notes from the civilian">
+                              <MessageCircle size={14} /> Chat
+                            </button>
                             {a.status === "pending" && (
                               <>
                                 <input

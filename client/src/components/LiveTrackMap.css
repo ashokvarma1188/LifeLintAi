@@ -27,3 +27,16 @@
 @media (prefers-reduced-motion: reduce) {
   .ltm-responder-icon span { animation: none; }
 }
+
+.ltm-road-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: rgba(42, 125, 225, 0.12);
+  color: #2a7de1;
+  vertical-align: middle;
+}

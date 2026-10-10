@@ -1,0 +1,67 @@
+.med-today-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.med-today-head h3 { margin: 0; font-size: 15px; }
+
+.med-doses { display: flex; flex-direction: column; gap: 8px; }
+.med-dose {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+.med-dose.taken { opacity: 0.65; }
+.med-dose.taken .med-dose-name strong { text-decoration: line-through; }
+.med-dose.due { border-color: #e5a72a; background: rgba(229, 167, 42, 0.08); }
+.med-dose-time { font-weight: 700; font-size: 15px; min-width: 52px; color: var(--accent); font-variant-numeric: tabular-nums; }
+.med-dose-name { flex: 1; display: flex; flex-direction: column; font-size: 13.5px; }
+.med-dose-name span { font-size: 12.5px; color: var(--text-secondary); }
+
+.med-list { display: flex; flex-direction: column; gap: 10px; }
+.med-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  flex-wrap: wrap;
+}
+.med-card.paused { opacity: 0.6; }
+.med-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-soft-bg);
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.med-card-body { flex: 1; min-width: 180px; display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; }
+.med-card-dose, .med-card-notes { font-size: 12.5px; color: var(--text-secondary); }
+.med-times { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.med-time-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: var(--accent-soft-bg);
+  color: var(--accent);
+}
+.med-card-actions { display: flex; gap: 6px; }
+
+.med-time-inputs { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.med-time-input { display: inline-flex; align-items: center; gap: 4px; }
+.med-time-input input { width: auto; }
+.med-time-input button {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  padding: 2px;
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, Plus, CheckCheck, Trash2, Check, X, Download, Flame } from "lucide-react";
+import { ArrowLeft, Plus, CheckCheck, Trash2, Check, X, Download, Flame, MessageCircle } from "lucide-react";
+import SosChat from "../components/SosChat";
 import AppNavbar from "./AppNavbar";
 import CoverageMap from "../components/CoverageMap";
 import MapsLink from "../components/MapsLink";
@@ -38,6 +39,7 @@ function FirestationAlerts() {
   const [form, setForm] = useState({ title: "", description: "" });
   const [newUnit, setNewUnit] = useState("");
   const [etaInputs, setEtaInputs] = useState({});
+  const [chatFor, setChatFor] = useState(null); // alert whose chat is open
   const knownPendingIds = useRef(new Set());
   const firstLoad = useRef(true);
 
@@ -165,6 +167,13 @@ function FirestationAlerts() {
   return (
     <div className="portal-page">
       <AppNavbar showLogout />
+      {chatFor && (
+        <SosChat
+          requestId={chatFor._id}
+          title={`SOS chat — ${chatFor.citizenId?.name || "Civilian"}`}
+          onClose={() => setChatFor(null)}
+        />
+      )}
 
       <div className="portal-content">
         <button className="portal-back" onClick={() => navigate("/dashboard")}>
@@ -265,6 +274,9 @@ function FirestationAlerts() {
                         <td style={{ whiteSpace: "nowrap" }}>
                           <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
                             <MapsLink coordinates={a.location?.coordinates} />
+                            <button className="portal-btn ghost small" onClick={() => setChatFor(a)} title="Messages, photos and voice notes from the civilian">
+                              <MessageCircle size={14} /> Chat
+                            </button>
                             {a.status === "pending" && (
                               <>
                                 <input

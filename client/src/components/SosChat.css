@@ -1,0 +1,112 @@
+.sos-chat-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.sos-chat {
+  width: 100%;
+  max-width: 460px;
+  height: min(620px, calc(100vh - 32px));
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+}
+
+.sos-chat-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #e0122a, #b8001f);
+  color: #fff;
+}
+.sos-chat-head h3 { margin: 0; font-size: 15px; display: flex; align-items: center; gap: 6px; }
+.sos-chat-head p { margin: 4px 0 0; font-size: 12px; opacity: 0.9; }
+.sos-chat-close { background: none; border: none; color: #fff; cursor: pointer; padding: 2px; }
+
+.sos-chat-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sos-chat-empty { margin: auto; text-align: center; color: var(--text-secondary); font-size: 13px; max-width: 280px; }
+
+.sos-chat-msg {
+  max-width: 82%;
+  padding: 8px 11px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sos-chat-msg.mine { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+.sos-chat-msg.theirs { align-self: flex-start; background: var(--accent-soft-bg); color: var(--text-primary); border-bottom-left-radius: 4px; }
+.sos-chat-meta { font-size: 11px; opacity: 0.8; }
+.sos-chat-text { white-space: pre-wrap; word-break: break-word; }
+.sos-chat-photo { display: block; max-width: 100%; max-height: 220px; border-radius: 8px; }
+.sos-chat-audio { width: 230px; max-width: 100%; height: 36px; }
+.sos-chat-media-loading, .sos-chat-media-error { font-size: 12px; opacity: 0.8; }
+
+.sos-chat-error { padding: 6px 14px; font-size: 12.5px; color: var(--error-text); }
+
+.sos-chat-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border-color);
+}
+.sos-chat-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 13.5px;
+  outline: none;
+}
+.sos-chat-form input:focus { border-color: var(--accent); }
+.sos-chat-icon, .sos-chat-send {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.sos-chat-icon:hover:not(:disabled) { color: var(--text-primary); }
+.sos-chat-icon.recording { background: #e5484d; border-color: #e5484d; color: #fff; animation: sos-chat-pulse 1.4s ease-out infinite; }
+.sos-chat-send { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sos-chat-icon:disabled, .sos-chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+.sos-chat-recording { flex: 1; font-size: 13px; color: #e5484d; font-weight: 600; }
+
+@keyframes sos-chat-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(229, 72, 77, 0.55); }
+  100% { box-shadow: 0 0 0 10px rgba(229, 72, 77, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sos-chat-icon.recording { animation: none; }
+}

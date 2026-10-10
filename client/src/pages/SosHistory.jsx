@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Siren, X, History, Phone, Share2 } from "lucide-react";
+import { ArrowLeft, Siren, X, History, Phone, Share2, MessageCircle, Route } from "lucide-react";
 import AppNavbar from "./AppNavbar";
 import MapsLink from "../components/MapsLink";
 import LiveTrackMap from "../components/LiveTrackMap";
+import SosChat from "../components/SosChat";
+import useRoadRoute from "../hooks/useRoadRoute";
 import { distanceKm } from "../utils/maps";
 import { sosMessage, trackUrl } from "../utils/share";
 import { getUser } from "../services/auth";
@@ -35,6 +37,8 @@ function LiveTracking({ request }) {
   const who = RESPONDER_LABEL[request.respondedByRole] || "Help";
   const name = request.respondedBy?.orgName || request.respondedBy?.name;
   const phone = request.respondedBy?.phone;
+  // Real road route + driving time; falls back to the straight-line estimate until it arrives.
+  const road = useRoadRoute(responder, you);
 
   if (!you || !responder) {
     return (
@@ -52,9 +56,10 @@ function LiveTracking({ request }) {
     );
   }
 
-  const km = distanceKm(you[1], you[0], responder[1], responder[0]);
-  const minutes = Math.max(1, Math.round((km / AVERAGE_SPEED_KMH) * 60));
-  const arrived = km < 0.1;
+  const straightKm = distanceKm(you[1], you[0], responder[1], responder[0]);
+  const km = road ? road.km : straightKm;
+  const minutes = road ? road.minutes : Math.max(1, Math.round((straightKm / AVERAGE_SPEED_KMH) * 60));
+  const arrived = straightKm < 0.1;
 
   return (
     <div style={{ marginTop: 12 }}>
@@ -62,6 +67,11 @@ function LiveTracking({ request }) {
         <strong>{arrived ? t("{who} has arrived", { who: t(who) }) : t("{who} is on the way", { who: t(who) })}</strong>
         {name ? ` — ${name}` : ""}
         {!arrived && ` · ${t("{distance} away · about {minutes} min", { distance: km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`, minutes })}`}
+        {!arrived && road && (
+          <span className="ltm-road-tag">
+            <Route size={11} /> {t("by road")}
+          </span>
+        )}
         {phone && (
           <>
             {" · "}
@@ -69,7 +79,7 @@ function LiveTracking({ request }) {
           </>
         )}
       </div>
-      <LiveTrackMap you={you} responder={responder} responderRole={request.respondedByRole} responderName={name} />
+      <LiveTrackMap you={you} responder={responder} responderRole={request.respondedByRole} responderName={name} route={road?.coords} />
     </div>
   );
 }
@@ -119,6 +129,7 @@ function SosHistory() {
   const [notice, setNotice] = useState("");
   const [busyId, setBusyId] = useState(null);
   const [cancelingId, setCancelingId] = useState(null);
+  const [chatFor, setChatFor] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -180,6 +191,7 @@ function SosHistory() {
   return (
     <div className="portal-page">
       <AppNavbar showLogout />
+      {chatFor && <SosChat requestId={chatFor} title={t("Chat with responders")} onClose={() => setChatFor(null)} />}
 
       <div className="portal-content">
         <button className="portal-back" onClick={() => navigate("/dashboard")}>
@@ -224,6 +236,11 @@ function SosHistory() {
 
                   <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
                     <MapsLink coordinates={r.location?.coordinates} />
+                    {r.status !== "cancelled" && (
+                      <button className="portal-btn primary small" onClick={() => setChatFor(r._id)}>
+                        <MessageCircle size={13} /> {t("Chat with responders")}
+                      </button>
+                    )}
                     {r.shareToken && ["pending", "accepted", "en_route"].includes(r.status) && (
                       <button className="portal-btn ghost small" onClick={() => shareLink(r)}>
                         <Share2 size={13} /> {t("Share live link")}

@@ -23,6 +23,7 @@ import FindPharmacies from "./pages/FindPharmacies";
 import FindEmergencyServices from "./pages/FindEmergencyServices";
 import EmergencyNumbers from "./pages/EmergencyNumbers";
 import SosHistory from "./pages/SosHistory";
+import Medicines from "./pages/Medicines";
 import MedicalId from "./pages/MedicalId";
 import Privacy from "./landing/pages/Privacy";
 import Terms from "./landing/pages/Terms";
@@ -198,6 +199,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SosHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/medicines"
+              element={
+                <ProtectedRoute>
+                  <Medicines />
                 </ProtectedRoute>
               }
             />

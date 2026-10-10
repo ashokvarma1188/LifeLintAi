@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -33,7 +33,7 @@ function FitBoth({ points }) {
 }
 
 /** `you` and `responder` are GeoJSON [lng, lat] pairs; `responder` is optional until someone accepts. */
-function LiveTrackMap({ you, responder, responderRole, responderName, youLabel = "You" }) {
+function LiveTrackMap({ you, responder, responderRole, responderName, youLabel = "You", route }) {
   const youLatLng = [you[1], you[0]];
   const responderLatLng = responder ? [responder[1], responder[0]] : null;
 
@@ -45,6 +45,7 @@ function LiveTrackMap({ you, responder, responderRole, responderName, youLabel =
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        {route?.length > 1 && <Polyline positions={route} pathOptions={{ color: "#2a7de1", weight: 5, opacity: 0.8 }} />}
         <Marker position={youLatLng}>
           <Popup>{youLabel}</Popup>
         </Marker>

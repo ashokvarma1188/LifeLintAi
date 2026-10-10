@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Siren, Phone } from "lucide-react";
 import LiveTrackMap from "../components/LiveTrackMap";
+import useRoadRoute from "../hooks/useRoadRoute";
 import { getTrack } from "../services/publicLinks";
 import { distanceKm } from "../utils/maps";
 import "./Dashboard.css";
@@ -59,8 +60,11 @@ function TrackSos() {
   }, [token]);
 
   const who = RESPONDER_LABEL[data?.responderRole] || "Help";
+  const road = useRoadRoute(data?.responderLocation, data?.location);
   let eta = null;
-  if (data?.location && data?.responderLocation) {
+  if (road) {
+    eta = { km: road.km, minutes: road.minutes };
+  } else if (data?.location && data?.responderLocation) {
     const km = distanceKm(data.location[1], data.location[0], data.responderLocation[1], data.responderLocation[0]);
     eta = { km, minutes: Math.max(1, Math.round((km / AVERAGE_SPEED_KMH) * 60)) };
   }
@@ -109,6 +113,7 @@ function TrackSos() {
                 responderRole={data.responderRole}
                 responderName={data.responderName}
                 youLabel={t("{name}'s location", { name: data.firstName })}
+                route={road?.coords}
               />
             ) : (
               <p style={{ color: "var(--text-secondary)", marginBottom: 0 }}>{t("Live location is hidden once an alert is over.")}</p>

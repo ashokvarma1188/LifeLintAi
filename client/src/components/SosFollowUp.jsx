@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { MessageCircle, Smartphone, Copy, Check, BedDouble, Phone, UserPlus } from "lucide-react";
+import { MessageCircle, Smartphone, Copy, Check, BedDouble, Phone, UserPlus, Camera } from "lucide-react";
+import SosChat from "./SosChat";
 import MapsLink from "./MapsLink";
 import { sosMessage, trackUrl, whatsappLink, smsLink } from "../utils/share";
 import { useLang } from "../i18n/context";
@@ -13,6 +14,7 @@ import "./SosFollowUp.css";
 function SosFollowUp({ result, contacts, userName, type }) {
   const { t } = useLang();
   const [copied, setCopied] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
   const token = result.emergencyRequest?.shareToken;
   const hospitals = result.nearbyHospitals || [];
   const reachable = (contacts || []).filter((c) => c.phone);
@@ -30,6 +32,18 @@ function SosFollowUp({ result, contacts, userName, type }) {
 
   return (
     <div className="sos-followup">
+      {chatOpen && result.emergencyRequest?._id && (
+        <SosChat requestId={result.emergencyRequest._id} title={t("Chat with responders")} onClose={() => setChatOpen(false)} />
+      )}
+      {result.emergencyRequest?._id && (
+        <div className="sos-followup-block">
+          <h4>{t("Tell responders more")}</h4>
+          <p>{t("Send a photo of the scene, a voice note or a message — everyone handling your alert sees it.")}</p>
+          <button type="button" className="sos-copy" onClick={() => setChatOpen(true)}>
+            <Camera size={13} /> {t("Open SOS chat")}
+          </button>
+        </div>
+      )}
       {token && (
         <div className="sos-followup-block">
           <h4>{t("Tell your family")}</h4>

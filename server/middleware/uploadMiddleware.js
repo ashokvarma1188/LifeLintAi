@@ -56,4 +56,31 @@ const uploadPhoto = (req, res, next) =>
     return res.status(400).json({ message: err.message || "Upload failed" });
   });
 
-module.exports = { uploadPdf, MAX_PDF_BYTES, uploadPhoto, MAX_IMAGE_BYTES };
+const MAX_SOS_MEDIA_BYTES = 5 * 1024 * 1024;
+const SOS_MEDIA_TYPES = {
+  photo: ["image/jpeg", "image/png", "image/webp"],
+  voice: ["audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/aac", "audio/wav"],
+};
+
+/* A scene photo or a short voice note attached to an SOS chat (field `file`, with `kind` = photo | voice). */
+const sosMediaUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_SOS_MEDIA_BYTES },
+  fileFilter: (req, file, cb) => {
+    const base = file.mimetype.split(";")[0];
+    const allowed = [...SOS_MEDIA_TYPES.photo, ...SOS_MEDIA_TYPES.voice];
+    if (!allowed.includes(base)) return cb(new Error("Only photos (JPG, PNG, WEBP) or voice notes are allowed"));
+    cb(null, true);
+  },
+});
+
+const uploadSosMedia = (req, res, next) =>
+  sosMediaUpload.single("file")(req, res, (err) => {
+    if (!err) return next();
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(413).json({ message: "File must be smaller than 5 MB" });
+    }
+    return res.status(400).json({ message: err.message || "Upload failed" });
+  });
+
+module.exports = { uploadPdf, MAX_PDF_BYTES, uploadPhoto, MAX_IMAGE_BYTES, uploadSosMedia, SOS_MEDIA_TYPES };
