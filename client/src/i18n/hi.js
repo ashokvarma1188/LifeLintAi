@@ -1334,6 +1334,15 @@ const hi = {
   "One tap, no sign-up. Demo accounts only see demo data.": "एक टैप, कोई साइन-अप नहीं। डेमो खाते सिर्फ़ डेमो डेटा देखते हैं।",
   "The demo isn't available right now. Please try again.": "डेमो अभी उपलब्ध नहीं है। कृपया फिर से कोशिश करें।",
   "Fire station": "फ़ायर स्टेशन",
+  "Help arrives faster": "मदद जल्दी पहुँचती है",
+  "when every second counts.": "जब हर सेकंड कीमती हो।",
+  "One app connecting civilians, hospitals, police and fire stations in real time.": "एक ऐप जो नागरिकों, अस्पतालों, पुलिस और फ़ायर स्टेशनों को रियल टाइम में जोड़ता है।",
+  "One SOS reaches hospital, police and fire": "एक SOS अस्पताल, पुलिस और फ़ायर तक पहुँचता है",
+  "Live tracking on the real road route": "असली सड़क रास्ते पर लाइव ट्रैकिंग",
+  "AI first-aid in your language": "आपकी भाषा में AI प्राथमिक चिकित्सा",
+  "Roles": "भूमिकाएँ",
+  "Languages": "भाषाएँ",
+  "Nearest match": "निकटतम मिलान",
 };
 
 export default hi;

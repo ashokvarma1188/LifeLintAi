@@ -142,7 +142,7 @@ function FirstAidCourse() {
                   <strong>{t("You're First-Aid Aware!")}</strong>
                   <span>{t("Best score: {score} out of {total}", { score: status.bestScore, total: status.total || 10 })}</span>
                 </div>
-                <button className="portal-btn primary small" onClick={() => download(certificate)} disabled={certBusy}>
+                <button className="portal-btn gold small" onClick={() => download(certificate)} disabled={certBusy}>
                   <FileBadge size={14} /> {certBusy ? t("Preparing PDF…") : t("Download certificate")}
                 </button>
               </div>
@@ -259,7 +259,7 @@ function FirstAidCourse() {
                 <div className="course-result-actions">
                   {result.passed && certificate && (
                     <>
-                      <button className="portal-btn primary" onClick={() => download(certificate)} disabled={certBusy}>
+                      <button className="portal-btn gold" onClick={() => download(certificate)} disabled={certBusy}>
                         <FileBadge size={16} /> {certBusy ? t("Preparing PDF…") : t("Download certificate")}
                       </button>
                       <Link className="portal-btn ghost" to={`/verify/${certificate.code}`} target="_blank">

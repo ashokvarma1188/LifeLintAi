@@ -1,0 +1,25 @@
+/* The floating light/dark switch on the landing and sign-in pages. Loaded with the component,
+   so it is styled on every page that shows it. */
+.ll-theme-toggle {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 50;
+  display: flex;
+  height: 3rem;
+  width: 3rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--ll-glass-bg);
+  border: 1px solid var(--ll-glass-border);
+  color: var(--ll-muted-foreground);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.ll-theme-toggle:hover {
+  color: var(--ll-foreground);
+  border-color: color-mix(in oklab, var(--ll-primary) 40%, transparent);
+}

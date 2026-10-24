@@ -1334,6 +1334,15 @@ const te = {
   "One tap, no sign-up. Demo accounts only see demo data.": "ఒక్క ట్యాప్, సైన్-అప్ అవసరం లేదు. డెమో ఖాతాలు డెమో డేటా మాత్రమే చూస్తాయి.",
   "The demo isn't available right now. Please try again.": "డెమో ప్రస్తుతం అందుబాటులో లేదు. దయచేసి మళ్ళీ ప్రయత్నించండి.",
   "Fire station": "అగ్నిమాపక కేంద్రం",
+  "Help arrives faster": "సహాయం వేగంగా చేరుతుంది",
+  "when every second counts.": "ప్రతి క్షణం విలువైనప్పుడు.",
+  "One app connecting civilians, hospitals, police and fire stations in real time.": "పౌరులు, ఆసుపత్రులు, పోలీసు, అగ్నిమాపక కేంద్రాలను రియల్ టైమ్‌లో కలిపే ఒకే యాప్.",
+  "One SOS reaches hospital, police and fire": "ఒక్క SOS ఆసుపత్రి, పోలీసు, అగ్నిమాపక సేవలకు చేరుతుంది",
+  "Live tracking on the real road route": "నిజమైన రోడ్డు మార్గంలో లైవ్ ట్రాకింగ్",
+  "AI first-aid in your language": "మీ భాషలో AI ప్రథమ చికిత్స",
+  "Roles": "పాత్రలు",
+  "Languages": "భాషలు",
+  "Nearest match": "దగ్గరి సరిపోలిక",
 };
 
 export default te;

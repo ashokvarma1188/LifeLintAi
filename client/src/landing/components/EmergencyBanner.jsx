@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import { useLang } from "../../i18n/context";
+import "../publicPage.css";
 
 const DISMISS_KEY = "ll-emergency-banner-dismissed";
 

@@ -1,4 +1,5 @@
 import { Sun, Moon } from "lucide-react";
+import "./ThemeToggle.css";
 
 /** Floating palette switch, pinned bottom-right as on the reference. */
 function ThemeToggle({ light, onToggle }) {

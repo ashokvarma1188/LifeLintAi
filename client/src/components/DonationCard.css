@@ -11,8 +11,13 @@
 .donation-stat div { display: flex; flex-direction: column; line-height: 1.2; }
 .donation-stat strong { font-size: 20px; color: var(--text-primary); }
 .donation-stat span { font-size: 12px; color: var(--text-secondary); }
-.donation-stat.badge { background: #fff4d6; color: #b7791f; }
-.donation-stat.badge strong { color: #7a4e0f; }
+.donation-stat.badge { background: var(--gold-soft-bg); color: var(--gold); border: 1px solid rgba(201, 154, 46, 0.35); }
+.donation-stat.badge strong {
+  background: var(--gold-gradient);
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
 
 .donation-next {
   display: flex;

@@ -10,7 +10,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 1.5rem;
+  padding: 2.5rem 1.5rem;
   background: var(--ll-gradient-hero);
 }
 
@@ -24,6 +24,151 @@
   z-index: 10;
   width: 100%;
   max-width: 27rem;
+}
+
+/* ------------------------------------------------------------ layout + brand side */
+
+.auth-layout {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 68rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-items: center;
+  align-items: center;
+  gap: 4rem;
+}
+
+.auth-side { display: none; }
+
+@media (min-width: 1024px) {
+  .auth-layout { grid-template-columns: 1.05fr 0.95fr; justify-items: stretch; }
+  .auth-layout .auth-shell { justify-self: end; }
+  .auth-side { display: block; max-width: 30rem; }
+}
+
+.auth-side-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  padding: 0.5rem 0.9rem 0.5rem 0.6rem;
+  border-radius: 999px;
+  border: 1px solid var(--ll-glass-border);
+  background: var(--ll-glass-bg);
+}
+
+.auth-side-title {
+  margin-top: 1.75rem;
+  font-size: clamp(2.2rem, 3.4vw, 3.1rem);
+  line-height: 1.08;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.auth-glow-text { filter: drop-shadow(0 0 22px color-mix(in oklab, var(--ll-primary) 35%, transparent)); }
+.ll-light .auth-glow-text { filter: none; }
+
+.auth-side-sub {
+  margin-top: 1rem;
+  max-width: 26rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ll-muted-foreground);
+}
+
+.auth-ekg {
+  display: block;
+  width: 100%;
+  max-width: 26rem;
+  height: 64px;
+  margin: 1.75rem 0 1.25rem;
+}
+
+.auth-ekg path {
+  fill: none;
+  stroke: var(--ll-primary);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 700;
+  stroke-dashoffset: 700;
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--ll-primary) 70%, transparent));
+  animation: auth-ekg-trace 3.2s ease-in-out infinite;
+}
+
+@keyframes auth-ekg-trace {
+  0% { stroke-dashoffset: 700; opacity: 1; }
+  65% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0.15; }
+}
+
+.auth-highlights {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.auth-highlights li {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  font-size: 0.95rem;
+  color: var(--ll-foreground);
+}
+
+.auth-highlight-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border: 1px solid;
+}
+
+.auth-highlight-icon.green {
+  color: var(--ll-primary);
+  background: color-mix(in oklab, var(--ll-primary) 12%, transparent);
+  border-color: color-mix(in oklab, var(--ll-primary) 30%, transparent);
+  box-shadow: 0 0 18px color-mix(in oklab, var(--ll-primary) 18%, transparent);
+}
+
+.auth-highlight-icon.red {
+  color: var(--ll-emergency);
+  background: color-mix(in oklab, var(--ll-emergency) 12%, transparent);
+  border-color: color-mix(in oklab, var(--ll-emergency) 35%, transparent);
+  box-shadow: 0 0 18px color-mix(in oklab, var(--ll-emergency) 22%, transparent);
+}
+
+.auth-stats {
+  display: flex;
+  gap: 2.25rem;
+  margin-top: 2.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ll-border);
+}
+
+.auth-stats div { display: flex; flex-direction: column; gap: 0.2rem; }
+.auth-stats strong {
+  font-size: 1.6rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  background: var(--ll-gradient-gold);
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.auth-stats span { font-size: 0.78rem; color: var(--ll-muted-foreground); text-transform: uppercase; letter-spacing: 0.08em; }
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-ekg path { animation: none; stroke-dashoffset: 0; }
 }
 
 .auth-back {
@@ -45,7 +190,30 @@
   overflow: hidden;
   border-radius: calc(var(--ll-radius) + 8px);
   padding: 2rem;
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.45),
+    0 0 70px color-mix(in oklab, var(--ll-primary) 8%, transparent);
 }
+
+/* A thin border that fades from green at the top to red at the bottom. */
+.auth-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(160deg,
+    color-mix(in oklab, var(--ll-primary) 55%, transparent),
+    transparent 35%,
+    transparent 70%,
+    color-mix(in oklab, var(--ll-emergency) 40%, transparent));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.ll-light .auth-card { box-shadow: 0 24px 60px rgba(15, 30, 22, 0.12); }
 
 .auth-card-rule {
   position: absolute;
@@ -136,8 +304,10 @@
 .auth-field input:focus,
 .auth-field select:focus {
   outline: none;
-  border-color: color-mix(in oklab, var(--ll-primary) 55%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ll-primary) 15%, transparent);
+  border-color: color-mix(in oklab, var(--ll-primary) 65%, transparent);
+  box-shadow:
+    0 0 0 4px color-mix(in oklab, var(--ll-primary) 14%, transparent),
+    0 0 22px color-mix(in oklab, var(--ll-primary) 18%, transparent);
   background: var(--ll-surface-elevated);
 }
 
@@ -218,7 +388,19 @@
   transition: box-shadow 0.2s, filter 0.2s, opacity 0.2s;
 }
 
-.auth-submit:hover:not(:disabled) { box-shadow: var(--ll-glow-success); }
+.auth-submit {
+  background: var(--ll-gradient-success);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 24px color-mix(in oklab, var(--ll-primary) 28%, transparent);
+  transition: box-shadow 0.2s, transform 0.2s, filter 0.2s, opacity 0.2s;
+}
+
+.auth-submit:hover:not(:disabled) {
+  box-shadow: var(--ll-glow-success);
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
 
 .auth-submit:disabled {
   opacity: 0.65;
@@ -314,7 +496,8 @@
 .auth-demo {
   margin-top: 1.5rem;
   padding: 1rem;
-  border: 1px dashed var(--ll-border);
+  background: color-mix(in oklab, var(--ll-primary) 4%, transparent);
+  border: 1px dashed color-mix(in oklab, var(--ll-primary) 30%, transparent);
   border-radius: calc(var(--ll-radius) + 2px);
   text-align: center;
 }
@@ -337,5 +520,19 @@
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }
-.auth-demo-btn:hover:not(:disabled) { border-color: var(--ll-primary); color: var(--ll-primary); }
+.auth-demo-btn { background: color-mix(in oklab, var(--ll-surface) 60%, transparent); }
+.auth-demo-btn svg { color: var(--ll-primary); }
+.auth-demo-btn:nth-child(3) svg,
+.auth-demo-btn:nth-child(4) svg { color: var(--ll-emergency); }
+.auth-demo-btn:hover:not(:disabled) {
+  border-color: var(--ll-primary);
+  color: var(--ll-primary);
+  box-shadow: 0 0 18px color-mix(in oklab, var(--ll-primary) 22%, transparent);
+  transform: translateY(-1px);
+}
 .auth-demo-btn:disabled { opacity: 0.6; cursor: wait; }
+
+/* Keep the bottom of the card clear of the floating light/dark switch on phones. */
+@media (max-width: 640px) {
+  .auth-page { padding-bottom: 5.5rem; }
+}

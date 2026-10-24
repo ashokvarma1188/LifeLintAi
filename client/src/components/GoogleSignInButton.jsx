@@ -18,7 +18,8 @@ function GoogleSignInButton({ onCredential, disabled }) {
         callback: (response) => onCredential(response.credential),
       });
       window.google.accounts.id.renderButton(buttonRef.current, {
-        theme: "outline",
+        theme: document.querySelector(".ll-root.ll-light") ? "outline" : "filled_black",
+        shape: "pill",
         size: "large",
         width: 320,
         text: "continue_with",

@@ -106,7 +106,7 @@ export function DonationCard({ onChange }) {
           </button>
         )}
         {status.donationCount > 0 && (
-          <button className="portal-btn primary small" onClick={downloadCertificate} disabled={certBusy}>
+          <button className="portal-btn gold small" onClick={downloadCertificate} disabled={certBusy}>
             <FileBadge size={14} /> {certBusy ? t("Preparing PDF…") : t("Download certificate")}
           </button>
         )}

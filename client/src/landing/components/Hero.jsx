@@ -16,6 +16,10 @@ function Hero() {
   return (
     <section id="top" className="ll-hero" style={{ background: "var(--ll-gradient-hero)" }}>
       <div className="ll-grid-bg ll-hero-grid" aria-hidden="true" />
+      <div className="ll-aurora" aria-hidden="true">
+        <span className="ll-aurora-green" />
+        <span className="ll-aurora-red" />
+      </div>
       <HeroDrops />
 
       <div className="ll-hero-content">

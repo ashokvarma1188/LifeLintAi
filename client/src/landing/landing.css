@@ -76,30 +76,6 @@
 
 /* --------------------------------------------------------- theme toggle */
 
-.ll-theme-toggle {
-  position: fixed;
-  right: 1.5rem;
-  bottom: 1.5rem;
-  z-index: 50;
-  display: flex;
-  height: 3rem;
-  width: 3rem;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  background: var(--ll-glass-bg);
-  border: 1px solid var(--ll-glass-border);
-  color: var(--ll-muted-foreground);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
-}
-
-.ll-theme-toggle:hover {
-  color: var(--ll-foreground);
-  border-color: color-mix(in oklab, var(--ll-primary) 40%, transparent);
-}
-
 /* ------------------------------------------------------------------ nav */
 
 .ll-nav-wrap {
@@ -390,22 +366,25 @@
 .ll-btn-wide { padding-inline: 1.75rem; }
 
 .ll-btn-primary {
-  background: var(--ll-primary);
+  background: var(--ll-gradient-success);
   color: var(--ll-primary-foreground);
+  box-shadow: 0 8px 26px color-mix(in oklab, var(--ll-primary) 30%, transparent);
 }
 
-.ll-btn-primary:hover { box-shadow: var(--ll-glow-success); }
+.ll-btn-primary:hover { box-shadow: var(--ll-glow-success); transform: translateY(-2px); }
 
 .ll-btn-emergency {
-  background: var(--ll-emergency);
+  background: var(--ll-gradient-emergency);
   color: var(--ll-emergency-foreground);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 8px 26px color-mix(in oklab, var(--ll-emergency) 32%, transparent);
 }
 
 .ll-btn-emergency:hover {
   box-shadow: var(--ll-glow-emergency);
   filter: brightness(1.1);
+  transform: translateY(-2px);
 }
 
 .ll-btn-ghost {
@@ -1499,3 +1478,22 @@
 @media (min-width: 640px) {
   .ll-nav-lang { display: inline-flex; }
 }
+
+
+/* Headline depth: a soft silver first line and a glowing green second line (dark theme). */
+.ll-root:not(.ll-light) .ll-hero-title {
+  background: linear-gradient(180deg, #ffffff 35%, #b9c7c0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.ll-root:not(.ll-light) .ll-hero-title > .ll-text-gradient-success {
+  background: var(--ll-gradient-success);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 28px color-mix(in oklab, var(--ll-primary) 35%, transparent));
+}
+
+/* Gold touches on the landing page */
+.ll-testimonial-quote-icon { color: var(--ll-gold) !important; }
+.ll-root:not(.ll-light) .ll-stat-value { filter: drop-shadow(0 0 18px rgba(233, 189, 90, 0.25)); }

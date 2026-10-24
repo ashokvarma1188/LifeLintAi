@@ -80,6 +80,14 @@
 .portal-btn.ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
 
 .portal-btn.danger { background: var(--danger); color: #fff; }
+
+.portal-btn.gold {
+  background: var(--gold-gradient);
+  color: #1d1404;
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(201, 154, 46, 0.25);
+}
+.portal-btn.gold:hover:not(:disabled) { filter: brightness(1.06); box-shadow: 0 8px 24px rgba(201, 154, 46, 0.4); }
 .portal-btn.danger:hover:not(:disabled) { background: var(--danger-hover); }
 
 .portal-btn.small { padding: 7px 12px; font-size: 13px; border-radius: 8px; }

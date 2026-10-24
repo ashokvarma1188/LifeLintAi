@@ -21,7 +21,7 @@ function ImpactStats() {
           <div className="ll-impact-grid-stats">
             {STATS.map((stat) => (
               <div key={stat.label} className="ll-stat">
-                <div className="ll-stat-value ll-text-gradient-success">
+                <div className="ll-stat-value ll-text-gradient-gold">
                   <Counter to={stat.value} suffix={stat.suffix} />
                 </div>
                 <div className="ll-stat-label">{t(stat.label)}</div>

@@ -288,3 +288,65 @@
     animation: none;
   }
 }
+
+/* ------------------------------------------------------------------ aurora */
+/* Two soft, slowly drifting glows (green and red) behind the hero and the auth pages. */
+.ll-aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ll-aurora span {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.55;
+  animation: ll-aurora-drift 18s ease-in-out infinite alternate;
+}
+
+.ll-aurora-green {
+  width: 46vw;
+  height: 46vw;
+  top: -18vw;
+  left: -10vw;
+  background: color-mix(in oklab, var(--ll-primary) 38%, transparent);
+}
+
+.ll-aurora-red {
+  width: 36vw;
+  height: 36vw;
+  bottom: -16vw;
+  right: -8vw;
+  background: color-mix(in oklab, var(--ll-emergency) 30%, transparent);
+  animation-delay: -9s;
+}
+
+.ll-light .ll-aurora span { opacity: 0.22; }
+
+@keyframes ll-aurora-drift {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(4vw, 3vw) scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ll-aurora span { animation: none; }
+}
+
+/* ------------------------------------------------------------------ gold */
+/* Gold is an accent for achievements and impact only; green stays the action colour. */
+.ll-root {
+  --ll-gold: #e9bd5a;
+  --ll-gradient-gold: linear-gradient(135deg, #f8e1a0, #e2b04a 55%, #b8862a);
+}
+.ll-root.ll-light {
+  --ll-gold: #a87a16;
+  --ll-gradient-gold: linear-gradient(135deg, #c99a2e, #9c7012);
+}
+.ll-text-gradient-gold {
+  background: var(--ll-gradient-gold);
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
