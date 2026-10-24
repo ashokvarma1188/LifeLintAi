@@ -11,8 +11,12 @@
  *   npm run demo:seed     # add / refresh the demo data
  *   npm run demo:reset    # remove all of it
  *
- * Demo logins (password Demo@12345): ravi@demo.lifelink.app (civilian),
- * plus three donors: sita@, kiran@ and arjun@demo.lifelink.app.
+ * Demo logins (password Demo@12345), also one tap each on the login page:
+ *   ravi@     civilian with a full profile (plus donors sita@, kiran@, arjun@)
+ *   hospital@ LifeLink Demo Hospital
+ *   police@   Vijayawada Police (Demo)
+ *   fire@     Vijayawada Fire Station (Demo)
+ * Demo accounts are sandboxed (utils/demo.js): they only see each other's alerts.
  */
 require("dotenv").config();
 const bcrypt = require("bcrypt");
@@ -27,6 +31,9 @@ const HealthRecord = require("../models/HealthRecord");
 const MedicineReminder = require("../models/MedicineReminder");
 const SafeWalk = require("../models/SafeWalk");
 const PushSubscription = require("../models/PushSubscription");
+const DonationCamp = require("../models/DonationCamp");
+const Certificate = require("../models/Certificate");
+const SafetyResponse = require("../models/SafetyResponse");
 
 const DOMAIN = "@demo.lifelink.app";
 const DEMO_PASSWORD = "Demo@12345";
@@ -85,6 +92,11 @@ async function reset({ quiet = false } = {}) {
     MedicineReminder.deleteMany({ userId: { $in: ids } }),
     SafeWalk.deleteMany({ userId: { $in: ids } }),
     PushSubscription.deleteMany({ userId: { $in: ids } }),
+    DonationCamp.deleteMany({ organiserId: { $in: ids } }),
+    DonationCamp.updateMany({}, { $pull: { registrations: { userId: { $in: ids } } } }),
+    Certificate.deleteMany({ userId: { $in: ids } }),
+    SafetyResponse.deleteMany({ userId: { $in: ids } }),
+    Hospital.deleteMany({ ownerId: { $in: ids } }),
   ]);
   await User.deleteMany({ _id: { $in: ids } });
   if (!quiet) {
@@ -132,6 +144,7 @@ async function seed() {
       location: near(VIJAYAWADA, 0.004, 0.006),
       assignedHospitalId: nearestHospital?._id,
       shareToken: crypto.randomBytes(12).toString("hex"),
+      demo: true,
       ...props,
     });
   const accident = await alert({ type: "accident", status: "resolved", targets: ["hospital", "police"], respondedByRole: "hospital", etaMinutes: 7, createdAt: daysAgo(12, 19), updatedAt: daysAgo(12, 20) });
@@ -200,11 +213,56 @@ async function seed() {
     { requestedBy: users.kiran._id, bloodGroup: "B+", unitsNeeded: 1, notes: "For my father's dialysis this weekend", location: near(VIJAYAWADA, -0.01, 0.004) },
   ]);
 
+  // Demo responders: a hospital (with its own listing), police and fire station, all approved.
+  const org = (key, role, orgName, extra = {}) =>
+    User.create({
+      name: orgName, orgName, email: `${key}${DOMAIN}`, password, role, roleStatus: "approved", emailVerified: true,
+      phone: "0866000" + String(Math.floor(1000 + Math.random() * 8999)), serviceRadiusKm: 25, ...extra,
+    });
+  const demoHospitalUser = await org("hospital", "hospital", "LifeLink Demo Hospital");
+  const demoHospital = await Hospital.create({
+    name: "LifeLink Demo Hospital", ownerId: demoHospitalUser._id, phone: demoHospitalUser.phone, address: "MG Road, Vijayawada",
+    location: near(VIJAYAWADA, 0.006, -0.004), totalBeds: 60, availableBeds: 18, icuBeds: 10, icuAvailableBeds: 4,
+    ambulanceAvailable: true, ambulanceCount: 3, oxygenAvailable: true, bloodBankAvailable: true,
+    bloodStock: DEFAULT_STOCK, bloodStockUpdatedAt: new Date(),
+  });
+  const demoPolice = await org("police", "police", "Vijayawada Police (Demo)", { location: near(VIJAYAWADA, -0.008, 0.005) });
+  await org("fire", "firestation", "Vijayawada Fire Station (Demo)", {
+    location: near(VIJAYAWADA, 0.01, 0.008),
+    fleet: [{ unitName: "Engine 1", status: "available" }, { unitName: "Engine 2", status: "available" }, { unitName: "Rescue van", status: "maintenance" }],
+  });
+
+  // Live alerts for the demo responders to handle (they show for 24 h in the control room).
+  const minutesAgo = (m) => new Date(Date.now() - m * 60000);
+  const live = (who, props) => EmergencyRequest.create({
+    citizenId: who._id, shareToken: crypto.randomBytes(12).toString("hex"), demo: true, assignedHospitalId: demoHospital._id, ...props,
+  });
+  await live(users.sita, { type: "medical", status: "pending", targets: ["hospital", "police"], location: near(VIJAYAWADA, 0.012, 0.006), shareMedicalId: true, createdAt: minutesAgo(6), updatedAt: minutesAgo(6) });
+  await live(users.arjun, { type: "fire", status: "pending", targets: ["firestation", "police"], location: near(VIJAYAWADA, -0.014, -0.009), createdAt: minutesAgo(3), updatedAt: minutesAgo(3) });
+  await live(users.kiran, {
+    type: "accident", status: "en_route", targets: ["hospital", "police"], location: near(VIJAYAWADA, -0.004, 0.011),
+    respondedBy: demoPolice._id, respondedByRole: "police", etaMinutes: 6,
+    responderLocation: { coordinates: near(VIJAYAWADA, -0.02, 0.018).coordinates, updatedAt: new Date() },
+    createdAt: minutesAgo(15), updatedAt: minutesAgo(4),
+  });
+
+  // An upcoming blood donation camp at the demo hospital, with two donors registered.
+  const campDay = new Date(Date.now() + 6 * DAY);
+  campDay.setHours(9, 0, 0, 0);
+  await DonationCamp.create({
+    organiserId: demoHospitalUser._id, organiserName: "LifeLink Demo Hospital", title: "World Blood Donor Week camp",
+    description: "Free health check-up and refreshments for every donor.", venue: "Main hall, LifeLink Demo Hospital",
+    location: demoHospital.location, startsAt: campDay, endsAt: new Date(campDay.getTime() + 6 * 60 * 60 * 1000), capacity: 80,
+    registrations: [{ userId: users.sita._id }, { userId: users.kiran._id }],
+  });
+
   console.log("Demo data ready:");
   console.log(`  • ${PEOPLE.length} civilians — log in as ravi${DOMAIN} / ${DEMO_PASSWORD}`);
   console.log("  • 3 past SOS alerts (one with a chat), 5 health records, 2 medicine reminders");
   console.log("  • 2 open blood requests, 3 available donors, organ pledge on Ravi's Medical ID");
   console.log(`  • blood-bank stock added to ${stocked} hospital(s)`);
+  console.log(`  • demo hospital, police and fire station (hospital${DOMAIN}, police${DOMAIN}, fire${DOMAIN})`);
+  console.log("  • 3 live alerts for them, and an upcoming donation camp");
 }
 
 (async () => {

@@ -7,6 +7,7 @@ const EmergencyRequest = require("../models/EmergencyRequest");
 const Hospital = require("../models/Hospital");
 const SafetyCheck = require("../models/SafetyCheck");
 const SafetyResponse = require("../models/SafetyResponse");
+const { sandboxFilter } = require("../utils/demo");
 
 const OPEN_STATUSES = ["pending", "accepted", "en_route"];
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -15,12 +16,12 @@ const getControlRoom = async (req, res) => {
   try {
     const since = new Date(Date.now() - DAY_MS);
     const [alerts, resolvedToday, hospitals, checks] = await Promise.all([
-      EmergencyRequest.find({ status: { $in: OPEN_STATUSES }, createdAt: { $gte: since } })
+      EmergencyRequest.find({ status: { $in: OPEN_STATUSES }, createdAt: { $gte: since }, ...sandboxFilter(req.user) })
         .select("type status targets location createdAt updatedAt etaMinutes respondedByRole responderLocation")
         .sort({ createdAt: -1 })
         .limit(300)
         .lean(),
-      EmergencyRequest.countDocuments({ status: "resolved", updatedAt: { $gte: since } }),
+      EmergencyRequest.countDocuments({ status: "resolved", updatedAt: { $gte: since }, ...sandboxFilter(req.user) }),
       Hospital.find({})
         .select("name location totalBeds availableBeds icuBeds icuAvailableBeds ambulanceCount ambulanceAvailable bloodStock")
         .limit(500)

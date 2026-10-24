@@ -41,6 +41,9 @@ const emergencyRequestSchema = new mongoose.Schema(
     // Unguessable token behind the public "track this SOS" link the civilian can send to family.
     shareToken: { type: String, index: true, sparse: true },
 
+    // Raised by a demo account: only demo responders see it (utils/demo.js).
+    demo: { type: Boolean, default: false, index: true },
+
     /*
      * Which services the civilian chose to alert — controls who sees this request.
      * "pharmacy" isn't included: there's no pharmacy alerts inbox to respond from,

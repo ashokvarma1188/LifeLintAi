@@ -13,6 +13,7 @@ const User = require("../models/User");
 const { CIVILIAN_ROLES } = require("../constants/roles");
 const { sendToUsers, notifyRespondersOfSos } = require("../utils/push");
 const { distanceKm, readPoint } = require("../utils/geo");
+const { isDemoUser } = require("../utils/demo");
 
 const KINDS = ["flood", "cyclone", "fire", "earthquake", "heatwave", "other"];
 const STATUSES = ["safe", "need_help", "not_in_area"];
@@ -172,6 +173,7 @@ const respond = async (req, res) => {
         location: { type: "Point", coordinates: point },
         targets: ["police", "firestation"],
         shareToken: crypto.randomBytes(12).toString("hex"),
+        demo: isDemoUser(req.user),
       });
       update.sosRequestId = sos._id;
       notifyRespondersOfSos(sos).catch(() => {});

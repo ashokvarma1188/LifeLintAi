@@ -7,6 +7,8 @@
 const crypto = require("crypto");
 const SafeWalk = require("../models/SafeWalk");
 const EmergencyRequest = require("../models/EmergencyRequest");
+const User = require("../models/User");
+const { isDemoUser } = require("./demo");
 const { sendToUsers, notifyRespondersOfSos } = require("./push");
 
 const CHECK_MS = 60 * 1000;
@@ -46,6 +48,7 @@ async function checkWalks(now = new Date()) {
       location: { type: "Point", coordinates: walk.lastLocation.coordinates },
       targets: ["police"],
       shareToken: crypto.randomBytes(12).toString("hex"),
+      demo: isDemoUser(await User.findById(walk.userId).select("email").lean()),
     });
     await SafeWalk.updateOne({ _id: walk._id }, { sosRequestId: request._id });
     result.alerted += 1;

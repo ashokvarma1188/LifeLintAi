@@ -5,6 +5,7 @@ const Hospital = require("../models/Hospital");
 const User = require("../models/User");
 const { redactMedicalId } = require("../utils/sosHelpers");
 const { notifyRespondersOfSos, notifyCitizenOfStatus } = require("../utils/push");
+const { isDemoUser, sandboxFilter } = require("../utils/demo");
 
 const VALID_TARGETS = ["hospital", "police", "firestation"];
 
@@ -49,6 +50,7 @@ const createSOS = async (req, res) => {
       targets: finalTargets,
       shareMedicalId: Boolean(shareMedicalId),
       shareToken: crypto.randomBytes(12).toString("hex"),
+      demo: isDemoUser(req.user),
     });
 
     // Fire-and-forget: a slow push service must never delay the SOS response itself.
@@ -78,7 +80,7 @@ const DEFAULT_SERVICE_RADIUS_KM = 25;
 const listSOS = async (req, res) => {
   try {
     const myHospital = await Hospital.findOne({ ownerId: req.user._id });
-    const filter = { targets: "hospital" };
+    const filter = { targets: "hospital", ...sandboxFilter(req.user) };
 
     if (myHospital) {
       const radiusKm = req.user.serviceRadiusKm || DEFAULT_SERVICE_RADIUS_KM;
@@ -221,7 +223,7 @@ const setStatus = (status) => async (req, res) => {
     }
 
     const request = await EmergencyRequest.findOneAndUpdate(
-      { _id: id, targets: req.user.role, status: { $in: REQUIRED_PRIOR_STATUS[status] } },
+      { _id: id, targets: req.user.role, status: { $in: REQUIRED_PRIOR_STATUS[status] }, ...sandboxFilter(req.user) },
       update,
       { new: true }
     ).populate([
@@ -231,7 +233,7 @@ const setStatus = (status) => async (req, res) => {
     ]);
 
     if (!request) {
-      const stillExists = await EmergencyRequest.exists({ _id: id, targets: req.user.role });
+      const stillExists = await EmergencyRequest.exists({ _id: id, targets: req.user.role, ...sandboxFilter(req.user) });
       return res.status(stillExists ? 409 : 404).json({
         message: stillExists
           ? "This request was already updated by someone else — refresh and try again."

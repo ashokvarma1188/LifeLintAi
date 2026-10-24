@@ -12,6 +12,7 @@ const PushSubscription = require("../models/PushSubscription");
 const User = require("../models/User");
 const Hospital = require("../models/Hospital");
 const { distanceKm } = require("./geo");
+const { DEMO_EMAIL } = require("./demo");
 
 const DEFAULT_SERVICE_RADIUS_KM = 25; // same default the alert inboxes use
 const RESPONDER_PAGE = { hospital: "/hospital/incoming", police: "/police/alerts", firestation: "/firestation/alerts" };
@@ -87,6 +88,7 @@ const notifyRespondersOfSos = async (request) => {
     role: { $in: request.targets },
     roleStatus: "approved",
     suspended: { $ne: true },
+    email: request.demo ? DEMO_EMAIL : { $not: DEMO_EMAIL },
   }).select("role location serviceRadiusKm");
 
   const sosPoint = request.location.coordinates;

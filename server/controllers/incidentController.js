@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const EmergencyRequest = require("../models/EmergencyRequest");
 const IncidentReport = require("../models/IncidentReport");
 const { redactMedicalId } = require("../utils/sosHelpers");
+const { sandboxFilter } = require("../utils/demo");
 
 const DEFAULT_SERVICE_RADIUS_KM = 25;
 
@@ -17,6 +18,7 @@ const listAlerts = async (req, res) => {
     const filter = {
       status: { $in: ["pending", "accepted", "en_route"] },
       targets: req.user.role,
+      ...sandboxFilter(req.user),
     };
 
     if (req.user.location?.coordinates?.length === 2) {

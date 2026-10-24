@@ -3,6 +3,7 @@ const EmergencyRequest = require("../models/EmergencyRequest");
 const SosMessage = require("../models/SosMessage");
 const { SOS_MEDIA_TYPES } = require("../middleware/uploadMiddleware");
 const { sendToUsers } = require("../utils/push");
+const { sameSide } = require("../utils/demo");
 
 const RESPONDER_ROLES = ["hospital", "police", "firestation"];
 const OPEN_STATUSES = ["pending", "accepted", "en_route"];
@@ -23,7 +24,7 @@ async function loadThread(req, res, requestId) {
     return null;
   }
   const isOwner = String(request.citizenId) === String(req.user._id);
-  const isResponder = RESPONDER_ROLES.includes(req.user.role) && request.targets.includes(req.user.role);
+  const isResponder = RESPONDER_ROLES.includes(req.user.role) && request.targets.includes(req.user.role) && sameSide(req.user, request);
   if (!isOwner && !isResponder) {
     res.status(404).json({ message: "Request not found" });
     return null;
