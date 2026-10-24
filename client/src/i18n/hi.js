@@ -1330,6 +1330,10 @@ const hi = {
   "This camp is no longer open.": "यह शिविर अब खुला नहीं है।",
   "Only civilian accounts can register to donate.": "सिर्फ़ नागरिक खाते ही रक्तदान के लिए रजिस्टर कर सकते हैं।",
   "Choose safe, need help or not in this area.": "सुरक्षित, मदद चाहिए या इस इलाक़े में नहीं — एक चुनें।",
+  "Try a demo account": "डेमो खाता आज़माएँ",
+  "One tap, no sign-up. Demo accounts only see demo data.": "एक टैप, कोई साइन-अप नहीं। डेमो खाते सिर्फ़ डेमो डेटा देखते हैं।",
+  "The demo isn't available right now. Please try again.": "डेमो अभी उपलब्ध नहीं है। कृपया फिर से कोशिश करें।",
+  "Fire station": "फ़ायर स्टेशन",
 };
 
 export default hi;

@@ -1330,6 +1330,10 @@ const te = {
   "This camp is no longer open.": "ఈ శిబిరం ఇక అందుబాటులో లేదు.",
   "Only civilian accounts can register to donate.": "పౌర ఖాతాలు మాత్రమే రక్తదానానికి నమోదు చేసుకోగలవు.",
   "Choose safe, need help or not in this area.": "సురక్షితం, సహాయం కావాలి లేదా ఈ ప్రాంతంలో లేను — ఒకటి ఎంచుకోండి.",
+  "Try a demo account": "డెమో ఖాతాతో ప్రయత్నించండి",
+  "One tap, no sign-up. Demo accounts only see demo data.": "ఒక్క ట్యాప్, సైన్-అప్ అవసరం లేదు. డెమో ఖాతాలు డెమో డేటా మాత్రమే చూస్తాయి.",
+  "The demo isn't available right now. Please try again.": "డెమో ప్రస్తుతం అందుబాటులో లేదు. దయచేసి మళ్ళీ ప్రయత్నించండి.",
+  "Fire station": "అగ్నిమాపక కేంద్రం",
 };
 
 export default te;

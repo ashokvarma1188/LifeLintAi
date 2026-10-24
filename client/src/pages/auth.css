@@ -309,3 +309,33 @@
   .auth-card { padding: 1.5rem 1.25rem; }
   .auth-row { grid-template-columns: 1fr; }
 }
+
+/* One-tap demo accounts under the sign-in form */
+.auth-demo {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px dashed var(--ll-border);
+  border-radius: calc(var(--ll-radius) + 2px);
+  text-align: center;
+}
+.auth-demo-title { margin: 0; font-size: 0.875rem; font-weight: 600; color: var(--ll-foreground); }
+.auth-demo-hint { margin: 0.25rem 0 0.75rem; font-size: 0.75rem; color: var(--ll-muted-foreground); }
+.auth-demo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+.auth-demo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.5rem;
+  border-radius: var(--ll-radius);
+  border: 1px solid var(--ll-border);
+  background: transparent;
+  color: var(--ll-foreground);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.auth-demo-btn:hover:not(:disabled) { border-color: var(--ll-primary); color: var(--ll-primary); }
+.auth-demo-btn:disabled { opacity: 0.6; cursor: wait; }

@@ -6,6 +6,16 @@ import AuthShell from "./AuthShell";
 import PasswordField from "./PasswordField";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import { useLang } from "../i18n/context";
+import { User, Hospital, ShieldCheck, Flame } from "lucide-react";
+
+// Sandboxed demo accounts (see server/utils/demo.js): they only ever see demo data.
+const DEMO_PASSWORD = "Demo@12345";
+const DEMO_ACCOUNTS = [
+  { key: "civilian", label: "Civilian", email: "ravi@demo.lifelink.app", icon: User },
+  { key: "hospital", label: "Hospital", email: "hospital@demo.lifelink.app", icon: Hospital },
+  { key: "police", label: "Police", email: "police@demo.lifelink.app", icon: ShieldCheck },
+  { key: "fire", label: "Fire station", email: "fire@demo.lifelink.app", icon: Flame },
+];
 
 function Login() {
   const navigate = useNavigate();
@@ -43,6 +53,20 @@ function Login() {
       }
     } catch (err) {
       setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const tryDemo = async (account) => {
+    setError("");
+    setLoading(true);
+    setForm({ email: account.email, password: DEMO_PASSWORD });
+    try {
+      await login({ email: account.email, password: DEMO_PASSWORD });
+      navigate("/dashboard", { replace: true });
+    } catch (err) {
+      setError(getErrorMessage(err, t("The demo isn't available right now. Please try again.")));
     } finally {
       setLoading(false);
     }
@@ -177,6 +201,18 @@ function Login() {
         <span>{t("or")}</span>
       </div>
       <GoogleSignInButton onCredential={handleGoogleCredential} disabled={loading} />
+
+      <div className="auth-demo">
+        <p className="auth-demo-title">{t("Try a demo account")}</p>
+        <p className="auth-demo-hint">{t("One tap, no sign-up. Demo accounts only see demo data.")}</p>
+        <div className="auth-demo-grid">
+          {DEMO_ACCOUNTS.map(({ key, label, email, icon: Icon }) => (
+            <button key={key} type="button" className="auth-demo-btn" onClick={() => tryDemo({ email })} disabled={loading}>
+              <Icon size={16} /> {t(label)}
+            </button>
+          ))}
+        </div>
+      </div>
     </AuthShell>
   );
 }
