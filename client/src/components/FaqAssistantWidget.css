@@ -5,9 +5,9 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #2a9df4;
-  color: #fff;
-  border: none;
+  background: var(--bg-surface);
+  color: var(--accent);
+  border: 1.5px solid var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -16,7 +16,7 @@
   z-index: 1000;
   transition: transform 0.15s ease, background 0.15s ease;
 }
-.faq-widget-btn:hover { background: #1c8ce0; transform: scale(1.06); }
+.faq-widget-btn:hover { background: var(--accent-soft-bg); transform: scale(1.06); }
 
 .faq-widget-panel {
   position: fixed;
@@ -42,15 +42,16 @@
   justify-content: space-between;
   gap: 8px;
   padding: 14px 16px;
-  background: #2a9df4;
-  color: #fff;
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
 }
 .faq-widget-header h4 { margin: 0; font-size: 14px; }
 .faq-widget-header p { margin: 2px 0 0; font-size: 11px; opacity: 0.9; }
 .faq-widget-close {
   background: transparent;
   border: none;
-  color: #fff;
+  color: var(--text-secondary);
   cursor: pointer;
   display: flex;
   padding: 4px;
@@ -89,7 +90,7 @@
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-.faq-widget-option:hover { border-color: #2a9df4; background: var(--bg-surface); }
+.faq-widget-option:hover { border-color: var(--accent); background: var(--bg-surface); }
 .faq-widget-option svg { flex-shrink: 0; opacity: 0.6; }
 
 .faq-widget-back {
@@ -99,7 +100,7 @@
   gap: 4px;
   background: transparent;
   border: none;
-  color: #2a9df4;
+  color: var(--accent);
   font-size: 12.5px;
   font-weight: 500;
   cursor: pointer;
@@ -115,8 +116,8 @@
 .faq-widget-q {
   align-self: flex-end;
   max-width: 85%;
-  background: #2a9df4;
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
   padding: 9px 12px;
   border-radius: 12px;
   border-bottom-right-radius: 4px;
@@ -141,8 +142,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #2a9df4;
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
   border: none;
   border-radius: 10px;
   padding: 9px 14px;

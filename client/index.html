@@ -5,7 +5,12 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#0f9d63" />
+    <meta name="theme-color" content="#050605" />
+    <script>
+      // Apply the saved theme (dark by default) before the app loads, so pages never flash white.
+      try { document.documentElement.setAttribute("data-theme", localStorage.getItem("theme") || "dark"); } catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
+    </script>
+    <style>html[data-theme="dark"], html[data-theme="dark"] body { background: #050605; }</style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

@@ -6,7 +6,7 @@
   height: 56px;
   border-radius: 50%;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border: none;
   display: flex;
   align-items: center;
@@ -43,14 +43,14 @@
   gap: 8px;
   padding: 14px 16px;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 .ai-widget-header h4 { margin: 0; font-size: 14px; }
 .ai-widget-header p { margin: 2px 0 0; font-size: 11px; opacity: 0.9; }
 .ai-widget-close {
   background: transparent;
   border: none;
-  color: #fff;
+  color: var(--on-accent);
   cursor: pointer;
   display: flex;
   padding: 4px;
@@ -78,7 +78,7 @@
 .ai-widget-msg.user {
   align-self: flex-end;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border-bottom-right-radius: 4px;
 }
 .ai-widget-msg.assistant {
@@ -160,7 +160,7 @@
 .ai-widget-form input:focus { outline: none; border-color: var(--accent); }
 .ai-widget-form button {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   border: none;
   border-radius: 10px;
   width: 38px;

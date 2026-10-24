@@ -19,8 +19,8 @@
   border-radius: 16px;
   display: grid;
   place-items: center;
-  color: #fff;
-  background: linear-gradient(135deg, var(--accent), #2a9df4);
+  color: var(--on-accent);
+  background: linear-gradient(135deg, var(--accent), #0a7a4b);
   box-shadow: 0 10px 24px rgba(15, 157, 99, 0.25);
 }
 
@@ -206,7 +206,7 @@
   border-right: 1px solid var(--border-color);
 }
 .ai-segment button:last-child { border-right: none; }
-.ai-segment button.on { background: var(--accent); color: #fff; }
+.ai-segment button.on { background: var(--accent); color: var(--on-accent); }
 
 .triage-card {
   display: grid;

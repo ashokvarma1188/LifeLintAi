@@ -71,12 +71,9 @@
 .crash-btn.primary {
   background: var(--accent);
   border-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
-:root[data-theme="dark"] .crash-btn.primary {
-  color: #04140c;
-}
 
 .crash-btn.primary:hover {
   background: var(--accent-hover);

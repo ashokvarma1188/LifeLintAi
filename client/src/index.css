@@ -25,6 +25,8 @@ body {
   --accent-soft-bg: #e2f8ee;
   --danger: #ef4444;
   --danger-hover: #dc2626;
+  /* Text on a solid accent (green) background */
+  --on-accent: #ffffff;
 
   --success-bg: #e8f8ee;
   --success-text: #1e7b3e;
@@ -40,34 +42,55 @@ body {
 }
 
 :root[data-theme="dark"] {
-  --bg-page: #07100c;
-  --bg-surface: #0d1712;
-  --bg-input: #101d17;
-  --text-primary: #f2f7f4;
-  --text-secondary: #8fa39a;
-  --border-color: #1c2b23;
-  --border-color-soft: #142019;
+  /* Black, green and red — the same look as the landing page */
+  color-scheme: dark;
+  --bg-page: #050605;
+  --bg-surface: #0c0f0d;
+  --bg-input: #111512;
+  --text-primary: #f2f5f3;
+  --text-secondary: #94a39b;
+  --border-color: #1e2621;
+  --border-color-soft: #151b17;
   --accent: #1fe08a;
   --accent-hover: #4eeaa4;
-  --accent-soft-bg: #10301f;
-  --danger: #f14848;
-  --danger-hover: #ff6363;
+  --accent-soft-bg: #0f2a1d;
+  --danger: #f43f46;
+  --danger-hover: #ff5a60;
+  --on-accent: #03150c;
 
-  --success-bg: #10301f;
+  --success-bg: #0f2a1d;
   --success-text: #4eeaa4;
-  --success-border: #1c4a30;
-  --error-bg: #33161a;
-  --error-text: #ff8b83;
-  --error-border: #5c2222;
-  --warning-bg: #332912;
+  --success-border: #1b4630;
+  --error-bg: #2e1013;
+  --error-text: #ff8b8f;
+  --error-border: #5c1e23;
+  --warning-bg: #2e2510;
   --warning-text: #f0c169;
 
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 8px 28px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.6);
 }
 
 body {
   background: var(--bg-page);
   color: var(--text-primary);
   transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* A soft green glow at the top of every dark page, like the landing page */
+:root[data-theme="dark"] body {
+  background:
+    radial-gradient(1100px 520px at 50% -180px, rgba(31, 224, 138, 0.09), transparent 70%),
+    var(--bg-page);
+  background-attachment: fixed;
+}
+
+/* Plain inputs with no styling of their own follow the theme too */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+select,
+textarea {
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
 }

@@ -55,6 +55,59 @@
   flex: 1;
 }
 
+/*
+ * The profile form reuses the sign-in page's class names, but that page's stylesheet
+ * only loads with that page, so the fields carry their own styling here (app theme).
+ */
+.profile-content .auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.profile-content .auth-field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.profile-content .auth-field input,
+.profile-content .auth-field select {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.profile-content .auth-field input:focus,
+.profile-content .auth-field select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.profile-content .auth-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.profile-content .auth-submit:hover:not(:disabled) { background: var(--accent-hover); }
+.profile-content .auth-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
 .tag-input-hint {
   font-size: 12px;
   color: var(--text-secondary);
