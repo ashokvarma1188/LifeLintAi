@@ -108,7 +108,7 @@ See [server/.env.example](server/.env.example) for every setting.
 | `npm run create-admin` | Creates the first admin account. There is no way to become admin from the website. |
 | `node scripts/seedVijayawada.js` | Adds real Vijayawada-area hospitals, police, fire and pharmacy. |
 | `node scripts/seedHospitals.js` | Adds Hyderabad hospitals. |
-| `npm run demo:seed` | Adds presentation data: a civilian with SOS history, chat, health records, medicines, an organ pledge, donors and blood stock. Login: `ravi@demo.lifelink.app` / `Demo@12345`. |
+| `npm run demo:seed` | Adds presentation data: a civilian with SOS history, chat, health records, medicines and an organ pledge; donors; a demo hospital, police and fire station with live alerts; an upcoming donation camp. All demo logins use the password `Demo@12345`: `ravi@`, `hospital@`, `police@`, `fire@demo.lifelink.app`. They're also one tap away on the login page. Demo accounts are sandboxed and only see demo data. |
 | `npm run demo:reset` | Removes all of that demo data again. |
 | `npm test` | Runs the API tests against an in-memory database. They never touch the real database or send email. |
 
