@@ -14,7 +14,7 @@
 ![Google Gemini](https://img.shields.io/badge/Google_Gemini-8E75B2?style=flat-square&logo=googlegemini&logoColor=white)
 ![Leaflet](https://img.shields.io/badge/Leaflet-199900?style=flat-square&logo=leaflet&logoColor=white)
 ![PWA](https://img.shields.io/badge/PWA-offline_ready-5A0FC8?style=flat-square&logo=pwa&logoColor=white)
-![Languages](https://img.shields.io/badge/Languages-English_·_हिन्दी_·_తెలుగు-D63A3A?style=flat-square)
+![Languages](https://img.shields.io/badge/Languages-English%20%7C%20Hindi%20%7C%20Telugu-D63A3A?style=flat-square&logo=googletranslate&logoColor=white)
 
 **[Live demo](https://lifelinkai-app.vercel.app)** · **[Try a demo account](#-try-it-in-10-seconds)** · **[Features](#-features)** · **[How it works](#-how-an-sos-works)** · **[Run it locally](#-running-locally)**
 
@@ -185,11 +185,11 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    subgraph Client["Browser — React PWA on Vercel"]
+    subgraph Client["React PWA · Vercel"]
         UI["Pages for 6 roles<br/>Leaflet maps · voice · shake · push"]
         SW["Service worker<br/>offline cache"]
     end
-    subgraph Server["Express REST API on Render"]
+    subgraph Server["Express API · Render"]
         API["Auth · SOS · chat · hospitals · donors<br/>camps · AI · Safety Check · control room"]
         JOBS["Schedulers<br/>medicine reminders · Walk with me"]
     end
