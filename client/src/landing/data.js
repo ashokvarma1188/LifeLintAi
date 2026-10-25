@@ -16,6 +16,8 @@ import {
   Lock,
   BadgeCheck,
   Siren,
+  Droplet,
+  CloudLightning,
 } from "lucide-react";
 
 export const NAV_LINKS = [
@@ -44,12 +46,6 @@ export const STEPS = [
   },
 ];
 
-export const STATS = [
-  { value: 124583, suffix: "", label: "Lives saved" },
-  { value: 89421, suffix: "", label: "Active donors" },
-  { value: 2147, suffix: "", label: "Partner hospitals" },
-  { value: 98, suffix: "%", label: "Match success" },
-];
 
 export const BENEFITS = [
   {
@@ -119,24 +115,37 @@ export const TRUST_BADGES = [
   { icon: Siren, label: "SOS location is only ever seen by who you alert" },
 ];
 
-export const TESTIMONIALS = [
+// Real situations LifeLink is built for, and what the app actually does in each one.
+export const SITUATIONS = [
   {
-    quote:
-      "Every second counted — I pressed SOS and the nearest hospital already had my blood group and allergies before I arrived.",
-    name: "Harshitha K.",
-    role: "Civilian, Vijayawada",
+    icon: Siren,
+    tone: "red",
+    title: "A road accident at night",
+    steps: [
+      "Press SOS, say \"help\" or shake the phone",
+      "The nearest hospital and police get your live location",
+      "Family get a tracking link and watch help arrive by road",
+    ],
   },
   {
-    quote:
-      "We used to get calls with no context. Now an alert comes in with the patient's location and medical ID already attached.",
-    name: "Dr. Varma",
-    role: "Hospital coordinator",
+    icon: Droplet,
+    tone: "green",
+    title: "Blood needed urgently",
+    steps: [
+      "Filter hospitals that have the blood group in stock",
+      "Compatible donors nearby are matched and notified",
+      "Hospitals post donation camps to refill their stock",
+    ],
   },
   {
-    quote:
-      "Matching donors used to take hours of phone calls. Now a compatible donor nearby gets notified in seconds.",
-    name: "Charan A.",
-    role: "Blood donor",
+    icon: CloudLightning,
+    tone: "gold",
+    title: "A cyclone warning",
+    steps: [
+      "The admin marks the affected area on a map",
+      "Everyone there is asked \"Are you safe?\"",
+      "\"I need help\" sends an SOS to police and fire services",
+    ],
   },
 ];
 

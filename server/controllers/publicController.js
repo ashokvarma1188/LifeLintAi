@@ -2,20 +2,33 @@ const User = require("../models/User");
 const Hospital = require("../models/Hospital");
 const EmergencyRequest = require("../models/EmergencyRequest");
 const SafeWalk = require("../models/SafeWalk");
+const { DEMO_EMAIL } = require("../utils/demo");
 
 /**
- * Real, live counts for the landing page's "network" section — no auth
- * required, and nothing here is sensitive (just how many of each org type
- * are approved, plus a handful of names already meant to be public-facing).
+ * Real, live counts for the landing page (network and impact sections). No auth needed and
+ * nothing sensitive: totals only, plus a few hospital names that are public anyway.
+ * Demo accounts and their data are left out, so the numbers are the real network.
  */
 const getNetworkStats = async (req, res) => {
   try {
-    const [hospitalCount, policeCount, firestationCount, pharmacyCount, hospitalNames] = await Promise.all([
-      Hospital.countDocuments({}),
-      User.countDocuments({ role: "police", roleStatus: "approved" }),
-      User.countDocuments({ role: "firestation", roleStatus: "approved" }),
-      User.countDocuments({ role: "pharmacy", roleStatus: "approved" }),
-      Hospital.find({}).select("name").sort({ availableBeds: -1 }).limit(8),
+    const demoIds = await User.find({ email: DEMO_EMAIL }).distinct("_id");
+    const realOrg = (role) => ({ role, roleStatus: "approved", email: { $not: DEMO_EMAIL } });
+    const realHospital = { ownerId: { $nin: demoIds } };
+
+    const [hospitalCount, policeCount, firestationCount, pharmacyCount, hospitalNames, sosResolved, donors, stock] = await Promise.all([
+      Hospital.countDocuments(realHospital),
+      User.countDocuments(realOrg("police")),
+      User.countDocuments(realOrg("firestation")),
+      User.countDocuments(realOrg("pharmacy")),
+      Hospital.find(realHospital).select("name").sort({ availableBeds: -1 }).limit(8),
+      EmergencyRequest.countDocuments({ status: "resolved", demo: { $ne: true } }),
+      User.countDocuments({ email: { $not: DEMO_EMAIL }, $or: [{ donorAvailable: true }, { donationCount: { $gt: 0 } }] }),
+      Hospital.aggregate([
+        { $match: realHospital },
+        { $project: { units: { $objectToArray: { $ifNull: ["$bloodStock", {}] } } } },
+        { $unwind: "$units" },
+        { $group: { _id: null, total: { $sum: "$units.v" } } },
+      ]),
     ]);
 
     res.json({
@@ -24,6 +37,13 @@ const getNetworkStats = async (req, res) => {
         police: policeCount,
         firestation: firestationCount,
         pharmacy: pharmacyCount,
+      },
+      impact: {
+        hospitals: hospitalCount,
+        responders: policeCount + firestationCount,
+        sosResolved,
+        donors,
+        bloodUnits: stock[0]?.total || 0,
       },
       hospitalNames: hospitalNames.map((h) => h.name),
     });

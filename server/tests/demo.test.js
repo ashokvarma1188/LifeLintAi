@@ -53,3 +53,21 @@ test("the control room shows demo responders only demo alerts; admins see everyt
   assert.equal((await api().get("/api/control-room").set(realPolice.auth)).body.alerts.length, 1);
   assert.equal((await api().get("/api/control-room").set(admin.auth)).body.alerts.length, 2);
 });
+
+test("the public impact numbers count real data only, never demo data", async () => {
+  const Hospital = require("../models/Hospital");
+  const EmergencyRequest = require("../models/EmergencyRequest");
+  const realCiv = await makeUser("civilian");
+  const demoCiv = await makeUser("civilian", { email: "civ@demo.lifelink.app" });
+  const demoOwner = await makeUser("hospital", { email: "hospital@demo.lifelink.app" });
+  await Hospital.create({ name: "Real", location: { type: "Point", coordinates: [80.6, 16.5] }, bloodStock: { "O+": 5, "A+": 3 } });
+  await Hospital.create({ name: "Demo", ownerId: demoOwner.user._id, location: { type: "Point", coordinates: [80.6, 16.5] }, bloodStock: { "O+": 50 } });
+  const at = { type: "Point", coordinates: [80.6, 16.5] };
+  await EmergencyRequest.create({ citizenId: realCiv.user._id, location: at, status: "resolved" });
+  await EmergencyRequest.create({ citizenId: demoCiv.user._id, location: at, status: "resolved", demo: true });
+
+  const { impact } = (await api().get("/api/public/network-stats")).body;
+  assert.equal(impact.hospitals, 1);
+  assert.equal(impact.bloodUnits, 8);
+  assert.equal(impact.sosResolved, 1);
+});

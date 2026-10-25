@@ -1,33 +1,36 @@
 import { motion } from "framer-motion";
-import { Quote } from "lucide-react";
-import { TESTIMONIALS } from "../data";
+import { SITUATIONS } from "../data";
 import { revealUp } from "../motion";
 import { useLang } from "../../i18n/context";
 
+/** Real situations LifeLink is built for, and what the app actually does in each one. */
 function Testimonials() {
   const { t } = useLang();
   return (
     <section id="stories" className="ll-section ll-section-how">
       <div className="ll-container ll-container-6xl">
         <div className="ll-section-head">
-          <p className="ll-eyebrow">{t("In their words")}</p>
-          <h2 className="ll-h2">{t("Built around real moments like these.")}</h2>
+          <p className="ll-eyebrow">{t("Built for real situations")}</p>
+          <h2 className="ll-h2">{t("What LifeLink does when it matters.")}</h2>
         </div>
 
         <div className="ll-testimonials">
-          {TESTIMONIALS.map(({ quote, name, role }, i) => (
+          {SITUATIONS.map(({ icon: Icon, tone, title, steps }, i) => (
             <motion.div
-              key={name}
+              key={title}
               {...revealUp((i % 3) * 0.08, { y: 16, duration: 0.4, margin: "-60px" })}
-              className="ll-card ll-testimonial-card"
+              className="ll-card ll-situation-card"
             >
               <span className="ll-card-orb ll-card-orb-sm" aria-hidden="true" />
-              <Quote size={20} className="ll-testimonial-quote-icon" />
-              <p className="ll-testimonial-quote">&ldquo;{t(quote)}&rdquo;</p>
-              <div className="ll-testimonial-author">
-                <span className="ll-testimonial-name">{name}</span>
-                <span className="ll-testimonial-role">{t(role)}</span>
-              </div>
+              <span className={`ll-situation-icon ${tone}`}>
+                <Icon size={20} />
+              </span>
+              <h3 className="ll-situation-title">{t(title)}</h3>
+              <ol className="ll-situation-steps">
+                {steps.map((step) => (
+                  <li key={step}>{t(step)}</li>
+                ))}
+              </ol>
             </motion.div>
           ))}
         </div>
