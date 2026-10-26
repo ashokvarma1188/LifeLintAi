@@ -18,7 +18,7 @@ async function loadThread(req, res, requestId) {
     res.status(404).json({ message: "Request not found" });
     return null;
   }
-  const request = await EmergencyRequest.findById(requestId).select("citizenId targets status respondedBy respondedByRole");
+  const request = await EmergencyRequest.findById(requestId).select("citizenId targets status respondedBy respondedByRole demo");
   if (!request) {
     res.status(404).json({ message: "Request not found" });
     return null;

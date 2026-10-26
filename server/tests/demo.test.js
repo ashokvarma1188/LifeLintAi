@@ -42,6 +42,17 @@ test("demo responders can't accept or read real alerts, and the other way round"
   assert.equal((await api().patch(`/api/sos/${demoAlert._id}/accept`).set(demoPolice.auth)).status, 200);
 });
 
+test("demo responders can chat on demo alerts", async () => {
+  const demoHospital = await makeUser("hospital", { email: "hospital@demo.lifelink.app" });
+  const demoCiv = await makeUser("civilian", { email: "civ@demo.lifelink.app" });
+  const demoAlert = (await raise(demoCiv)).body.emergencyRequest;
+
+  const sent = await api().post(`/api/sos/${demoAlert._id}/messages`).set(demoHospital.auth).send({ text: "Ambulance on the way" });
+  assert.equal(sent.status, 201);
+  const seen = await api().get(`/api/sos/${demoAlert._id}/messages`).set(demoCiv.auth);
+  assert.deepEqual(seen.body.messages.map((m) => m.text), ["Ambulance on the way"]);
+});
+
 test("the control room shows demo responders only demo alerts; admins see everything", async () => {
   const demoPolice = await makeUser("police", { email: "police@demo.lifelink.app" });
   const realPolice = await makeUser("police");
