@@ -504,6 +504,7 @@
 .auth-demo-title { margin: 0; font-size: 0.875rem; font-weight: 600; color: var(--ll-foreground); }
 .auth-demo-hint { margin: 0.25rem 0 0.75rem; font-size: 0.75rem; color: var(--ll-muted-foreground); }
 .auth-demo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+.auth-demo-btn:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .auth-demo-btn {
   display: inline-flex;
   align-items: center;

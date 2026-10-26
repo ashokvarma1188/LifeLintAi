@@ -16,6 +16,7 @@
  *   hospital@ LifeLink Demo Hospital
  *   police@   Vijayawada Police (Demo)
  *   fire@     Vijayawada Fire Station (Demo)
+ *   pharmacy@ LifeLink Demo Pharmacy
  * Demo accounts are sandboxed (utils/demo.js): they only see each other's alerts.
  */
 require("dotenv").config();
@@ -29,6 +30,7 @@ const SosMessage = require("../models/SosMessage");
 const BloodRequest = require("../models/BloodRequest");
 const HealthRecord = require("../models/HealthRecord");
 const MedicineReminder = require("../models/MedicineReminder");
+const MedicineRequest = require("../models/MedicineRequest");
 const SafeWalk = require("../models/SafeWalk");
 const PushSubscription = require("../models/PushSubscription");
 const DonationCamp = require("../models/DonationCamp");
@@ -90,6 +92,7 @@ async function reset({ quiet = false } = {}) {
     BloodRequest.updateMany({}, { $pull: { responses: { donorId: { $in: ids } } } }),
     HealthRecord.deleteMany({ userId: { $in: ids } }),
     MedicineReminder.deleteMany({ userId: { $in: ids } }),
+    MedicineRequest.deleteMany({ $or: [{ requestedBy: { $in: ids } }, { pharmacyId: { $in: ids } }] }),
     SafeWalk.deleteMany({ userId: { $in: ids } }),
     PushSubscription.deleteMany({ userId: { $in: ids } }),
     DonationCamp.deleteMany({ organiserId: { $in: ids } }),
@@ -232,6 +235,18 @@ async function seed() {
     fleet: [{ unitName: "Engine 1", status: "available" }, { unitName: "Engine 2", status: "available" }, { unitName: "Rescue van", status: "maintenance" }],
   });
 
+  const demoPharmacy = await org("pharmacy", "pharmacy", "LifeLink Demo Pharmacy", {
+    location: near(VIJAYAWADA, 0.004, 0.003), openHours: "8 AM – 11 PM", isOpen: true,
+    stock: [
+      { medicineName: "Paracetamol 500 mg", inStock: true, quantity: 240 },
+      { medicineName: "Amoxicillin 500 mg", inStock: true, quantity: 60 },
+      { medicineName: "Salbutamol inhaler", inStock: true, quantity: 12 },
+      { medicineName: "ORS sachets", inStock: true, quantity: 150 },
+      { medicineName: "Insulin glargine", inStock: false, quantity: 0 },
+    ],
+  });
+  await MedicineRequest.create({ requestedBy: ravi._id, pharmacyId: demoPharmacy._id, medicineName: "Insulin glargine", notes: "Need 1 pen for tonight, please." });
+
   // Live alerts for the demo responders to handle (they show for 24 h in the control room).
   const minutesAgo = (m) => new Date(Date.now() - m * 60000);
   const live = (who, props) => EmergencyRequest.create({
@@ -261,7 +276,7 @@ async function seed() {
   console.log("  • 3 past SOS alerts (one with a chat), 5 health records, 2 medicine reminders");
   console.log("  • 2 open blood requests, 3 available donors, organ pledge on Ravi's Medical ID");
   console.log(`  • blood-bank stock added to ${stocked} hospital(s)`);
-  console.log(`  • demo hospital, police and fire station (hospital${DOMAIN}, police${DOMAIN}, fire${DOMAIN})`);
+  console.log(`  • demo hospital, police and fire station and pharmacy (hospital${DOMAIN}, police${DOMAIN}, fire${DOMAIN}, pharmacy${DOMAIN})`);
   console.log("  • 3 live alerts for them, and an upcoming donation camp");
 }
 

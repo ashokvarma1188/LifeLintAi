@@ -1,13 +1,14 @@
 /*
- * Demo accounts (any @demo.lifelink.app email) live in a sandbox on the real site:
- * their SOS alerts are tagged `demo`, demo responders only see demo alerts, and real
- * responders never see (or get notified about) them. Anyone can try the demo from the
- * login page without seeing real people's emergencies.
+ * Demo accounts (any @demo.lifelink.app email, plus the presenter's walkthrough
+ * address below) live in a sandbox on the real site: their SOS alerts are tagged
+ * `demo`, demo responders only see demo alerts, and real responders never see (or
+ * get notified about) them. Anyone can try the demo from the login page without
+ * seeing real people's emergencies.
  */
 const DEMO_DOMAIN = "@demo.lifelink.app";
-const DEMO_EMAIL = /@demo\.lifelink\.app$/i;
+const DEMO_EMAIL = /^(?:.+@demo\.lifelink\.app|ashokvarma5247\+demo@gmail\.com)$/i;
 
-const isDemoUser = (user) => String(user?.email || "").toLowerCase().endsWith(DEMO_DOMAIN);
+const isDemoUser = (user) => DEMO_EMAIL.test(String(user?.email || ""));
 
 /** Mongo filter that keeps a user to their own side of the sandbox. Admins see everything. */
 const sandboxFilter = (user) => {

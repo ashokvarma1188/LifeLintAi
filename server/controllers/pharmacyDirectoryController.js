@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 const User = require("../models/User");
 const MedicineRequest = require("../models/MedicineRequest");
+const { DEMO_EMAIL, isDemoUser } = require("../utils/demo");
+
+// Demo civilians only find the demo pharmacy, and real civilians never see it.
+const sameSidePharmacies = (user) => (isDemoUser(user) ? { email: DEMO_EMAIL } : { email: { $not: DEMO_EMAIL } });
 
 /**
  * Every approved pharmacy — for civilians to browse stock and send requests.
@@ -17,6 +21,7 @@ const listPharmacies = async (req, res) => {
       const pharmacies = await User.find({
         role: "pharmacy",
         roleStatus: "approved",
+        ...sameSidePharmacies(req.user),
         location: {
           $near: { $geometry: { type: "Point", coordinates: [parseFloat(longitude), parseFloat(latitude)] } },
         },
@@ -26,7 +31,7 @@ const listPharmacies = async (req, res) => {
       return res.json({ pharmacies });
     }
 
-    const pharmacies = await User.find({ role: "pharmacy", roleStatus: "approved" }).select(select);
+    const pharmacies = await User.find({ role: "pharmacy", roleStatus: "approved", ...sameSidePharmacies(req.user) }).select(select);
     res.json({ pharmacies });
   } catch (err) {
     res.status(500).json({ message: "Something went wrong", error: err.message });
@@ -45,7 +50,7 @@ const createMedicineRequest = async (req, res) => {
       return res.status(400).json({ message: "Medicine name is required" });
     }
 
-    const pharmacy = await User.findOne({ _id: id, role: "pharmacy", roleStatus: "approved" });
+    const pharmacy = await User.findOne({ _id: id, role: "pharmacy", roleStatus: "approved", ...sameSidePharmacies(req.user) });
     if (!pharmacy) {
       return res.status(404).json({ message: "Pharmacy not found" });
     }

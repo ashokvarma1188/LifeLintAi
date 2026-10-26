@@ -42,6 +42,21 @@ test("demo responders can't accept or read real alerts, and the other way round"
   assert.equal((await api().patch(`/api/sos/${demoAlert._id}/accept`).set(demoPolice.auth)).status, 200);
 });
 
+test("the presenter's walkthrough Gmail is sandboxed like a demo account", async () => {
+  const presenter = await makeUser("civilian", { email: "ashokvarma5247+demo@gmail.com" });
+  const realGmail = await makeUser("civilian", { email: "ashokvarma5247@gmail.com" });
+  assert.equal((await raise(presenter)).body.emergencyRequest.demo, true);
+  assert.equal((await raise(realGmail)).body.emergencyRequest.demo, false);
+});
+
+test("real civilians never find the demo pharmacy, and demo civilians only find it", async () => {
+  await makeUser("pharmacy", { email: "pharmacy@demo.lifelink.app", orgName: "Demo Pharmacy" });
+  await makeUser("pharmacy", { orgName: "Real Pharmacy" });
+  const names = async (who) => (await api().get("/api/pharmacies").set(who.auth)).body.pharmacies.map((p) => p.orgName);
+  assert.deepEqual(await names(await makeUser("civilian")), ["Real Pharmacy"]);
+  assert.deepEqual(await names(await makeUser("civilian", { email: "civ@demo.lifelink.app" })), ["Demo Pharmacy"]);
+});
+
 test("demo responders can chat on demo alerts", async () => {
   const demoHospital = await makeUser("hospital", { email: "hospital@demo.lifelink.app" });
   const demoCiv = await makeUser("civilian", { email: "civ@demo.lifelink.app" });

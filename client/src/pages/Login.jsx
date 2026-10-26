@@ -6,7 +6,7 @@ import AuthShell from "./AuthShell";
 import PasswordField from "./PasswordField";
 import GoogleSignInButton from "../components/GoogleSignInButton";
 import { useLang } from "../i18n/context";
-import { User, Hospital, ShieldCheck, Flame } from "lucide-react";
+import { User, Hospital, ShieldCheck, Flame, Pill } from "lucide-react";
 
 // Sandboxed demo accounts (see server/utils/demo.js): they only ever see demo data.
 const DEMO_PASSWORD = "Demo@12345";
@@ -15,6 +15,7 @@ const DEMO_ACCOUNTS = [
   { key: "hospital", label: "Hospital", email: "hospital@demo.lifelink.app", icon: Hospital },
   { key: "police", label: "Police", email: "police@demo.lifelink.app", icon: ShieldCheck },
   { key: "fire", label: "Fire station", email: "fire@demo.lifelink.app", icon: Flame },
+  { key: "pharmacy", label: "Pharmacy", email: "pharmacy@demo.lifelink.app", icon: Pill },
 ];
 
 function Login() {

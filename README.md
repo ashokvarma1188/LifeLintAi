@@ -56,6 +56,7 @@ Open **[lifelinkai-app.vercel.app/login](https://lifelinkai-app.vercel.app/login
 | 🏥 Hospital | `hospital@demo.lifelink.app` | `Demo@12345` |
 | 🚓 Police | `police@demo.lifelink.app` | `Demo@12345` |
 | 🚒 Fire station | `fire@demo.lifelink.app` | `Demo@12345` |
+| 💊 Pharmacy | `pharmacy@demo.lifelink.app` | `Demo@12345` |
 
 > 🔒 **Demo accounts are sandboxed.** They only see each other's alerts. A demo SOS never reaches real responders, and demo responders never see real people's emergencies.
 
